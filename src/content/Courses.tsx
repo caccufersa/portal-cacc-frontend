@@ -3,44 +3,36 @@ import styles from './Content.module.css';
 const semesters = [
     {
         name: '1º Semestre',
-        subjects: [
-            'Introdução à Ciência da Computação',
-            'Cálculo I',
-            'Algoritmos e Lógica de Programação',
-            'Matemática Discreta',
-            'Geometria Analítica'
-        ]
+        subjects: []
     },
     {
         name: '2º Semestre',
-        subjects: [
-            'Programação Orientada a Objetos',
-            'Cálculo II',
-            'Estrutura de Dados I',
-            'Álgebra Linear',
-            'Física I'
-        ]
+        subjects: []
     },
     {
         name: '3º Semestre',
-        subjects: [
-            'Estrutura de Dados II',
-            'Banco de Dados I',
-            'Arquitetura de Computadores',
-            'Probabilidade e Estatística',
-            'Física II'
-        ]
+        subjects: []
     },
     {
         name: '4º Semestre',
-        subjects: [
-            'Análise de Algoritmos',
-            'Banco de Dados II',
-            'Sistemas Operacionais',
-            'Redes de Computadores I',
-            'Engenharia de Software I'
-        ]
-    }
+        subjects: []
+    },
+    {
+        name: '5º Semestre',
+        subjects: []
+    },
+    {
+        name: '6º Semestre',
+        subjects: []
+    },
+    {
+        name: '7º Semestre',
+        subjects: []
+    },
+    {
+        name: '8º Semestre',
+        subjects: []
+    },
 ];
 
 export default function CoursesContent() {
