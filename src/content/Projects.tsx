@@ -7,29 +7,14 @@ const projects = [
         description: 'Treinamento e participação em competições de programação regionais e nacionais.'
     },
     {
-        icon: '🎮',
-        title: 'Game Dev UFERSA',
-        description: 'Grupo de desenvolvimento de jogos com encontros semanais e game jams.'
     },
     {
-        icon: '🤖',
-        title: 'Clube de IA',
-        description: 'Estudos e projetos práticos em Inteligência Artificial e Machine Learning.'
     },
     {
-        icon: '🌐',
-        title: 'Dev Web',
-        description: 'Workshops e projetos de desenvolvimento web com tecnologias modernas.'
     },
     {
-        icon: '🔐',
-        title: 'Cyber Security',
-        description: 'Estudos em segurança da informação e participação em CTFs.'
     },
     {
-        icon: '📱',
-        title: 'Mobile Dev',
-        description: 'Desenvolvimento de aplicativos móveis para Android e iOS.'
     }
 ];
 
