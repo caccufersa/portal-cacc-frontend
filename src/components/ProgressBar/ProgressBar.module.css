@@ -1,0 +1,33 @@
+.progressWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.label {
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    display: flex;
+    justify-content: space-between;
+}
+
+.progressBar {
+    height: 20px;
+    background: var(--win95-white);
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-dark),
+        inset -1px -1px 0 var(--win95-border-light),
+        inset 2px 2px 0 var(--win95-border-darker),
+        inset -2px -2px 0 var(--win95-white);
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: repeating-linear-gradient(90deg,
+            var(--win95-blue) 0px,
+            var(--win95-blue) 8px,
+            transparent 8px,
+            transparent 10px);
+    transition: width 0.3s ease;
+}

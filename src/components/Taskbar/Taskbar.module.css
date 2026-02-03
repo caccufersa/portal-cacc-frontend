@@ -1,0 +1,148 @@
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: var(--win95-gray);
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    gap: 4px;
+    z-index: 9999;
+    box-shadow:
+        inset 0 1px 0 var(--win95-border-light),
+        inset 0 2px 0 var(--win95-white);
+}
+
+.startButton {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-base);
+    font-weight: bold;
+    background: var(--win95-gray);
+    border: none;
+    cursor: pointer;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray);
+}
+
+.startButton:active,
+.startButtonActive {
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-darker),
+        inset -1px -1px 0 var(--win95-border-light),
+        inset 2px 2px 0 var(--win95-border-dark),
+        inset -2px -2px 0 var(--win95-light-gray);
+    padding: 5px 7px 3px 9px;
+}
+
+.startLogo {
+    font-size: 20px;
+}
+
+.separator {
+    width: 2px;
+    height: 24px;
+    background: linear-gradient(to right,
+            var(--win95-border-dark),
+            var(--win95-border-light));
+    margin: 0 2px;
+}
+
+.windowList {
+    display: flex;
+    flex: 1;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 0 4px;
+}
+
+.windowList::-webkit-scrollbar {
+    display: none;
+}
+
+.windowButton {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    min-width: 140px;
+    max-width: 200px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    background: var(--win95-gray);
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray);
+    transition: none;
+}
+
+.windowButton:hover {
+    background: var(--win95-light-gray);
+}
+
+.windowButtonActive {
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-darker),
+        inset -1px -1px 0 var(--win95-border-light),
+        inset 2px 2px 0 var(--win95-border-dark),
+        inset -2px -2px 0 var(--win95-light-gray);
+    background: repeating-conic-gradient(var(--win95-gray) 0% 25%, var(--win95-white) 0% 50%) 50% / 2px 2px;
+}
+
+.windowButtonIcon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.windowButtonText {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.systemTray {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    margin-left: auto;
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-dark),
+        inset -1px -1px 0 var(--win95-border-light);
+}
+
+.trayIcon {
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.trayIcon:hover {
+    background: var(--win95-blue);
+    color: var(--win95-white);
+}
+
+.clockContainer {
+    padding-left: 8px;
+    border-left: 1px solid var(--win95-border-dark);
+    margin-left: 4px;
+}
+
+.clock {
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+}

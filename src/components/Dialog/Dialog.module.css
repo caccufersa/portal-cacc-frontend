@@ -1,0 +1,118 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.dialog {
+    background: var(--win95-gray);
+    min-width: 300px;
+    max-width: 90vw;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray),
+        4px 4px 0 rgba(0, 0, 0, 0.3);
+}
+
+.titleBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 3px;
+    background: var(--win95-title-active);
+    color: var(--win95-white);
+}
+
+.titleText {
+    font-family: var(--font-main);
+    font-size: var(--font-size-base);
+    font-weight: bold;
+}
+
+.closeButton {
+    width: 16px;
+    height: 14px;
+    background: var(--win95-gray);
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-family: var(--font-main);
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light);
+}
+
+.closeButton:active {
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-darker),
+        inset -1px -1px 0 var(--win95-border-light);
+}
+
+.content {
+    padding: 16px;
+    font-family: var(--font-main);
+}
+
+.iconContent {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.message {
+    flex: 1;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 16px 16px;
+}
+
+.button {
+    min-width: 75px;
+    padding: 4px 12px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-base);
+    background: var(--win95-gray);
+    border: none;
+    cursor: pointer;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray);
+}
+
+.button:active {
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-darker),
+        inset -1px -1px 0 var(--win95-border-light),
+        inset 2px 2px 0 var(--win95-border-dark),
+        inset -2px -2px 0 var(--win95-light-gray);
+}
+
+.buttonPrimary {
+    outline: 1px solid var(--win95-black);
+    outline-offset: -4px;
+}

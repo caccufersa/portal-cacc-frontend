@@ -1,0 +1,225 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.popup {
+    background: var(--win95-gray);
+    width: 500px;
+    max-width: 90vw;
+    animation: slideIn 0.3s ease;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray),
+        8px 8px 0 rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.titleBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3px 4px;
+    background: var(--win95-title-active);
+    color: var(--win95-white);
+}
+
+.titleContent {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.titleIcon {
+    font-size: 16px;
+}
+
+.titleText {
+    font-family: var(--font-main);
+    font-size: var(--font-size-base);
+    font-weight: bold;
+}
+
+.closeButton {
+    width: 16px;
+    height: 14px;
+    background: var(--win95-gray);
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-family: var(--font-main);
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light);
+}
+
+.closeButton:active {
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-darker),
+        inset -1px -1px 0 var(--win95-border-light);
+}
+
+.content {
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.iconLarge {
+    font-size: 48px;
+    flex-shrink: 0;
+}
+
+.textContent {
+    flex: 1;
+    font-family: var(--font-main);
+}
+
+.textContent h2 {
+    font-size: var(--font-size-xl);
+    margin: 0 0 12px 0;
+    color: var(--win95-blue);
+}
+
+.textContent p {
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.highlight {
+    background: var(--win95-blue);
+    color: var(--win95-white);
+    padding: 2px 6px;
+}
+
+.tips {
+    background: var(--win95-white);
+    padding: 12px;
+    margin: 12px 0;
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-dark),
+        inset -1px -1px 0 var(--win95-border-light),
+        inset 2px 2px 0 var(--win95-border-darker);
+}
+
+.tips h3 {
+    font-size: var(--font-size-base);
+    margin: 0 0 8px 0;
+    color: var(--win95-blue);
+}
+
+.tips ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.tips li {
+    margin-bottom: 4px;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-top: 1px solid var(--win95-border-dark);
+    box-shadow: inset 0 1px 0 var(--win95-border-light);
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+}
+
+.checkboxInput {
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    background: var(--win95-white);
+    cursor: pointer;
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-dark),
+        inset -1px -1px 0 var(--win95-border-light),
+        inset 2px 2px 0 var(--win95-border-darker);
+}
+
+.checkboxInput:checked::after {
+    content: '✓';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--win95-black);
+}
+
+.okButton {
+    min-width: 90px;
+    padding: 6px 16px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-base);
+    font-weight: bold;
+    background: var(--win95-gray);
+    border: none;
+    cursor: pointer;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray);
+    outline: 1px solid var(--win95-black);
+    outline-offset: -4px;
+}
+
+.okButton:active {
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-darker),
+        inset -1px -1px 0 var(--win95-border-light),
+        inset 2px 2px 0 var(--win95-border-dark),
+        inset -2px -2px 0 var(--win95-light-gray);
+}
+
+.okButton:hover {
+    background: var(--win95-light-gray);
+}

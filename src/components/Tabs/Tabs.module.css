@@ -1,0 +1,49 @@
+.tabs {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tabList {
+    display: flex;
+    gap: 0;
+    padding: 4px 4px 0 4px;
+}
+
+.tab {
+    padding: 4px 16px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    background: var(--win95-gray);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: -2px;
+    box-shadow:
+        inset -1px 0 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px 0 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray);
+}
+
+.tabActive {
+    background: var(--win95-gray);
+    z-index: 1;
+    padding-bottom: 6px;
+    box-shadow:
+        inset -1px 0 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px 0 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray);
+}
+
+.tabContent {
+    flex: 1;
+    padding: 12px;
+    background: var(--win95-gray);
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray);
+}

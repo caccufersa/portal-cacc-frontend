@@ -1,0 +1,53 @@
+.icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    cursor: pointer;
+    width: 80px;
+    border: 1px solid transparent;
+    position: absolute;
+    user-select: none;
+}
+
+.icon:hover {
+    background: rgba(0, 0, 128, 0.1);
+}
+
+.iconSelected {
+    background: var(--win95-blue);
+    border: 1px dotted var(--win95-white);
+}
+
+.iconSelected .label {
+    background: var(--win95-blue);
+    color: var(--win95-white);
+}
+
+.iconDragging {
+    opacity: 0.7;
+    z-index: 1000;
+}
+
+.iconImage {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    pointer-events: none;
+}
+
+.label {
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    text-align: center;
+    color: var(--win95-white);
+    text-shadow: 1px 1px 0 var(--win95-black);
+    word-break: break-word;
+    max-width: 100%;
+    padding: 2px 4px;
+    pointer-events: none;
+}

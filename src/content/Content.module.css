@@ -1,0 +1,181 @@
+.content {
+    font-family: var(--font-main);
+    line-height: 1.6;
+}
+
+.content h1 {
+    font-size: var(--font-size-xl);
+    margin-bottom: 16px;
+    color: var(--win95-blue);
+}
+
+.content h2 {
+    font-size: var(--font-size-lg);
+    margin: 16px 0 8px 0;
+    color: var(--win95-black);
+}
+
+.content p {
+    margin-bottom: 12px;
+}
+
+.content ul {
+    margin: 8px 0 16px 24px;
+}
+
+.content li {
+    margin-bottom: 4px;
+}
+
+.content a {
+    color: var(--win95-blue);
+}
+
+.content a:hover {
+    color: var(--win95-blue-light);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--win95-gray);
+}
+
+.logo {
+    font-size: 48px;
+}
+
+.title {
+    font-size: var(--font-size-xl);
+    color: var(--win95-blue);
+}
+
+.subtitle {
+    font-size: var(--font-size-base);
+    color: var(--win95-dark-gray);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.card {
+    padding: 12px;
+    background: var(--win95-gray);
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light);
+}
+
+.card h3 {
+    font-size: var(--font-size-base);
+    margin-bottom: 8px;
+    color: var(--win95-blue);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+}
+
+.table th,
+.table td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid var(--win95-dark-gray);
+}
+
+.table th {
+    background: var(--win95-blue);
+    color: var(--win95-white);
+}
+
+.table tr:nth-child(even) {
+    background: var(--win95-light-gray);
+}
+
+.button {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--win95-gray);
+    font-family: var(--font-main);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--win95-black);
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray);
+}
+
+.button:hover {
+    color: var(--win95-black);
+}
+
+.socialLinks {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+}
+
+.socialLink {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--win95-gray);
+    text-decoration: none;
+    color: var(--win95-black);
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light);
+}
+
+.socialLink:hover {
+    background: var(--win95-blue);
+    color: var(--win95-white);
+}
+
+.faqItem {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--win95-light-gray);
+}
+
+.faqQuestion {
+    font-weight: bold;
+    color: var(--win95-blue);
+    margin-bottom: 8px;
+}
+
+.docItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: var(--win95-light-gray);
+    cursor: pointer;
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-dark),
+        inset -1px -1px 0 var(--win95-border-light);
+}
+
+.docItem:hover {
+    background: var(--win95-blue);
+    color: var(--win95-white);
+}
+
+.docIcon {
+    font-size: 24px;
+}

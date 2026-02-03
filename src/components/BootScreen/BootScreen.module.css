@@ -1,0 +1,89 @@
+.bootScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000080;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-main);
+    color: var(--win95-white);
+    z-index: 99999;
+}
+
+.title {
+    font-size: 72px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: 4px;
+}
+
+.subtitle {
+    font-size: 20px;
+    margin-bottom: 40px;
+    color: #b0b0b0;
+}
+
+.loadingContainer {
+    width: 300px;
+}
+
+.loadingText {
+    font-size: 14px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.loadingBar {
+    height: 20px;
+    background: #000040;
+    border: 2px solid #808080;
+    padding: 2px;
+}
+
+.loadingFill {
+    height: 100%;
+    background: repeating-linear-gradient(90deg,
+            #00ff00 0px,
+            #00ff00 8px,
+            transparent 8px,
+            transparent 10px);
+    animation: loading 2s ease-in-out forwards;
+}
+
+@keyframes loading {
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+.copyright {
+    position: absolute;
+    bottom: 40px;
+    font-size: 14px;
+    color: #808080;
+}
+
+.blinkText {
+    animation: blink 0.8s ease-in-out infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}

@@ -1,0 +1,22 @@
+.groupBox {
+    border: 1px solid var(--win95-border-dark);
+    padding: 16px;
+    padding-top: 8px;
+    margin-top: 8px;
+    position: relative;
+    box-shadow: 1px 1px 0 var(--win95-border-light);
+}
+
+.legend {
+    position: absolute;
+    top: -10px;
+    left: 8px;
+    background: var(--win95-gray);
+    padding: 0 4px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+}
+
+.content {
+    margin-top: 8px;
+}

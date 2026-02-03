@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+:root {
+  --win95-bg: #008080;
+  --win95-gray: #c0c0c0;
+  --win95-dark-gray: #808080;
+  --win95-darker-gray: #404040;
+  --win95-light-gray: #dfdfdf;
+  --win95-white: #ffffff;
+  --win95-black: #000000;
+  --win95-blue: #000080;
+  --win95-blue-light: #1084d0;
+  --win95-border-light: #ffffff;
+  --win95-border-dark: #808080;
+  --win95-border-darker: #404040;
+  --win95-title-active: linear-gradient(90deg, #000080, #1084d0);
+  --win95-title-inactive: linear-gradient(90deg, #808080, #b0b0b0);
+  --font-main: 'VT323', monospace;
+  --font-size-base: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-sm: 14px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-main);
+  font-size: var(--font-size-base);
+  background: var(--win95-bg);
+  color: var(--win95-black);
+  user-select: none;
+}
+
+.win95-button {
+  background: var(--win95-gray);
+  border: none;
+  padding: 4px 12px;
+  font-family: var(--font-main);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  box-shadow: 
+    inset -1px -1px 0 var(--win95-border-darker),
+    inset 1px 1px 0 var(--win95-border-light),
+    inset -2px -2px 0 var(--win95-border-dark),
+    inset 2px 2px 0 var(--win95-light-gray);
+}
+
+.win95-button:active {
+  box-shadow: 
+    inset 1px 1px 0 var(--win95-border-darker),
+    inset -1px -1px 0 var(--win95-border-light),
+    inset 2px 2px 0 var(--win95-border-dark),
+    inset -2px -2px 0 var(--win95-light-gray);
+  padding: 5px 11px 3px 13px;
+}
+
+.win95-button:focus {
+  outline: 1px dotted var(--win95-black);
+  outline-offset: -4px;
+}
+
+.win95-inset {
+  box-shadow: 
+    inset 1px 1px 0 var(--win95-border-dark),
+    inset -1px -1px 0 var(--win95-border-light),
+    inset 2px 2px 0 var(--win95-border-darker),
+    inset -2px -2px 0 var(--win95-white);
+}
+
+.win95-outset {
+  box-shadow: 
+    inset -1px -1px 0 var(--win95-border-darker),
+    inset 1px 1px 0 var(--win95-border-light),
+    inset -2px -2px 0 var(--win95-border-dark),
+    inset 2px 2px 0 var(--win95-light-gray);
+}
+
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background: repeating-conic-gradient(var(--win95-gray) 0% 25%, var(--win95-white) 0% 50%) 50% / 2px 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--win95-gray);
+  box-shadow: 
+    inset -1px -1px 0 var(--win95-border-darker),
+    inset 1px 1px 0 var(--win95-border-light),
+    inset -2px -2px 0 var(--win95-border-dark),
+    inset 2px 2px 0 var(--win95-light-gray);
+}
+
+::-webkit-scrollbar-button {
+  background: var(--win95-gray);
+  box-shadow: 
+    inset -1px -1px 0 var(--win95-border-darker),
+    inset 1px 1px 0 var(--win95-border-light),
+    inset -2px -2px 0 var(--win95-border-dark),
+    inset 2px 2px 0 var(--win95-light-gray);
+}
+
+a {
+  color: var(--win95-blue);
+  text-decoration: underline;
+}
+
+a:hover {
+  color: var(--win95-blue-light);
+}

@@ -1,0 +1,35 @@
+.desktop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 40px;
+    background: url('../../../public/images/background.webp') no-repeat center center fixed;
+}
+
+.iconsContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.windowsContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.windowsContainer>* {
+    pointer-events: all;
+}
+
+.selectionBox {
+    position: absolute;
+    border: 1px dotted var(--win95-white);
+    background: rgba(0, 0, 128, 0.2);
+    pointer-events: none;
+    z-index: 100;
+}

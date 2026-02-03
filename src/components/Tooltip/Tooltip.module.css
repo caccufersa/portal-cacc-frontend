@@ -1,0 +1,25 @@
+.tooltipWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background: #ffffcc;
+    border: 1px solid var(--win95-black);
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    z-index: 10001;
+    pointer-events: none;
+    box-shadow: 1px 1px 0 var(--win95-black);
+}
+
+.tooltipBottom {
+    bottom: auto;
+    top: calc(100% + 4px);
+}

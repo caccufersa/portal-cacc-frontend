@@ -1,0 +1,55 @@
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: var(--win95-gray);
+    border: none;
+    padding: 4px 12px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    min-width: 75px;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray);
+}
+
+.button:active {
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-darker),
+        inset -1px -1px 0 var(--win95-border-light),
+        inset 2px 2px 0 var(--win95-border-dark),
+        inset -2px -2px 0 var(--win95-light-gray);
+    padding: 5px 11px 3px 13px;
+}
+
+.button:focus {
+    outline: 1px dotted var(--win95-black);
+    outline-offset: -4px;
+}
+
+.button:disabled {
+    color: var(--win95-dark-gray);
+    cursor: not-allowed;
+    text-shadow: 1px 1px 0 var(--win95-white);
+}
+
+.buttonSmall {
+    min-width: auto;
+    padding: 2px 6px;
+    font-size: var(--font-size-sm);
+}
+
+.buttonIcon {
+    min-width: 23px;
+    width: 23px;
+    height: 23px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
