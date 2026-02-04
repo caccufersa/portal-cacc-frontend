@@ -66,7 +66,9 @@ export default function DesktopIcon({ id, icon, label, initialPosition, isSelect
             onDoubleClick={(e) => { e.stopPropagation(); onDoubleClick(); }}
             tabIndex={0}
         >
-            <div className={styles.iconImage}>{icon}</div>
+            <div className={styles.iconImage}>
+                <img src={icon} alt={label} style={{ width: '32px', height: '32px' }} />
+            </div>
             <span className={styles.label}>{label}</span>
         </div>
     );

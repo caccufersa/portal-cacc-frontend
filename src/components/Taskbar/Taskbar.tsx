@@ -49,7 +49,7 @@ export default function Taskbar() {
                     className={`${styles.startButton} ${startMenuOpen ? styles.startButtonActive : ''}`}
                     onClick={handleStartClick}
                 >
-                    <span className={styles.startLogo}>🖥️</span>
+                    <img src="/icons-95/windows.ico" alt="Iniciar" className={styles.startLogo} style={{ width: '20px', height: '20px' }} />
                     <span>Iniciar</span>
                 </button>
 
@@ -63,15 +63,21 @@ export default function Taskbar() {
                             onClick={() => handleWindowClick(w.id)}
                             title={w.title}
                         >
-                            <span className={styles.windowButtonIcon}>{w.icon}</span>
+                            <span className={styles.windowButtonIcon}>
+                                <img src={w.icon} alt="" style={{ width: '16px', height: '16px' }} />
+                            </span>
                             <span className={styles.windowButtonText}>{w.title}</span>
                         </button>
                     ))}
                 </div>
 
                 <div className={styles.systemTray}>
-                    <span className={styles.trayIcon} title="Volume">🔊</span>
-                    <span className={styles.trayIcon} title="Rede">🌐</span>
+                    <span className={styles.trayIcon} title="Volume">
+                        <img src="/icons-95/loudspeaker_rays.ico" alt="Volume" style={{ width: '16px', height: '16px' }} />
+                    </span>
+                    <span className={styles.trayIcon} title="Rede">
+                        <img src="/icons-95/network.ico" alt="Rede" style={{ width: '16px', height: '16px' }} />
+                    </span>
                     <div className={styles.clockContainer} title={date}>
                         <span className={styles.clock}>{time}</span>
                     </div>

@@ -34,14 +34,20 @@ const faqs = [
 export default function HelpContent() {
     return (
         <div className={styles.content}>
-            <h1>❓ Ajuda - FAQ</h1>
+            <h1>
+                <img src="icons-95/help_question_mark.ico" alt="" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />
+                {' '}Ajuda - FAQ
+            </h1>
             <p>
                 Encontre aqui respostas para as perguntas mais frequentes dos estudantes.
             </p>
 
             {faqs.map((faq, index) => (
                 <div key={index} className={styles.faqItem}>
-                    <div className={styles.faqQuestion}>❔ {faq.question}</div>
+                    <div className={styles.faqQuestion}>
+                        <img src="icons-95/msg_question.ico" alt="" style={{ width: '16px', height: '16px', verticalAlign: 'middle' }} />
+                        {' '}{faq.question}
+                    </div>
                     <p>{faq.answer}</p>
                 </div>
             ))}

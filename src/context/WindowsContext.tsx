@@ -39,12 +39,12 @@ interface WindowsContextType {
 const WindowsContext = createContext<WindowsContextType | null>(null);
 
 const initialWindows: WindowState[] = [
-  { id: 'about', title: 'Sobre o CACC', icon: '📁', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 50, y: 50 }, size: { width: 500, height: 400 } },
-  { id: 'courses', title: 'Grade Curricular', icon: '📚', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 100, y: 80 }, size: { width: 600, height: 450 } },
-  { id: 'projects', title: 'Projetos', icon: '🎓', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 150, y: 60 }, size: { width: 550, height: 420 } },
-  { id: 'contact', title: 'Contato', icon: '📞', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 200, y: 100 }, size: { width: 450, height: 400 } },
-  { id: 'help', title: 'Ajuda', icon: '❓', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 120, y: 70 }, size: { width: 500, height: 450 } },
-  { id: 'documents', title: 'Documentos', icon: '📄', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 80, y: 90 }, size: { width: 520, height: 420 } },
+  { id: 'about', title: 'Sobre o CACC', icon: 'icons-95/directory_closed.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 50, y: 50 }, size: { width: 500, height: 400 } },
+  { id: 'courses', title: 'Grade Curricular', icon: 'icons-95/help_book_cool.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 100, y: 80 }, size: { width: 600, height: 450 } },
+  { id: 'projects', title: 'Projetos', icon: 'icons-95/directory_program_group.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 150, y: 60 }, size: { width: 550, height: 420 } },
+  { id: 'contact', title: 'Contato', icon: 'icons-95/address_book.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 200, y: 100 }, size: { width: 450, height: 400 } },
+  { id: 'help', title: 'Ajuda', icon: 'icons-95/help_question_mark.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 120, y: 70 }, size: { width: 500, height: 450 } },
+  { id: 'documents', title: 'Documentos', icon: 'icons-95/notepad_file.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 80, y: 90 }, size: { width: 520, height: 420 } },
 ];
 
 const initialIconPositions: IconPosition[] = [

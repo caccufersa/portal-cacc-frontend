@@ -2,7 +2,7 @@ import styles from './Content.module.css';
 
 const projects = [
     {
-        icon: '💻',
+        icon: 'icons-95/computer.ico',
         title: 'Maratona de Programação',
         description: 'Treinamento e participação em competições de programação regionais e nacionais.'
     },
@@ -21,7 +21,10 @@ const projects = [
 export default function ProjectsContent() {
     return (
         <div className={styles.content}>
-            <h1>🎓 Projetos e Atividades</h1>
+            <h1>
+                <img src="icons-95/directory_program_group.ico" alt="" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />
+                {' '}Projetos e Atividades
+            </h1>
             <p>
                 Confira os projetos e grupos de estudo organizados pelo CACC e pelos
                 estudantes do curso.
@@ -30,7 +33,10 @@ export default function ProjectsContent() {
             <div className={styles.grid}>
                 {projects.map((project, index) => (
                     <div key={index} className={styles.card}>
-                        <h3>{project.icon} {project.title}</h3>
+                        <h3>
+                            <img src={project.icon} alt="" style={{ width: '16px', height: '16px', verticalAlign: 'middle' }} />
+                            {' '}{project.title}
+                        </h3>
                         <p>{project.description}</p>
                     </div>
                 ))}

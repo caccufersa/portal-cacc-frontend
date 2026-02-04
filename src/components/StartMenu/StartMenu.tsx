@@ -47,7 +47,9 @@ export default function StartMenu() {
                                     className={styles.menuItem}
                                     onClick={() => handleItemClick(w.id)}
                                 >
-                                    <span className={styles.menuItemIcon}>{w.icon}</span>
+                                    <span className={styles.menuItemIcon}>
+                                        <img src={w.icon} alt="" style={{ width: '20px', height: '20px' }} />
+                                    </span>
                                     <span className={styles.menuItemText}>{w.title}</span>
                                 </button>
                             ))}
@@ -63,7 +65,9 @@ export default function StartMenu() {
                         className={styles.menuItem}
                         onClick={() => handleItemClick(w.id)}
                     >
-                        <span className={styles.menuItemIcon}>{w.icon}</span>
+                        <span className={styles.menuItemIcon}>
+                            <img src={w.icon} alt="" style={{ width: '20px', height: '20px' }} />
+                        </span>
                         <span className={styles.menuItemText}>{w.title}</span>
                     </button>
                 ))}
@@ -71,19 +75,19 @@ export default function StartMenu() {
                 <div className={styles.menuDivider} />
 
                 <button className={styles.menuItem} onClick={() => window.open('https://sigaa.ufersa.edu.br', '_blank')}>
-                    <span className={styles.menuItemIcon}>🌐</span>
+                    <img src="icons-95/world.ico" alt="SIGAA" className={styles.menuItemIcon} />
                     <span className={styles.menuItemText}>SIGAA</span>
                 </button>
 
                 <button className={styles.menuItem} onClick={() => window.open('https://instagram.com/cacc.ufersa', '_blank')}>
-                    <span className={styles.menuItemIcon}>📸</span>
+                    <img src="icons-95/msn3.ico" alt="Instagram" className={styles.menuItemIcon} />
                     <span className={styles.menuItemText}>Instagram</span>
                 </button>
 
                 <div className={styles.menuDivider} />
 
                 <button className={`${styles.menuItem} ${styles.shutdownItem}`} onClick={handleShutdown}>
-                    <span className={styles.menuItemIcon}>🔌</span>
+                   <img src="icons-95/shut_down_with_computer.ico" alt="Desligar" className={styles.menuItemIcon} />
                     <span className={styles.menuItemText}>Desligar...</span>
                 </button>
             </div>

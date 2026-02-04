@@ -4,7 +4,7 @@ export default function AboutContent() {
     return (
         <div className={styles.content}>
             <div className={styles.header}>
-                <span className={styles.logo}>🎓</span>
+                <img src="icons-95/directory_closed_cool.ico" alt="Sobre" className={styles.contentIcon} />
                 <div>
                     <h1 className={styles.title}>CACC</h1>
                     <p className={styles.subtitle}>Centro Acadêmico de Ciência da Computação</p>
@@ -36,19 +36,19 @@ export default function AboutContent() {
             <div className={styles.grid}>
                 <div className={styles.card}>
                     <h3>Presidente</h3>
-                    <p>A definir</p>
+                    
                 </div>
                 <div className={styles.card}>
                     <h3>Vice-Presidente</h3>
-                    <p>A definir</p>
+                 
                 </div>
                 <div className={styles.card}>
                     <h3>Secretário</h3>
-                    <p>A definir</p>
+                    
                 </div>
                 <div className={styles.card}>
                     <h3>Tesoureiro</h3>
-                    <p>A definir</p>
+                    
                 </div>
             </div>
         </div>

@@ -32,14 +32,18 @@ export default function WelcomePopup({ onClose }: WelcomePopupProps) {
             <div className={styles.popup}>
                 <div className={styles.titleBar}>
                     <div className={styles.titleContent}>
-                        <span className={styles.titleIcon}>🎓</span>
+                        <span className={styles.titleIcon}>
+                            <img src="/icons-95/msinfo32.ico" alt="" style={{ width: '16px', height: '16px' }} />
+                        </span>
                         <span className={styles.titleText}>Bem-vindo ao CACC!</span>
                     </div>
                     <button className={styles.closeButton} onClick={handleClose}>×</button>
                 </div>
 
                 <div className={styles.content}>
-                    <span className={styles.iconLarge}>🖥️</span>
+                    <span className={styles.iconLarge}>
+                        <img src="/icons-95/computer.ico" alt="" style={{ width: '48px', height: '48px' }} />
+                    </span>
                     <div className={styles.textContent}>
                         <h2>Olá, Calouro! 👋</h2>
                         <p>

@@ -10,7 +10,7 @@ const socialLinks = [
 export default function ContactContent() {
     return (
         <div className={styles.content}>
-            <h1>📞 Contato</h1>
+            <img src="icons-95/phone_desk.ico" alt="Contato" className={styles.contentIcon} />
             <p>
                 Entre em contato conosco! Estamos sempre disponíveis para ajudar
                 os estudantes e ouvir sugestões.
@@ -26,7 +26,7 @@ export default function ContactContent() {
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        <span>{link.icon}</span>
+                        <img src={`icons-95/${link.name.toLowerCase()}.ico`} alt={link.name} className={styles.contentIcon} />
                         <span>{link.name}</span>
                     </a>
                 ))}

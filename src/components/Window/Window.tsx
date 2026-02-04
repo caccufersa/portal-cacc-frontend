@@ -136,7 +136,9 @@ export default function Window({ windowState, children }: WindowProps) {
                 className={`${styles.titleBar} ${!isActive ? styles.titleBarInactive : ''}`}
                 onMouseDown={handleMouseDown}
             >
-                <span className={styles.titleIcon}>{windowState.icon}</span>
+                <span className={styles.titleIcon}>
+                    <img src={windowState.icon} alt="" style={{ width: '16px', height: '16px' }} />
+                </span>
                 <span className={styles.titleText}>{windowState.title}</span>
                 <div className={styles.titleButtons}>
                     <button

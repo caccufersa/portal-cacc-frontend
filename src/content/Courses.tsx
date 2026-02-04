@@ -38,7 +38,7 @@ const semesters = [
 export default function CoursesContent() {
     return (
         <div className={styles.content}>
-            <h1>📚 Grade Curricular</h1>
+            <img src="icons-95/address_book_pad.ico" alt="Grade Curricular" className={styles.contentIcon} />
             <p>
                 Confira abaixo a grade curricular do curso de Ciência da Computação da UFERSA.
                 As disciplinas estão organizadas por semestre.
