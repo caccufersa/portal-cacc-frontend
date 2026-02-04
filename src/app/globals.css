@@ -1,4 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@font-face {
+  font-family: 'VT323';
+  src: url('/fonts/VT323-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --win95-bg: #008080;
@@ -117,4 +123,28 @@ a {
 
 a:hover {
   color: var(--win95-blue-light);
+}
+
+/* Responsive style, change this if needed */
+@media (max-width: 768px) {
+  :root {
+    --font-size-base: 14px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    --font-size-sm: 12px;
+  }
+
+  html, body {
+    font-size: 14px;
+  }
+
+  .win95-button {
+    padding: 6px 12px;
+    font-size: 14px;
+    touch-action: manipulation;
+  }
+
+  .win95-button:active {
+    padding: 7px 11px 5px 13px;
+  }
 }

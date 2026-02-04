@@ -223,3 +223,78 @@
 .okButton:hover {
     background: var(--win95-light-gray);
 }
+
+@media (max-width: 768px) {
+    .popup {
+        width: 90vw;
+        max-width: 400px;
+    }
+
+    .titleBar {
+        padding: 4px 6px;
+    }
+
+    .titleText {
+        font-size: 14px;
+    }
+
+    .titleIcon {
+        font-size: 14px;
+    }
+
+    .closeButton {
+        width: 20px;
+        height: 18px;
+        font-size: 12px;
+    }
+
+    .content {
+        padding: 14px;
+        gap: 14px;
+        flex-direction: column;
+    }
+
+    .iconLarge {
+        font-size: 40px;
+    }
+
+    .textContent h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .textContent p {
+        font-size: 14px;
+    }
+
+    .features {
+        gap: 10px;
+    }
+
+    .feature {
+        padding: 10px;
+    }
+
+    .featureTitle {
+        font-size: 14px;
+    }
+
+    .featureDescription {
+        font-size: 12px;
+    }
+
+    .footer {
+        padding: 14px;
+        gap: 10px;
+    }
+
+    .checkboxContainer {
+        font-size: 12px;
+    }
+
+    .okButton {
+        padding: 8px 20px;
+        font-size: 14px;
+        touch-action: manipulation;
+    }
+}

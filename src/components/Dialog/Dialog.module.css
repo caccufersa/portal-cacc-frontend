@@ -116,3 +116,49 @@
     outline: 1px solid var(--win95-black);
     outline-offset: -4px;
 }
+
+@media (max-width: 768px) {
+    .dialog {
+        min-width: 260px;
+        max-width: 85vw;
+    }
+
+    .titleBar {
+        padding: 4px 6px;
+    }
+
+    .titleText {
+        font-size: 14px;
+    }
+
+    .closeButton {
+        width: 20px;
+        height: 18px;
+        font-size: 12px;
+    }
+
+    .content {
+        padding: 14px;
+        font-size: 14px;
+    }
+
+    .icon {
+        font-size: 28px;
+    }
+
+    .iconContent {
+        gap: 12px;
+    }
+
+    .buttons {
+        padding: 0 14px 14px;
+        gap: 10px;
+    }
+
+    .button {
+        min-width: 70px;
+        padding: 6px 12px;
+        font-size: 14px;
+        touch-action: manipulation;
+    }
+}

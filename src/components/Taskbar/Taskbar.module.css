@@ -146,3 +146,47 @@
     font-family: var(--font-main);
     font-size: var(--font-size-sm);
 }
+
+@media (max-width: 768px) {
+    .taskbar {
+        height: 50px;
+        padding: 6px;
+    }
+
+    .startButton {
+        padding: 6px 12px;
+        font-size: 14px;
+        min-width: 80px;
+    }
+
+    .startButton:active,
+    .startButtonActive {
+        padding: 7px 11px 5px 13px;
+    }
+
+    .startLogo {
+        font-size: 18px;
+    }
+
+    .windowList {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .windowButton {
+        min-width: 100px;
+        max-width: 160px;
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .windowButtonIcon {
+        font-size: 16px;
+    }
+
+    .clock {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}

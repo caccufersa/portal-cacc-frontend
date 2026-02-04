@@ -129,3 +129,36 @@
     border-bottom: 1px solid var(--win95-border-dark);
     background: var(--win95-light-gray);
 }
+
+@media (max-width: 768px) {
+    .startMenu {
+        bottom: 56px;
+        left: 6px;
+        width: min(280px, calc(100vw - 16px));
+    }
+
+    .sidebar {
+        width: 24px;
+        padding-bottom: 6px;
+    }
+
+    .sidebarText {
+        font-size: 16px;
+        letter-spacing: 1px;
+    }
+
+    .menuItem {
+        padding: 10px 14px;
+        font-size: 14px;
+        touch-action: manipulation;
+    }
+
+    .menuItemIcon {
+        font-size: 18px;
+        width: 22px;
+    }
+
+    .submenu {
+        width: min(240px, calc(100vw - 32px));
+    }
+}
