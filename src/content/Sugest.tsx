@@ -107,7 +107,7 @@ const Sugest: React.FC = () => {
         }
     };
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/sugestoes'; 
+    const API_URL = 'https://backend-go-portal.onrender.com/api/sugestoes'; // HARD CODE MESMO, O BACK BLOQUEA REQUISIÇÕES DE OUTROS DOMÍNIOS, ENTÃO NAO TEM JEITO, A NÃO SER QUE O BACK SEJA CONFIGURADO PRA PERMITIR CORS DO NOSSO DOMÍNIO, MAS ISSO É PRO FUTURO, POR ENQUANTO VAI ASSIM MESMO   
 
     const fetchSuggestions = async () => {
         try {
