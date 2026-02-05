@@ -20,7 +20,7 @@ export default function StartMenu() {
         }
     };
 
-    const mainItems = windows.filter(w => ['about', 'courses', 'projects', 'contact', 'help', 'documents'].includes(w.id));
+    const mainItems = windows.filter(w => ['about', 'courses', 'projects', 'contact', 'documents', 'help'].includes(w.id));
     const toolItems = windows.filter(w => ['calculator', 'notepad'].includes(w.id));
 
     return (
@@ -34,9 +34,9 @@ export default function StartMenu() {
                     onMouseEnter={() => setShowProgramsSubmenu(true)}
                     onMouseLeave={() => setShowProgramsSubmenu(false)}
                 >
-                    <span className={styles.menuItemIcon}>📂</span>
+                    {/*<span className={styles.menuItemIcon}>📂</span>
                     <span className={styles.menuItemText}>Programas</span>
-                    <span className={styles.arrow}>▶</span>
+                    <span className={styles.arrow}>▶</span>*/}
 
                     {showProgramsSubmenu && (
                         <div className={styles.submenu}>

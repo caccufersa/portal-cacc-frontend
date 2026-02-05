@@ -38,12 +38,13 @@ const semesters = [
 export default function CoursesContent() {
     return (
         <div className={styles.content}>
-            <img src="icons-95/address_book_pad.ico" alt="Grade Curricular" className={styles.contentIcon} />
-            <p>
+            <div className={styles.header}>
+            <img src="icons-95/certificate_3.ico" alt="Grade Curricular" className={styles.contentIcon} />
+            <h3>
                 Confira abaixo a grade curricular do curso de Ciência da Computação da UFERSA.
                 As disciplinas estão organizadas por semestre.
-            </p>
-
+            </h3>
+                </div>
             {semesters.map((semester, index) => (
                 <div key={index}>
                     <h2>{semester.name}</h2>

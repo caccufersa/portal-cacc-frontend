@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { useWindows } from '@/context/WindowsContext';
 import StartMenu from '@/components/StartMenu/StartMenu';
 import styles from './Taskbar.module.css';
-
+import { AlertDialog } from '../Dialog/Dialog';
 export default function Taskbar() {
+    const [alertOpen, setAlertOpen] = useState(false);
     const { windows, activeWindowId, startMenuOpen, setStartMenuOpen, focusWindow, restoreWindow, minimizeWindow } = useWindows();
     const [time, setTime] = useState('');
     const [date, setDate] = useState('');
@@ -73,11 +74,23 @@ export default function Taskbar() {
 
                 <div className={styles.systemTray}>
                     <span className={styles.trayIcon} title="Volume">
+                      <button className={styles.volumeButton} onClick={alertOpen ? () => setAlertOpen(false) : () => setAlertOpen(true)}>
                         <img src="/icons-95/loudspeaker_rays.ico" alt="Volume" style={{ width: '16px', height: '16px' }} />
+                        </button>
                     </span>
                     <span className={styles.trayIcon} title="Rede">
-                        <img src="/icons-95/network.ico" alt="Rede" style={{ width: '16px', height: '16px' }} />
+                     <button className={styles.networkButton} onClick={alertOpen ? () => setAlertOpen(false) : () => setAlertOpen(true)}>
+                        <img src="/icons-95/world.ico" alt="Rede" style={{ width: '16px', height: '16px' }} />
+                        </button>  
                     </span>
+                    {alertOpen && (
+                        <AlertDialog
+                            title="Em breve"
+                            message="Obrigado por ser curioso, em breve adicionaremos novas features."
+                            type="info"
+                            onOk={() => setAlertOpen(false)}
+                        />
+                    )}
                     <div className={styles.clockContainer} title={date}>
                         <span className={styles.clock}>{time}</span>
                     </div>

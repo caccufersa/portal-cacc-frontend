@@ -10,6 +10,7 @@ import ProjectsContent from '@/content/Projects';
 import ContactContent from '@/content/Contact';
 import HelpContent from '@/content/Help';
 import DocumentsContent from '@/content/Documents';
+import CalouroGuide from '@/content/CalouroGuide';
 
 import styles from './Desktop.module.css';
 
@@ -20,6 +21,7 @@ const windowContents: Record<string, React.ReactNode> = {
     contact: <ContactContent />,
     help: <HelpContent />,
     documents: <DocumentsContent />,
+    calouroGuide: <CalouroGuide />,
 };
 
 interface SelectionBox {

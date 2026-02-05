@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portal CACC Frontend
 
-## Getting Started
+Este repositório contém o front-end em Next.js do portal do Centro Acadêmico de Ciência da Computação da UFERSA. O foco é reproduzir uma experiência gráfica inspirada no Windows 95 com conteúdo institucional e utilitários para calouros, membros e visitantes.
 
-First, run the development server:
+## Começando
+
+Instale as dependências e execute o servidor de desenvolvimento local:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000) no navegador para visualizar o projeto. Qualquer alteração em `src/` ou `app/` atualiza a página automaticamente.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estrutura principal
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `app/` — rotas e layout do Next.js (app directory).
+- `src/components/` — componentes reutilizáveis como a Taskbar, janelas e diálogos.
+- `src/content/` — blocos de conteúdo (ex.: guias e textos fixos).
+- `public/` — ativos públicos como ícones, fontes e favicon.
 
-## Learn More
+## Miniguia de Contribuição de Páginas
 
-To learn more about Next.js, take a look at the following resources:
+1. **Planeje o conteúdo**: defina o que será exibido, título, textos e quaisquer ícones necessários.
+2. **Crie o componente**: adicione o conteúdo em `src/content/` ou `src/components/` conforme o caso.
+3. **Registre a página**:
+   - Se for uma rota nova, crie pasta dentro de `app/` com `page.tsx`.
+   - Importe o componente e renderize dentro de `export default function Page()`.
+4. **Estilize com módulos CSS** (`*.module.css`) ou classes globais em `src/styles`.
+5. **Teste localmente**: verifique em `npm run dev` e certifique-se de que a página aparece e responde conforme esperado.
+6. **Atualize ícones/metadados** se necessário (ex.: favicon em `public/`, metadata em `src/app/layout.tsx`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Pronto! Faça um Commit com mensagem clara e abra um PR descrevendo a nova página.# Portal CACC Frontend
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Este repositório contém o front-end em Next.js do portal do Centro Acadêmico de Ciência da Computação da UFERSA. O foco é reproduzir uma experiência gráfica inspirada no Windows 95 com conteúdo institucional e utilitários para calouros, membros e visitantes.
 
-## Deploy on Vercel
+## Começando
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Instale as dependências e execute o servidor de desenvolvimento local:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm install
+npm run dev
+```
+
+Abra [http://localhost:3000](http://localhost:3000) no navegador para visualizar o projeto. Qualquer alteração em `src/` ou `app/` atualiza a página automaticamente.
+
+## Estrutura principal
+
+- `app/` — rotas e layout do Next.js (app directory).
+- `src/components/` — componentes reutilizáveis como a Taskbar, janelas e diálogos.
+- `src/content/` — blocos de conteúdo (ex.: guias e textos fixos).
+- `public/` — ativos públicos como ícones, fontes e favicon.
+
+## Miniguia de Contribuição de Páginas
+
+1. **Planeje o conteúdo**: defina o que será exibido, título, textos e quaisquer ícones necessários.
+2. **Crie o componente**: adicione o conteúdo em `src/content/` ou `src/components/` conforme o caso.
+3. **Registre a página**:
+   - Se for uma rota nova, crie pasta dentro de `app/` com `page.tsx`.
+   - Importe o componente e renderize dentro de `export default function Page()`.
+4. **Estilize com módulos CSS** (`*.module.css`) ou classes globais em `src/styles`.
+5. **Teste localmente**: verifique em `npm run dev` e certifique-se de que a página aparece e responde conforme esperado.
+6. **Atualize ícones/metadados** se necessário (ex.: favicon em `public/`, metadata em `src/app/layout.tsx`).
+
+Pronto! Faça um Commit com mensagem clara e abra um PR descrevendo a nova página.
