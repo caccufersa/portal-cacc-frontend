@@ -14,75 +14,96 @@ const Sugest: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const styles = {
+    const winGray = '#c0c0c0';
+    const winDark = '#808080';
+    const winLight = '#ffffff';
+
+    const styles: Record<string, React.CSSProperties> = {
         container: {
-            backgroundColor: '#c0c0c0',
-            fontFamily: '"MS Sans Serif", Tahoma, sans-serif',
+            backgroundColor: winGray,
+            fontFamily: '"MS Sans Serif", "Segoe UI", Tahoma, sans-serif',
+            fontSize: '11px', 
             padding: '10px',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column' as const,
-            alignItems: 'center',
+            height: '100%',
+            color: 'black',
         },
-        window: {
-            width: '600px',
-            border: '2px solid #dfdfdf',
-            borderRightColor: '#404040',
-            borderBottomColor: '#404040',
-            backgroundColor: '#c0c0c0',
-            boxShadow: '1px 1px 0 0 #000',
-            marginBottom: '20px',
+        fieldset: {
+            border: `2px groove ${winLight}`, 
+            padding: '10px',
+            marginBottom: '10px',
         },
-        titleBar: {
-            background: 'linear-gradient(90deg, navy, #1084d0)',
-            color: 'white',
-            padding: '3px 5px',
-            fontWeight: 'bold' as const,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+        legend: {
+            padding: '0 4px',
+            marginBottom: '4px',
         },
-        content: {
-            padding: '15px',
+        label: {
+            display: 'block', 
+            marginBottom: '2px',
         },
         input: {
             width: '100%',
-            padding: '4px',
-            marginBottom: '10px',
-            border: '2px inset #dfdfdf',
+            padding: '3px',
+            marginBottom: '8px',
+            border: '2px inset #ffffff', 
             backgroundColor: 'white',
             fontFamily: 'inherit',
+            outline: 'none',
+            fontSize: '12px'
         },
         textarea: {
             width: '100%',
             height: '80px',
-            padding: '4px',
-            marginBottom: '10px',
-            border: '2px inset #dfdfdf',
+            padding: '3px',
+            marginBottom: '8px',
+            border: '2px inset #ffffff',
             backgroundColor: 'white',
             fontFamily: 'inherit',
-            resize: 'none' as const,
+            resize: 'none',
+            outline: 'none',
+            fontSize: '12px'
+
         },
         button: {
-            backgroundColor: '#c0c0c0',
-            border: '2px outset #dfdfdf',
+            backgroundColor: winGray,
+            border: '2px outset #ffffff', 
             padding: '4px 12px',
             cursor: 'pointer',
             fontFamily: 'inherit',
-            fontWeight: 'bold' as const,
+            color: 'black',
+            fontSize: '11px',
+            minWidth: '75px'
         },
-        listItem: {
-            border: '2px inset #dfdfdf',
+        buttonContainer: {
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            gap: '6px' 
+        },
+        listBox: {
+            border: '2px inset #ffffff',
             backgroundColor: 'white',
-            padding: '8px',
-            marginBottom: '8px',
+            height: '300px', 
+            overflowY: 'auto',
+            padding: '4px',
         },
-        fieldset: {
-                border: '2px solid #dfdfdf',
-                borderRightColor: 'white',
-                borderBottomColor: 'white',
-                padding: '10px',
-                marginTop: '10px'
+        messageItem: {
+            marginBottom: '8px', 
+            paddingBottom: '8px',
+            borderBottom: '1px dotted #808080'
+        },
+        messageHeader: { 
+            fontWeight: 'bold', 
+            color: '#000080',
+            marginBottom: '2px' 
+        },
+        messageBody: { 
+            fontFamily: '"Courier New", monospace', 
+            fontSize: '12px'
+        },
+        messageDate: { 
+            fontSize: '9px', 
+            color: '#666', 
+            marginTop: '2px',
+            textAlign: 'right' as const
         }
     };
 
@@ -97,8 +118,7 @@ const Sugest: React.FC = () => {
         } catch (err) {
             console.error(err);
             setSuggestions([
-                { Id: 1, Author: 'Admin', Texto: 'Welcome to the suggestion board!', CreatedAt: new Date().toISOString() },
-                { Id: 2, Author: 'Guest', Texto: 'I love the retro style.', CreatedAt: new Date().toISOString() }
+                { Id: 1, Author: 'CalouroJuninho123', Texto: 'Acho que a api nao ta funcionando nao', CreatedAt: new Date().toISOString() },
             ]);
         }
     };
@@ -106,24 +126,20 @@ const Sugest: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!author || !message) return;
-
         setLoading(true);
         setError(null);
-
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ Author: author, Texto: message }),
             });
-
             if (!response.ok) throw new Error('Failed to post suggestion');
-            
             await fetchSuggestions();
             setAuthor('');
             setMessage('');
         } catch (err) {
-            setError('Error posting data. Please try again.');
+            setError('Erro ao enviar dados. Por favor, tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -135,67 +151,60 @@ const Sugest: React.FC = () => {
 
     return (
         <div style={styles.container}>
-            <div style={styles.window}>
-                <div style={styles.titleBar}>
-                    <span>New Suggestion.exe</span>
-                    <button style={{...styles.button, padding: '0 4px', minWidth: '20px'}}>X</button>
-                </div>
-                <div style={styles.content}>
-                    <form onSubmit={handleSubmit}>
-                        <label style={{ display: 'block', marginBottom: '5px' }}>Author:</label>
-                        <input
-                            type="text"
-                            style={styles.input}
-                            value={author}
-                            onChange={(e) => setAuthor(e.target.value)}
-                            placeholder="Your Name"
-                        />
-                        
-                        <label style={{ display: 'block', marginBottom: '5px' }}>Message:</label>
-                        <textarea
-                            style={styles.textarea}
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Type your suggestion here..."
-                        />
+            <fieldset style={styles.fieldset}>
+                <legend style={styles.legend}>Nova Mensagem</legend>
+                
+                <form onSubmit={handleSubmit}>
+                    <label style={styles.label}>De:</label>
+                    <input
+                        type="text"
+                        style={styles.input}
+                        value={author}
+                        onChange={(e) => setAuthor(e.target.value)}
+                        placeholder="Seu nome aqui juninho..."
+                    />
 
-                        {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
-                        
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                                <button type="submit" style={styles.button} disabled={loading}>
-                                        {loading ? 'Sending...' : 'Submit'}
-                                </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+                    <label style={styles.label}>Mensagem:</label>
+                    <textarea
+                        style={styles.textarea}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Digite sua sugestão..."
+                    />
 
-            <div style={styles.window}>
-                <div style={styles.titleBar}>
-                    <span>Incoming Suggestions - Notepad</span>
-                    <button style={{...styles.button, padding: '0 4px', minWidth: '20px'}}>X</button>
+                    {error && <div style={{ color: 'red', marginBottom: '8px', border: '1px dotted red', padding: '2px' }}>{error}</div>}
+
+                    <div style={styles.buttonContainer}>
+                        <button type="submit" style={styles.button} disabled={loading}>
+                            {loading ? 'Enviando...' : 'Enviar'}
+                        </button>
+                    </div>
+                </form>
+            </fieldset>
+
+            <fieldset style={{...styles.fieldset, flex: 1, display: 'flex', flexDirection: 'column'}}>
+                <legend style={styles.legend}>Mural de Sugestões</legend>
+                
+                <div style={styles.listBox}>
+                    {suggestions.length === 0 ? (
+                        <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>Nenhuma sugestão encontrada... ALGUEM ESCREVA ALGO</p>
+                    ) : (
+                        suggestions.map((s) => (
+                            <div key={s.Id} style={styles.messageItem}>
+                                <div style={styles.messageHeader}>&lt;{s.Author}&gt; escreveu:</div>
+                                <div style={styles.messageBody}>{s.Texto}</div>
+                                <div style={styles.messageDate}>
+                                    {new Date(s.CreatedAt).toLocaleString()}
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
-                <div style={styles.content}>
-                        <div style={{...styles.fieldset, height: '300px', overflowY: 'auto', backgroundColor: 'white' }}>
-                                {suggestions.length === 0 ? (
-                                        <p>No suggestions yet...</p>
-                                ) : (
-                                        suggestions.map((s) => (
-                                        <div key={s.Id} style={{ marginBottom: '15px', borderBottom: '1px dashed #000', paddingBottom: '5px' }}>
-                                                <div style={{ fontWeight: 'bold', color: 'navy' }}>&lt;{s.Author}&gt; says:</div>
-                                                <div style={{ fontFamily: '"Courier New", monospace' }}>{s.Texto}</div>
-                                                <div style={{ fontSize: '0.8em', color: '#666', marginTop: '4px' }}>
-                                                        Sent: {new Date(s.CreatedAt).toLocaleDateString()}
-                                                </div>
-                                        </div>
-                                        ))
-                                )}
-                        </div>
-                        <div style={{ marginTop: '10px', textAlign: 'right' }}>
-                                <button onClick={fetchSuggestions} style={styles.button}>Refresh</button>
-                        </div>
+
+                <div style={{ textAlign: 'right' }}>
+                    <button onClick={fetchSuggestions} style={styles.button}>Atualizar</button>
                 </div>
-            </div>
+            </fieldset>
         </div>
     );
 };
