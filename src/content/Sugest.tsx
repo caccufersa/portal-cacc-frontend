@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 interface Suggestion {
-    Id: number;
-    Author: string;
-    Texto: string;
-    CreatedAt: string;
+    id: number;
+    author: string;
+    texto: string;
+    data_criacao: string;
 }
 
 const Sugest: React.FC = () => {
@@ -118,21 +118,21 @@ const Sugest: React.FC = () => {
         } catch (err) {
             console.error(err);
             setSuggestions([
-                { Id: 1, Author: 'CalouroJuninho123', Texto: 'Acho que a api nao ta funcionando nao', CreatedAt: new Date().toISOString() },
+                { id: 1, author: 'CalouroJuninho123', texto: 'Acho que a api nao ta funcionando nao', data_criacao: new Date().toISOString() },
             ]);
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!author || !message) return;
+        if (!author || !texto) return;
         setLoading(true);
         setError(null);
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ Author: author, Texto: message }),
+                body: JSON.stringify({ author: author, texto: message }),
             });
             if (!response.ok) throw new Error('Failed to post suggestion');
             await fetchSuggestions();
@@ -190,11 +190,11 @@ const Sugest: React.FC = () => {
                         <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>Nenhuma sugestão encontrada... ALGUEM ESCREVA ALGO</p>
                     ) : (
                         suggestions.map((s) => (
-                            <div key={s.Id} style={styles.messageItem}>
-                                <div style={styles.messageHeader}>&lt;{s.Author}&gt; escreveu:</div>
-                                <div style={styles.messageBody}>{s.Texto}</div>
+                            <div key={s.id} style={styles.messageItem}>
+                                <div style={styles.messageHeader}>&lt;{s.author}&gt; escreveu:</div>
+                                <div style={styles.messageBody}>{s.texto}</div>
                                 <div style={styles.messageDate}>
-                                    {new Date(s.CreatedAt).toLocaleString()}
+                                    {new Date(s.data_criacao).toLocaleString()}
                                 </div>
                             </div>
                         ))
