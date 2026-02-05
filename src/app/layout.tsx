@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     apple: '/favicon.svg'
   },
   openGraph: {
-    title: 'CACC - Centro Acadêmico de Ciência da Computação',
+    title: '',
     description: 'Site oficial do CA de Ciência da Computação da UFERSA',
     type: 'website',
     locale: 'pt_BR'

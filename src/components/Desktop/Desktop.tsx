@@ -13,6 +13,7 @@ import DocumentsContent from '@/content/Documents';
 import CalouroGuide from '@/content/CalouroGuide';
 
 import styles from './Desktop.module.css';
+import Sugest from '@/content/Sugest';
 
 const windowContents: Record<string, React.ReactNode> = {
     about: <AboutContent />,
@@ -22,6 +23,7 @@ const windowContents: Record<string, React.ReactNode> = {
     help: <HelpContent />,
     documents: <DocumentsContent />,
     calouroGuide: <CalouroGuide />,
+    sugest: <Sugest />, 
 };
 
 interface SelectionBox {

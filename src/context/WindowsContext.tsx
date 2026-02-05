@@ -46,6 +46,7 @@ const initialWindows: WindowState[] = [
   { id: 'documents', title: 'Documentos', icon: 'icons-95/notepad_file.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 80, y: 90 }, size: { width: 520, height: 420 } },
   { id: 'help', title: 'Ajuda', icon: 'icons-95/help_question_mark.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 120, y: 70 }, size: { width: 500, height: 450 } },
   { id: 'calouroGuide', title: 'Guia do Calouro', icon: 'icons-95/user_world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 600, y: 250 }, size: { width: 700, height: 500 } },
+  { id: 'sugest', title: 'Sugestões', icon: 'icons-95/notepad_file.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 300, y: 150 }, size: { width: 600, height: 400 } },
 ];
 
 const initialIconPositions: IconPosition[] = [
@@ -55,6 +56,7 @@ const initialIconPositions: IconPosition[] = [
   { id: 'contact', position: { x: 20, y: 290 } },
   { id: 'documents', position: { x: 20, y: 380 } },
   { id: 'help', position: { x: 20, y: 470 } },
+  { id: 'sugest', position: { x: 20, y: 800 } },
   { id: 'calouroGuide', position: { x: 800, y: 250 } },
 ];
 
