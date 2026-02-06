@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import styles from './Dialog.module.css';
+import Image from 'next/image';
 
 interface DialogButton {
     label: string;
@@ -55,6 +56,7 @@ interface AlertDialogProps {
     type?: 'info' | 'warning' | 'error' | 'question';
     onOk: () => void;
     onCancel?: () => void;
+    Image?: React.ComponentType<{ src: string; alt: string; height: number; width: number }>;
 }
 
 const typeIcons = {
@@ -64,7 +66,7 @@ const typeIcons = {
     question: '❓'
 };
 
-export function AlertDialog({ title, message, type = 'info', onOk, onCancel }: AlertDialogProps) {
+export function AlertDialog({ title, message, type = 'info', onOk, onCancel, Image }: AlertDialogProps) {
     const buttons: DialogButton[] = onCancel
         ? [
             { label: 'OK', onClick: onOk, primary: true },
@@ -74,6 +76,9 @@ export function AlertDialog({ title, message, type = 'info', onOk, onCancel }: A
 
     return (
         <Dialog title={title} icon={typeIcons[type]} buttons={buttons} onClose={onCancel || onOk}>
+            <div style={{ paddingRight: '50px', justifyContent: 'center', display: 'flex', }}>
+            {Image && <Image src={`/icons-95/${type}.ico`} alt={type} height={16} width={16}  />}
+            </div>
             <p>{message}</p>
         </Dialog>
     );

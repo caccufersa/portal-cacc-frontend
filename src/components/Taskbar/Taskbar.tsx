@@ -5,6 +5,7 @@ import { useWindows } from '@/context/WindowsContext';
 import StartMenu from '@/components/StartMenu/StartMenu';
 import styles from './Taskbar.module.css';
 import { AlertDialog } from '../Dialog/Dialog';
+import Image from 'next/image';
 export default function Taskbar() {
     const [alertOpen, setAlertOpen] = useState(false);
     const { windows, activeWindowId, startMenuOpen, setStartMenuOpen, focusWindow, restoreWindow, minimizeWindow } = useWindows();
@@ -84,12 +85,15 @@ export default function Taskbar() {
                         </button>  
                     </span>
                     {alertOpen && (
+                        <>
                         <AlertDialog
                             title="Em breve"
                             message="Obrigado por ser curioso, em breve adicionaremos novas features."
                             type="info"
                             onOk={() => setAlertOpen(false)}
+                            Image={() => <Image src="/images/cat.jpg" alt="info" height={128} width={256} />}
                         />
+                        </>
                     )}
                     <div className={styles.clockContainer} title={date}>
                         <span className={styles.clock}>{time}</span>
