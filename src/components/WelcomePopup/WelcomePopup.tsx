@@ -48,7 +48,7 @@ export default function WelcomePopup({ onClose }: WelcomePopupProps) {
                     <div className={styles.textContent}>
                         <div className={styles.rowtitle}>
                         <h2>Olá, Calouro! 👋</h2>
-                        <Image src="/gifs/linux.gif" alt="pinguim" width={64} height={64} />
+                        <Image src="/gifs/linux.gif" alt="pinguim" width={64} height={64} className={styles.gifIcon} />
                         </div>
                         <p>
                             Seja muito bem-vindo ao <span className={styles.highlight}>CACC</span> -

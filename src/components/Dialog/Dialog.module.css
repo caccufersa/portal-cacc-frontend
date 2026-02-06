@@ -118,17 +118,10 @@
 }
 
 @media (max-width: 768px) {
-    .overlay {
-        padding: 8px;
-        align-items: flex-start;
-    }
-
     .dialog {
         min-width: unset;
-        width: 100%;
-        max-width: calc(100vw - 16px);
-        max-height: calc(100vh - 16px);
-        margin-top: 8px;
+        width: calc(100vw - 24px);
+        max-width: 360px;
     }
 
     .titleBar {
