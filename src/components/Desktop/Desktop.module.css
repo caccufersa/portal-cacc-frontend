@@ -37,8 +37,9 @@
 @media (max-width: 768px) {
     .desktop {
         bottom: 44px;
+        background: url('../../../public/images/background.webp') no-repeat center top;
         background-size: cover;
-        background-position: center;
+        background-attachment: scroll;
     }
 
     .iconsContainer {
