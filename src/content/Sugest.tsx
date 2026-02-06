@@ -186,7 +186,7 @@ const Sugest: React.FC = () => {
                 <legend style={styles.legend}>Mural de Sugestões</legend>
                 
                 <div style={styles.listBox}>
-                    {suggestions.length === 1 ? (
+                    {suggestions.length === 0 ? (
                         <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>Nenhuma sugestão encontrada... ALGUEM ESCREVA ALGO</p>
                     ) : (
                         suggestions.map((s) => (

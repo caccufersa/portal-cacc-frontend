@@ -223,6 +223,14 @@
 .okButton:hover {
     background: var(--win95-light-gray);
 }
+.rowtitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.underlineHighlight {
+    border-bottom: 2px solid var(--win95-blue);
+}
 
 @media (max-width: 768px) {
     .popup {

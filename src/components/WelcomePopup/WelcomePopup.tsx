@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import styles from './WelcomePopup.module.css';
 
 interface WelcomePopupProps {
@@ -33,7 +34,7 @@ export default function WelcomePopup({ onClose }: WelcomePopupProps) {
                 <div className={styles.titleBar}>
                     <div className={styles.titleContent}>
                         <span className={styles.titleIcon}>
-                            <img src="/icons-95/msinfo32.ico" alt="" style={{ width: '16px', height: '16px' }} />
+                            <Image src="/icons-95/msinfo32.ico" alt="" width={16} height={16} />
                         </span>
                         <span className={styles.titleText}>Bem-vindo ao CACC!</span>
                     </div>
@@ -42,13 +43,16 @@ export default function WelcomePopup({ onClose }: WelcomePopupProps) {
 
                 <div className={styles.content}>
                     <span className={styles.iconLarge}>
-                        <img src="/icons-95/computer.ico" alt="" style={{ width: '48px', height: '48px' }} />
+                        <Image src="/icons-95/computer.ico" alt="" width={48} height={48} />
                     </span>
                     <div className={styles.textContent}>
+                        <div className={styles.rowtitle}>
                         <h2>Olá, Calouro! 👋</h2>
+                        <Image src="/gifs/linux.gif" alt="pinguim" width={64} height={64} />
+                        </div>
                         <p>
                             Seja muito bem-vindo ao <span className={styles.highlight}>CACC</span> -
-                            Centro Acadêmico de Ciência da Computação da UFERSA!
+                            <span className={styles.underlineHighlight}>Centro Acadêmico de Ciência da Computação da UFERSA!</span>
                         </p>
                         <p>
                             Este é o seu portal de informações sobre o curso. Navegue pelos
