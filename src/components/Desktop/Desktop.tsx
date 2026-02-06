@@ -14,6 +14,7 @@ import CalouroGuide from '@/content/CalouroGuide';
 
 import styles from './Desktop.module.css';
 import Sugest from '@/content/Sugest';
+import BalanceContent from '@/content/Balance';
 
 const windowContents: Record<string, React.ReactNode> = {
     about: <AboutContent />,
@@ -23,7 +24,8 @@ const windowContents: Record<string, React.ReactNode> = {
     help: <HelpContent />,
     documents: <DocumentsContent />,
     calouroGuide: <CalouroGuide />,
-    sugest: <Sugest />, 
+    sugest: <Sugest />,
+    balance: <BalanceContent />,
 };
 
 interface SelectionBox {
