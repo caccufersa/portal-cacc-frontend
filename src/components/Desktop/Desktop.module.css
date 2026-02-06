@@ -4,7 +4,12 @@
     left: 0;
     right: 0;
     bottom: 40px;
-    background: url('../../../public/images/background.webp') no-repeat center center fixed;
+    background-color: #008080;
+    background-image: url('../../../public/images/background.webp');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    background-size: cover;
 }
 
 .iconsContainer {
@@ -37,7 +42,10 @@
 @media (max-width: 768px) {
     .desktop {
         bottom: 44px;
-        background: url('../../../public/images/background.webp') no-repeat center top;
+        background-color: #008080;
+        background-image: url('../../../public/images/background.webp');
+        background-repeat: no-repeat;
+        background-position: center top;
         background-size: cover;
         background-attachment: scroll;
     }
