@@ -36,13 +36,28 @@
 
 @media (max-width: 768px) {
     .desktop {
-        bottom: 50px;
+        bottom: 44px;
         background-size: cover;
         background-position: center;
     }
 
     .iconsContainer {
-        padding: 8px;
+        padding: 12px 8px;
         overflow-y: auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        align-content: start;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .selectionBox {
+        display: none;
+    }
+}
+
+@media (max-width: 400px) {
+    .iconsContainer {
+        grid-template-columns: repeat(3, 1fr);
     }
 }

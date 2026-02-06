@@ -71,6 +71,35 @@
     color: #808080;
 }
 
+@media (max-width: 768px) {
+    .title {
+        font-size: 42px;
+        letter-spacing: 2px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+
+    .loadingContainer {
+        width: 220px;
+    }
+
+    .loadingText {
+        font-size: 12px;
+    }
+
+    .loadingBar {
+        height: 16px;
+    }
+
+    .copyright {
+        bottom: 24px;
+        font-size: 11px;
+    }
+}
+
 .blinkText {
     animation: blink 0.8s ease-in-out infinite;
 }

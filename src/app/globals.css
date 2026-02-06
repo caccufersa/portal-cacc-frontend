@@ -128,23 +128,32 @@ a:hover {
 /* Responsive style, change this if needed */
 @media (max-width: 768px) {
   :root {
-    --font-size-base: 14px;
-    --font-size-lg: 18px;
-    --font-size-xl: 20px;
-    --font-size-sm: 12px;
+    --font-size-base: 13px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    --font-size-sm: 11px;
   }
 
   html, body {
-    font-size: 14px;
+    font-size: 13px;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    touch-action: manipulation;
   }
 
   .win95-button {
     padding: 6px 12px;
-    font-size: 14px;
+    font-size: 13px;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .win95-button:active {
     padding: 7px 11px 5px 13px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
   }
 }

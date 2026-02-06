@@ -119,8 +119,9 @@
 
 @media (max-width: 768px) {
     .dialog {
-        min-width: 260px;
-        max-width: 85vw;
+        min-width: unset;
+        width: calc(100vw - 24px);
+        max-width: 360px;
     }
 
     .titleBar {
@@ -128,7 +129,7 @@
     }
 
     .titleText {
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .closeButton {
@@ -139,7 +140,7 @@
 
     .content {
         padding: 14px;
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .icon {
@@ -157,8 +158,9 @@
 
     .button {
         min-width: 70px;
-        padding: 6px 12px;
-        font-size: 14px;
+        padding: 8px 14px;
+        font-size: 13px;
         touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 }

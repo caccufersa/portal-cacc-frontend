@@ -234,8 +234,11 @@
 
 @media (max-width: 768px) {
     .popup {
-        width: 90vw;
+        width: calc(100vw - 16px);
         max-width: 400px;
+        max-height: calc(100vh - 60px);
+        display: flex;
+        flex-direction: column;
     }
 
     .titleBar {
@@ -243,7 +246,7 @@
     }
 
     .titleText {
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .titleIcon {
@@ -257,52 +260,63 @@
     }
 
     .content {
-        padding: 14px;
-        gap: 14px;
+        padding: 12px;
+        gap: 10px;
         flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        flex: 1;
     }
 
     .iconLarge {
-        font-size: 40px;
+        font-size: 36px;
+    }
+
+    .rowtitle {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 
     .textContent h2 {
-        font-size: 18px;
-        margin-bottom: 10px;
+        font-size: 17px;
+        margin-bottom: 8px;
     }
 
     .textContent p {
-        font-size: 14px;
+        font-size: 13px;
+        line-height: 1.4;
     }
 
-    .features {
-        gap: 10px;
-    }
-
-    .feature {
+    .tips {
         padding: 10px;
+        margin: 8px 0;
     }
 
-    .featureTitle {
-        font-size: 14px;
+    .tips h3 {
+        font-size: 13px;
     }
 
-    .featureDescription {
+    .tips li {
         font-size: 12px;
     }
 
     .footer {
-        padding: 14px;
-        gap: 10px;
+        padding: 10px 12px;
+        gap: 8px;
+        flex-shrink: 0;
     }
 
-    .checkboxContainer {
-        font-size: 12px;
+    .checkbox {
+        font-size: 11px;
     }
 
     .okButton {
-        padding: 8px 20px;
-        font-size: 14px;
+        min-width: 80px;
+        padding: 8px 16px;
+        font-size: 13px;
         touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 }

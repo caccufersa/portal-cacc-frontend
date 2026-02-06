@@ -19,11 +19,19 @@ export default function Window({ windowState, children }: WindowProps) {
     const [resizeDirection, setResizeDirection] = useState<ResizeDirection>(null);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0, posX: 0, posY: 0 });
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const isActive = activeWindowId === windowState.id;
 
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
-        if (windowState.isMaximized) return;
+        if (windowState.isMaximized || isMobile) return;
         focusWindow(windowState.id);
         setIsDragging(true);
         setDragOffset({
@@ -34,7 +42,7 @@ export default function Window({ windowState, children }: WindowProps) {
 
     const handleResizeStart = useCallback((e: React.MouseEvent, direction: ResizeDirection) => {
         e.stopPropagation();
-        if (windowState.isMaximized) return;
+        if (windowState.isMaximized || isMobile) return;
         focusWindow(windowState.id);
         setIsResizing(true);
         setResizeDirection(direction);
@@ -117,7 +125,8 @@ export default function Window({ windowState, children }: WindowProps) {
         return null;
     }
 
-    const windowStyle = windowState.isMaximized ? {} : {
+    // No mobile, janelas sempre aparecem em fullscreen via CSS
+    const windowStyle = (windowState.isMaximized || isMobile) ? {} : {
         left: windowState.position.x,
         top: windowState.position.y,
         width: windowState.size.width,
@@ -128,7 +137,7 @@ export default function Window({ windowState, children }: WindowProps) {
     return (
         <div
             ref={windowRef}
-            className={`${styles.window} ${windowState.isMaximized ? styles.windowMaximized : ''}`}
+            className={`${styles.window} ${(windowState.isMaximized || isMobile) ? styles.windowMaximized : ''}`}
             style={{ ...windowStyle, zIndex: windowState.zIndex }}
             onClick={() => focusWindow(windowState.id)}
         >
@@ -141,18 +150,22 @@ export default function Window({ windowState, children }: WindowProps) {
                 </span>
                 <span className={styles.titleText}>{windowState.title}</span>
                 <div className={styles.titleButtons}>
-                    <button
-                        className={styles.titleButton}
-                        onClick={(e) => { e.stopPropagation(); minimizeWindow(windowState.id); }}
-                    >
-                        _
-                    </button>
-                    <button
-                        className={styles.titleButton}
-                        onClick={(e) => { e.stopPropagation(); handleMaximizeToggle(); }}
-                    >
-                        □
-                    </button>
+                    {!isMobile && (
+                        <>
+                            <button
+                                className={styles.titleButton}
+                                onClick={(e) => { e.stopPropagation(); minimizeWindow(windowState.id); }}
+                            >
+                                _
+                            </button>
+                            <button
+                                className={styles.titleButton}
+                                onClick={(e) => { e.stopPropagation(); handleMaximizeToggle(); }}
+                            >
+                                □
+                            </button>
+                        </>
+                    )}
                     <button
                         className={styles.titleButton}
                         onClick={(e) => { e.stopPropagation(); closeWindow(windowState.id); }}
@@ -165,7 +178,7 @@ export default function Window({ windowState, children }: WindowProps) {
                 {children}
             </div>
 
-            {!windowState.isMaximized && (
+            {!windowState.isMaximized && !isMobile && (
                 <>
                     <div className={`${styles.resizeHandle} ${styles.resizeN}`} onMouseDown={(e) => handleResizeStart(e, 'n')} />
                     <div className={`${styles.resizeHandle} ${styles.resizeS}`} onMouseDown={(e) => handleResizeStart(e, 's')} />

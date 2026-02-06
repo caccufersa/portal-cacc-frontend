@@ -183,3 +183,84 @@
     width: 48px;
     height: 48px;
 }
+
+@media (max-width: 768px) {
+    .content h1 {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .content h2 {
+        font-size: 16px;
+        margin: 10px 0 6px;
+    }
+
+    .content p {
+        font-size: 13px;
+        margin-bottom: 8px;
+        line-height: 1.5;
+    }
+
+    .content li {
+        font-size: 13px;
+    }
+
+    .header {
+        gap: 10px;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    .logo {
+        font-size: 36px;
+    }
+
+    .contentIcon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        font-size: 12px;
+    }
+
+    .table th,
+    .table td {
+        padding: 6px;
+        white-space: nowrap;
+    }
+
+    .socialLinks {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .socialLink {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .button {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+
+    .faqItem {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .docItem {
+        padding: 10px;
+        gap: 8px;
+    }
+}

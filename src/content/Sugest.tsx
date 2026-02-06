@@ -204,7 +204,7 @@ const Sugest: React.FC = () => {
                 
                 <div style={styles.listBox}>
                     {suggestions.length === 0 ? (
-                        <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>Nenhuma sugestão encontrada... ALGUEM ESCREVA ALGO</p>
+                        <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>CALMAAAAAAAAAAAAAAAAA QUE TA CARREGANDOOOOOOOOOOOOO</p>
                     ) : (
                         suggestions.map((s) => (
                             <div key={s.id} style={styles.messageItem}>

@@ -54,9 +54,16 @@
 
 @media (max-width: 768px) {
     .icon {
-        width: 72px;
-        padding: 6px;
+        position: static !important;
+        width: 100%;
+        padding: 8px 4px;
         touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .iconDragging {
+        opacity: 1;
+        z-index: auto;
     }
 
     .iconImage {
@@ -66,7 +73,8 @@
     }
 
     .label {
-        font-size: 12px;
-        padding: 3px 5px;
+        font-size: 11px;
+        padding: 2px 2px;
+        line-height: 1.2;
     }
 }

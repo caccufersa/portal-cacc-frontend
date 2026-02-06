@@ -162,44 +162,69 @@
 
 @media (max-width: 768px) {
     .taskbar {
-        height: 50px;
-        padding: 6px;
+        height: 44px;
+        padding: 4px;
     }
 
     .startButton {
-        padding: 6px 12px;
-        font-size: 14px;
-        min-width: 80px;
+        padding: 4px 8px;
+        font-size: 12px;
+        min-width: auto;
+        gap: 3px;
+    }
+
+    .startButton span {
+        display: none;
     }
 
     .startButton:active,
     .startButtonActive {
-        padding: 7px 11px 5px 13px;
+        padding: 5px 7px 3px 9px;
     }
 
     .startLogo {
-        font-size: 18px;
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    .separator {
+        height: 20px;
+        margin: 0 1px;
     }
 
     .windowList {
         overflow-x: auto;
         scrollbar-width: none;
         -ms-overflow-style: none;
+        gap: 2px;
     }
 
     .windowButton {
-        min-width: 100px;
-        max-width: 160px;
-        padding: 6px 10px;
-        font-size: 12px;
+        min-width: 36px;
+        max-width: 36px;
+        padding: 4px;
+        justify-content: center;
+    }
+
+    .windowButtonText {
+        display: none;
     }
 
     .windowButtonIcon {
-        font-size: 16px;
+        font-size: 14px;
+    }
+
+    .systemTray {
+        padding: 2px 4px;
+        gap: 2px;
+    }
+
+    .clockContainer {
+        padding-left: 4px;
+        margin-left: 2px;
     }
 
     .clock {
-        padding: 6px 10px;
-        font-size: 12px;
+        font-size: 11px;
     }
 }

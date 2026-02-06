@@ -18,18 +18,34 @@ export default function DesktopIcon({ id, icon, label, initialPosition, isSelect
     const [isDragging, setIsDragging] = useState(false);
     const [position, setPosition] = useState(initialPosition);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+    const [isMobile, setIsMobile] = useState(false);
     const iconRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
         onSelect(id);
+        if (isMobile) return; // No drag on mobile
         setIsDragging(true);
         setDragOffset({
             x: e.clientX - position.x,
             y: e.clientY - position.y
         });
-    }, [id, position, onSelect]);
+    }, [id, position, onSelect, isMobile]);
+
+    const handleTap = useCallback(() => {
+        if (isMobile) {
+            onSelect(id);
+            onDoubleClick();
+        }
+    }, [id, isMobile, onSelect, onDoubleClick]);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -61,8 +77,9 @@ export default function DesktopIcon({ id, icon, label, initialPosition, isSelect
         <div
             ref={iconRef}
             className={`${styles.icon} ${isSelected ? styles.iconSelected : ''} ${isDragging ? styles.iconDragging : ''}`}
-            style={{ left: position.x, top: position.y }}
+            style={isMobile ? {} : { left: position.x, top: position.y }}
             onMouseDown={handleMouseDown}
+            onClick={handleTap}
             onDoubleClick={(e) => { e.stopPropagation(); onDoubleClick(); }}
             tabIndex={0}
         >

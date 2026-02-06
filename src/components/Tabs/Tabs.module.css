@@ -41,9 +41,35 @@
     flex: 1;
     padding: 12px;
     background: var(--win95-gray);
+    overflow: auto;
     box-shadow:
         inset -1px -1px 0 var(--win95-border-darker),
         inset 1px 1px 0 var(--win95-border-light),
         inset -2px -2px 0 var(--win95-border-dark),
         inset 2px 2px 0 var(--win95-light-gray);
+}
+
+@media (max-width: 768px) {
+    .tabList {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 2px 2px 0;
+    }
+
+    .tabList::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab {
+        padding: 6px 10px;
+        font-size: 11px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .tabContent {
+        padding: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
 }
