@@ -111,22 +111,18 @@ const Sugest: React.FC = () => {
 
     const fetchSuggestions = async () => {
         try {
-            console.log('Fetching suggestions...');
             const response = await fetch(API_URL, {
                 cache: 'no-store',
                 headers: {
-                    'Cache-Control': 'no-cache'
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
                 }
             });
             if (!response.ok) throw new Error('Failed to fetch suggestions');
             const data = await response.json();
-            console.log('Suggestions received:', data);
             setSuggestions(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error('Error fetching suggestions:', err);
-            setSuggestions([
-                { id: 1, author: 'CalouroJuninho123', texto: 'Acho que a api nao ta funcionando nao', data_criacao: new Date().toISOString() },
-            ]);
         }
     };
 
@@ -136,7 +132,6 @@ const Sugest: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            console.log('Sending suggestion:', { author, texto: message });
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -147,10 +142,9 @@ const Sugest: React.FC = () => {
                 console.error('POST failed:', errorText);
                 throw new Error('Failed to post suggestion');
             }
-            console.log('Suggestion posted successfully');
             
-            await new Promise(resolve => setTimeout(resolve, 500));
-            await fetchSuggestions();
+            // Atualiza imediatamente após enviar
+            fetchSuggestions();
             
             setAuthor('');
             setMessage('');
@@ -164,6 +158,12 @@ const Sugest: React.FC = () => {
 
     useEffect(() => {
         fetchSuggestions();
+        
+        const interval = setInterval(() => {
+            fetchSuggestions();
+        }, 3000);
+        
+        return () => clearInterval(interval);
     }, []);
 
     return (
