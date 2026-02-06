@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 interface Suggestion {
     id: number;
-    author: string;
     texto: string;
     data_criacao: string;
+    author: string;  
 }
 
 const Sugest: React.FC = () => {
@@ -111,12 +111,19 @@ const Sugest: React.FC = () => {
 
     const fetchSuggestions = async () => {
         try {
-            const response = await fetch(API_URL);
+            console.log('Fetching suggestions...');
+            const response = await fetch(API_URL, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
             if (!response.ok) throw new Error('Failed to fetch suggestions');
             const data = await response.json();
-            setSuggestions(data);
+            console.log('Suggestions received:', data);
+            setSuggestions(Array.isArray(data) ? data : []);
         } catch (err) {
-            console.error(err);
+            console.error('Error fetching suggestions:', err);
             setSuggestions([
                 { id: 1, author: 'CalouroJuninho123', texto: 'Acho que a api nao ta funcionando nao', data_criacao: new Date().toISOString() },
             ]);
@@ -125,20 +132,30 @@ const Sugest: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!author || !texto) return;
+        if (!author || !message) return;
         setLoading(true);
         setError(null);
         try {
+            console.log('Sending suggestion:', { author, texto: message });
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ author: author, texto: message }),
             });
-            if (!response.ok) throw new Error('Failed to post suggestion');
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('POST failed:', errorText);
+                throw new Error('Failed to post suggestion');
+            }
+            console.log('Suggestion posted successfully');
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
             await fetchSuggestions();
+            
             setAuthor('');
             setMessage('');
         } catch (err) {
+            console.error('Error posting suggestion:', err);
             setError('Erro ao enviar dados. Por favor, tente novamente.');
         } finally {
             setLoading(false);
