@@ -61,7 +61,7 @@ const getInitialIconPositions = (): IconPosition[] => {
       { id: 'help', position: { x: 20, y: 470 } },
       { id: 'balance', position: { x: 20, y: 560 } },
       { id: 'sugest', position: { x: 20, y: 650 } },
-      { id: 'calouroGuide', position: { x: 20, y: 740 } },
+      { id: 'calouroGuide', position: { x: 400, y: 300 } },
     ];
   }
 
@@ -71,8 +71,14 @@ const getInitialIconPositions = (): IconPosition[] => {
   const leftColumn = 20;
   const iconSpacing = 90;
   
+  // Calcula posição centralizada para o Guia do Calouro
+  const centerX = Math.max(20, (screenWidth / 2) - 50); 
+  const centerY = Math.max(20, (screenHeight / 2) - 150); 
+  
   if (screenWidth >= 1024 && screenHeight >= 768) {
     const rightColumn = screenWidth - 120;
+    const bottomRight = screenHeight - 150; 
+    
     return [
       { id: 'about', position: { x: leftColumn, y: 20 } },
       { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
@@ -81,11 +87,12 @@ const getInitialIconPositions = (): IconPosition[] => {
       { id: 'documents', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
       { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
       { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
-      { id: 'sugest', position: { x: rightColumn, y: 20 } },
-      { id: 'calouroGuide', position: { x: rightColumn, y: 20 + iconSpacing } },
+      { id: 'sugest', position: { x: rightColumn, y: bottomRight } },
+      { id: 'calouroGuide', position: { x: centerX, y: centerY } },
     ];
   }
   
+  // Para telas menores
   return [
     { id: 'about', position: { x: leftColumn, y: 20 } },
     { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
@@ -95,7 +102,7 @@ const getInitialIconPositions = (): IconPosition[] => {
     { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
     { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
     { id: 'sugest', position: { x: leftColumn, y: 20 + iconSpacing * 7 } },
-    { id: 'calouroGuide', position: { x: leftColumn, y: 20 + iconSpacing * 8 } },
+    { id: 'calouroGuide', position: { x: centerX, y: centerY } },
   ];
 };
 
