@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 
 export interface WindowState {
   id: string;
@@ -50,24 +50,70 @@ const initialWindows: WindowState[] = [
   { id: 'balance', title: 'Balancetes', icon: 'icons-95/calculator.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 400, y: 120 }, size: { width: 600, height: 450 } },
 ];
 
-const initialIconPositions: IconPosition[] = [
-  { id: 'about', position: { x: 20, y: 20 } },
-  { id: 'courses', position: { x: 20, y: 110 } },
-  { id: 'projects', position: { x: 20, y: 200 } },
-  { id: 'contact', position: { x: 20, y: 290 } },
-  { id: 'documents', position: { x: 20, y: 380 } },
-  { id: 'help', position: { x: 20, y: 470 } },
-  { id: 'sugest', position: { x: 20, y: 800 } },
-  { id: 'balance', position: { x: 20, y: 560 } },
-  { id: 'calouroGuide', position: { x: 800, y: 250 } },
-];
+const getInitialIconPositions = (): IconPosition[] => {
+  if (typeof window === 'undefined') {
+    return [
+      { id: 'about', position: { x: 20, y: 20 } },
+      { id: 'courses', position: { x: 20, y: 110 } },
+      { id: 'projects', position: { x: 20, y: 200 } },
+      { id: 'contact', position: { x: 20, y: 290 } },
+      { id: 'documents', position: { x: 20, y: 380 } },
+      { id: 'help', position: { x: 20, y: 470 } },
+      { id: 'balance', position: { x: 20, y: 560 } },
+      { id: 'sugest', position: { x: 20, y: 650 } },
+      { id: 'calouroGuide', position: { x: 20, y: 740 } },
+    ];
+  }
+
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+  
+  const leftColumn = 20;
+  const iconSpacing = 90;
+  
+  if (screenWidth >= 1024 && screenHeight >= 768) {
+    const rightColumn = screenWidth - 120;
+    return [
+      { id: 'about', position: { x: leftColumn, y: 20 } },
+      { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
+      { id: 'projects', position: { x: leftColumn, y: 20 + iconSpacing * 2 } },
+      { id: 'contact', position: { x: leftColumn, y: 20 + iconSpacing * 3 } },
+      { id: 'documents', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
+      { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
+      { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
+      { id: 'sugest', position: { x: rightColumn, y: 20 } },
+      { id: 'calouroGuide', position: { x: rightColumn, y: 20 + iconSpacing } },
+    ];
+  }
+  
+  return [
+    { id: 'about', position: { x: leftColumn, y: 20 } },
+    { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
+    { id: 'projects', position: { x: leftColumn, y: 20 + iconSpacing * 2 } },
+    { id: 'contact', position: { x: leftColumn, y: 20 + iconSpacing * 3 } },
+    { id: 'documents', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
+    { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
+    { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
+    { id: 'sugest', position: { x: leftColumn, y: 20 + iconSpacing * 7 } },
+    { id: 'calouroGuide', position: { x: leftColumn, y: 20 + iconSpacing * 8 } },
+  ];
+};
 
 export function WindowsProvider({ children }: { children: ReactNode }) {
   const [windows, setWindows] = useState<WindowState[]>(initialWindows);
-  const [iconPositions, setIconPositions] = useState<IconPosition[]>(initialIconPositions);
+  const [iconPositions, setIconPositions] = useState<IconPosition[]>(getInitialIconPositions());
   const [activeWindowId, setActiveWindowId] = useState<string | null>(null);
   const [highestZIndex, setHighestZIndex] = useState(1);
   const [startMenuOpen, setStartMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIconPositions(getInitialIconPositions());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const openWindow = useCallback((id: string) => {
     setHighestZIndex(prev => prev + 1);
