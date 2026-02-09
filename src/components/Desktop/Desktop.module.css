@@ -5,11 +5,6 @@
     right: 0;
     bottom: 40px;
     background-color: #008080;
-    background-image: url('../../../public/images/background.webp');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-attachment: fixed;
-    background-size: cover;
 }
 
 .iconsContainer {
@@ -43,11 +38,6 @@
     .desktop {
         bottom: 44px;
         background-color: #008080;
-        background-image: url('../../../public/images/background.webp');
-        background-repeat: no-repeat;
-        background-position: center top;
-        background-size: cover;
-        background-attachment: scroll;
     }
 
     .iconsContainer {
