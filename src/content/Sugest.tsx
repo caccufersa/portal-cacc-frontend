@@ -318,7 +318,6 @@ const Sugest: React.FC = () => {
             <fieldset style={{...styles.fieldset, flex: 1, display: 'flex', flexDirection: 'column'}}>
                 <legend style={styles.legend}>📋 Mural de Mensagens ({filteredSuggestions.length})</legend>
                 
-                {/* Estatísticas */}
                 <div style={styles.statsBar}>
                     <strong>Estatísticas:</strong>
                     {CATEGORIAS.map(cat => (
@@ -335,7 +334,6 @@ const Sugest: React.FC = () => {
                     ))}
                 </div>
 
-                {/* Filtros */}
                 <div style={styles.filterBar}>
                     <div style={styles.filterGroup}>
                         <label style={{...styles.label, fontSize: '10px'}}>Filtrar por Categoria:</label>
@@ -388,7 +386,7 @@ const Sugest: React.FC = () => {
                             <div key={s.id} style={styles.messageItem}>
                                 <div style={styles.messageHeader}>
                                     <span style={{ color: winBlue }}>
-                                        👤 {s.author}
+                                         {s.author}
                                     </span>
                                     <span 
                                         style={{
@@ -410,7 +408,7 @@ const Sugest: React.FC = () => {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
                     <span style={{ fontSize: '10px', color: '#666', alignSelf: 'center' }}>
-                        Atualização automática a cada 3s
+                        Atualização automática
                     </span>
                     <button onClick={fetchSuggestions} style={styles.button}>
                         Atualizar
