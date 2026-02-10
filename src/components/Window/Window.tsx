@@ -38,7 +38,7 @@ export default function Window({ windowState, children }: WindowProps) {
             x: e.clientX - windowState.position.x,
             y: e.clientY - windowState.position.y
         });
-    }, [windowState.id, windowState.position, windowState.isMaximized, focusWindow]);
+    }, [windowState.id, windowState.position, windowState.isMaximized, focusWindow, isMobile]);
 
     const handleResizeStart = useCallback((e: React.MouseEvent, direction: ResizeDirection) => {
         e.stopPropagation();
@@ -54,7 +54,7 @@ export default function Window({ windowState, children }: WindowProps) {
             posX: windowState.position.x,
             posY: windowState.position.y
         });
-    }, [windowState.id, windowState.size, windowState.position, windowState.isMaximized, focusWindow]);
+    }, [windowState.id, windowState.size, windowState.position, windowState.isMaximized, focusWindow, isMobile]);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {

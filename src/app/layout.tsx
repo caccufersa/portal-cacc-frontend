@@ -3,15 +3,13 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    absolute: '',
+    absolute: '\u200B',
   },
   description: 'Site oficial do Centro Acadêmico de Ciência da Computação da Universidade Federal Rural do Semi-Árido (UFERSA). Informações sobre o curso, grade curricular, projetos, eventos e contato.',
   keywords: 'CACC, Centro Acadêmico, Ciência da Computação, UFERSA, Mossoró, RN, Universidade, Curso, Programação',
   authors: [{ name: 'CACC UFERSA' }],
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
-    apple: '/favicon.svg'
+    icon: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
   },
   openGraph: {
     title: 'CACC - Centro Acadêmico de Ciência da Computação',

@@ -22,6 +22,7 @@ const Sugest: React.FC = () => {
     const [message, setMessage] = useState('');
     const [categoria, setCategoria] = useState<string>('Sugestão');
     const [loading, setLoading] = useState(false);
+    const [isFetching, setIsFetching] = useState(false);
     const [error, setError] = useState<string | null>(null);
     
     // Filtros
@@ -184,6 +185,36 @@ const Sugest: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '4px'
+        },
+        loadingWrap: {
+            display: 'flex',
+            flexDirection: 'column' as const,
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            gap: '8px',
+            color: '#404040',
+            fontSize: '11px'
+        },
+        loadingBar: {
+            width: '140px',
+            height: '10px',
+            border: '2px inset #ffffff',
+            backgroundColor: 'white',
+            position: 'relative' as const,
+            overflow: 'hidden'
+        },
+        loadingBarFill: {
+            position: 'absolute' as const,
+            height: '100%',
+            width: '40%',
+            backgroundColor: winBlue,
+            animation: 'loadingBar 1.2s infinite linear'
+        },
+        loadingDots: {
+            display: 'flex',
+            gap: '4px',
+            alignItems: 'center'
         }
     };
 
@@ -208,6 +239,7 @@ const Sugest: React.FC = () => {
     }, [suggestions]);   
 
     const fetchSuggestions = async () => {
+        setIsFetching(true);
         try {
             const response = await fetch(API_URL, {
                 cache: 'no-store',
@@ -221,6 +253,8 @@ const Sugest: React.FC = () => {
             setSuggestions(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error('Error fetching suggestions:', err);
+        } finally {
+            setIsFetching(false);
         }
     };
 
@@ -316,7 +350,7 @@ const Sugest: React.FC = () => {
             </fieldset>
 
             <fieldset style={{...styles.fieldset, flex: 1, display: 'flex', flexDirection: 'column'}}>
-                <legend style={styles.legend}>📋 Mural de Mensagens ({filteredSuggestions.length})</legend>
+                <legend style={styles.legend}> Mural de Mensagens ({filteredSuggestions.length})</legend>
                 
                 <div style={styles.statsBar}>
                     <strong>Estatísticas:</strong>
@@ -365,7 +399,7 @@ const Sugest: React.FC = () => {
                                 setFilterCategoria('Todas');
                                 setFilterDate('');
                             }}
-                            style={{...styles.button, alignSelf: 'flex-end'}}
+                            style={{...styles.button, height: '30px', alignSelf: 'flex-end'}}
                         >
                              Limpar
                         </button>
@@ -373,13 +407,25 @@ const Sugest: React.FC = () => {
                 </div>
                 
                 <div style={styles.listBox}>
-                    {suggestions.length === 0 ? (
+                    {suggestions.length === 0 && isFetching ? (
+                        <div style={styles.loadingWrap}>
+                            <div>Carregando sugestões</div>
+                            <div style={styles.loadingBar}>
+                                <div style={styles.loadingBarFill} />
+                            </div>
+                            <div style={styles.loadingDots}>
+                                <span className="loadingDot">●</span>
+                                <span className="loadingDot">●</span>
+                                <span className="loadingDot">●</span>
+                            </div>
+                        </div>
+                    ) : suggestions.length === 0 ? (
                         <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>
-                            Carregando mensagens...
+                            Nenhuma mensagem ainda. Que tal inaugurar o mural?
                         </p>
                     ) : filteredSuggestions.length === 0 ? (
                         <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>
-                            Nenhuma mensagem encontrada com os filtros aplicados.
+                            Nenhuma mensagem encontrada, ALGUÉM MANDA ALGO
                         </p>
                     ) : (
                         filteredSuggestions.map((s) => (
@@ -399,7 +445,7 @@ const Sugest: React.FC = () => {
                                 </div>
                                 <div style={styles.messageBody}>{s.texto}</div>
                                 <div style={styles.messageDate}>
-                                    📅 {new Date(s.data_criacao).toLocaleString('pt-BR')}
+                                     {new Date(s.data_criacao).toLocaleString('pt-BR')}
                                 </div>
                             </div>
                         ))
@@ -408,13 +454,30 @@ const Sugest: React.FC = () => {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
                     <span style={{ fontSize: '10px', color: '#666', alignSelf: 'center' }}>
-                        Atualização automática
+                        {isFetching ? 'Atualizando…' : 'Atualização automática'}
                     </span>
                     <button onClick={fetchSuggestions} style={styles.button}>
                         Atualizar
                     </button>
                 </div>
             </fieldset>
+            <style jsx>{`
+                @keyframes loadingBar {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(250%); }
+                }
+                @keyframes dotPulse {
+                    0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+                    40% { opacity: 1; transform: translateY(-2px); }
+                }
+                .loadingDot {
+                    font-size: 10px;
+                    color: #000080;
+                    animation: dotPulse 1s infinite ease-in-out;
+                }
+                .loadingDot:nth-child(2) { animation-delay: 0.2s; }
+                .loadingDot:nth-child(3) { animation-delay: 0.4s; }
+            `}</style>
         </div>
     );
 };

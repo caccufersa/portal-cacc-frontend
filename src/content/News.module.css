@@ -1,0 +1,499 @@
+.container {
+    background: #c0c0c0;
+    font-family: var(--font-main);
+    font-size: 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    color: #000;
+    overflow: hidden;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    background: #c0c0c0;
+    border-bottom: 1px solid #808080;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.toolbarBtn {
+    background: #c0c0c0;
+    border: none;
+    padding: 4px 12px;
+    font-family: var(--font-main);
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #fff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    white-space: nowrap;
+    color: #000;
+}
+
+.toolbarBtn:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #fff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+}
+
+.toolbarBtn:disabled {
+    color: #808080;
+    cursor: default;
+}
+
+.toolbarBtnActive {
+    background: #dfdfdf;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #fff;
+}
+
+.toolbarSep {
+    width: 2px;
+    height: 22px;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #fff;
+    margin: 0 3px;
+}
+
+.addressBar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px;
+    background: #c0c0c0;
+    border-bottom: 1px solid #808080;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.addressLabel {
+    font-weight: bold;
+    font-size: 14px;
+    color: #000;
+    white-space: nowrap;
+}
+
+.addressInput {
+    flex: 1;
+    padding: 3px 6px;
+    font-family: var(--font-main);
+    font-size: 14px;
+    border: none;
+    background: #fff;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #fff,
+        inset 2px 2px 0 #404040,
+        inset -2px -2px 0 #dfdfdf;
+    outline: none;
+    color: #000;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #dfdfdf;
+}
+
+/* ===== DESTAQUES MARQUEE ===== */
+
+.marqueeWrap {
+    background: #000080;
+    color: #ffff00;
+    padding: 5px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: bold;
+    border-bottom: 2px groove #fff;
+    position: relative;
+}
+
+.marqueeTrack {
+    display: inline-block;
+    animation: marqueeScroll 20s linear infinite;
+    padding-left: 100%;
+}
+
+.marqueeItem {
+    display: inline;
+    margin-right: 60px;
+    cursor: pointer;
+}
+
+.marqueeItem:hover {
+    text-decoration: underline;
+}
+
+.marqueeSep {
+    display: inline;
+    margin: 0 20px;
+    color: #8080ff;
+}
+
+@keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+
+/* ===== CATEGORIAS FILTER ===== */
+
+.catBar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 8px;
+    background: #d4d0c8;
+    border-bottom: 1px solid #808080;
+    overflow-x: auto;
+    flex-shrink: 0;
+}
+
+.catBtn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    font-family: var(--font-main);
+    font-size: 13px;
+    background: #c0c0c0;
+    border: none;
+    cursor: pointer;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #fff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    white-space: nowrap;
+    color: #000;
+}
+
+.catBtn:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #fff;
+}
+
+.catBtnActive {
+    background: #fff;
+    font-weight: bold;
+    color: #000080;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #fff;
+}
+
+.catIcon {
+    width: 16px;
+    height: 16px;
+}
+
+/* ===== NEWS LIST ===== */
+
+.newsList {
+    padding: 0;
+}
+
+.newsItem {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #d0d0d0;
+    cursor: pointer;
+    transition: background 0.05s;
+}
+
+.newsItem:hover {
+    background: #f0f0ff;
+}
+
+.newsThumb {
+    width: 80px;
+    height: 60px;
+    background: #d4d0c8;
+    border: 1px solid #808080;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #fff;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.newsThumbImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.newsThumbFallback {
+    width: 32px;
+    height: 32px;
+    opacity: 0.4;
+}
+
+.newsBody {
+    flex: 1;
+    min-width: 0;
+}
+
+.newsTitle {
+    font-size: 15px;
+    font-weight: bold;
+    color: #000080;
+    margin-bottom: 3px;
+    line-height: 1.3;
+}
+
+.newsResumo {
+    font-size: 14px;
+    color: #404040;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.newsMeta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #808080;
+}
+
+.newsTag {
+    background: #c0c0c0;
+    padding: 1px 6px;
+    font-size: 11px;
+    box-shadow:
+        inset -1px -1px 0 #808080,
+        inset 1px 1px 0 #fff;
+}
+
+.newsTagDestaque {
+    background: #ffff80;
+    color: #800000;
+    font-weight: bold;
+}
+
+/* ===== DETAIL VIEW ===== */
+
+.detail {
+    padding: 0;
+}
+
+.detailHeader {
+    padding: 16px 18px 12px;
+    border-bottom: 2px groove #fff;
+    background: #f0f0f0;
+}
+
+.detailTitle {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000080;
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+
+.detailMeta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+    color: #808080;
+    flex-wrap: wrap;
+}
+
+.detailMetaItem {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.detailMetaIcon {
+    width: 14px;
+    height: 14px;
+}
+
+.detailImage {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-bottom: 2px groove #fff;
+    display: block;
+}
+
+.detailBody {
+    padding: 16px 18px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: #000;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.backBtn {
+    composes: toolbarBtn;
+    margin: 8px 10px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ===== SKELETONS ===== */
+
+.skeletonItem {
+    display: flex;
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid #e8e8e8;
+    animation: skeletonFade 0.6s ease-in-out infinite alternate;
+}
+
+.skeletonThumb {
+    width: 80px;
+    height: 60px;
+    background: #e0e0e0;
+    flex-shrink: 0;
+    box-shadow:
+        inset -1px -1px 0 #c0c0c0,
+        inset 1px 1px 0 #f0f0f0;
+}
+
+.skeletonLines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skeletonLine {
+    height: 12px;
+    background: #e0e0e0;
+}
+
+.skeletonLineShort {
+    composes: skeletonLine;
+    width: 45%;
+}
+
+.skeletonLineMed {
+    composes: skeletonLine;
+    width: 80%;
+}
+
+.skeletonLineLong {
+    composes: skeletonLine;
+    width: 95%;
+}
+
+.skeletonLineTiny {
+    composes: skeletonLine;
+    width: 25%;
+}
+
+@keyframes skeletonFade {
+    0% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+/* ===== EMPTY STATE ===== */
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 10px;
+    color: #808080;
+    font-size: 15px;
+    padding: 40px;
+    text-align: center;
+}
+
+.emptyState img {
+    width: 48px;
+    height: 48px;
+    opacity: 0.5;
+}
+
+/* ===== STATUSBAR ===== */
+
+.statusbar {
+    display: flex;
+    align-items: center;
+    padding: 3px 6px;
+    background: #c0c0c0;
+    border-top: 1px solid #808080;
+    font-size: 13px;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.statusSection {
+    padding: 2px 8px;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #fff;
+    white-space: nowrap;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 600px) {
+    .toolbar {
+        gap: 2px;
+        padding: 2px 4px;
+    }
+
+    .toolbarBtn {
+        font-size: 13px;
+        padding: 3px 8px;
+    }
+
+    .addressBar {
+        display: none;
+    }
+
+    .newsThumb {
+        width: 60px;
+        height: 45px;
+    }
+
+    .newsTitle {
+        font-size: 14px;
+    }
+
+    .detailTitle {
+        font-size: 17px;
+    }
+
+    .detailBody {
+        font-size: 15px;
+        padding: 12px 14px;
+    }
+
+    .marqueeWrap {
+        font-size: 13px;
+    }
+}
