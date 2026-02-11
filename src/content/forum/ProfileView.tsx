@@ -14,12 +14,14 @@ export default function ProfileView({
     onOpenThread,
     likedSet,
     onLike,
+    onOpenProfile,
 }: {
     username: string;
     onBack: () => void;
     onOpenThread: (id: number) => void;
     likedSet: Set<number>;
     onLike: (id: number) => void;
+    onOpenProfile: (username: string) => void;
 }) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
@@ -106,6 +108,7 @@ export default function ProfileView({
                                 post={p}
                                 onOpenThread={onOpenThread}
                                 onLike={onLike}
+                                onOpenProfile={onOpenProfile}
                                 likedSet={likedSet}
                             />
                         ))

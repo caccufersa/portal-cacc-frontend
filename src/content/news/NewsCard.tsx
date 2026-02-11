@@ -19,8 +19,22 @@ export default function NewsCard({
 }) {
     const cat = CATEGORIAS[noticia.categoria] || CATEGORIAS.geral;
 
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick();
+        }
+    };
+
     return (
-        <div className={s.newsItem} onClick={onClick}>
+        <div
+            className={s.newsItem}
+            onClick={onClick}
+            onKeyDown={handleKeyPress}
+            role="button"
+            tabIndex={0}
+            aria-label={`Notícia: ${noticia.titulo}`}
+        >
             <div className={s.newsThumb}>
                 {noticia.image_url ? (
                     <img src={noticia.image_url} alt="" className={s.newsThumbImg} />

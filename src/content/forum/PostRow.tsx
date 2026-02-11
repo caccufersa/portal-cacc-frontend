@@ -20,13 +20,39 @@ export default function PostRow({
 }) {
     const liked = likedSet.has(post.id);
 
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onOpenThread(post.id);
+        }
+    };
+
+    const handleAuthorKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            e.stopPropagation();
+            onOpenProfile(post.author);
+        }
+    };
+
     return (
-        <div className={s.post} onClick={() => onOpenThread(post.id)}>
+        <div
+            className={s.post}
+            onClick={() => onOpenThread(post.id)}
+            onKeyDown={handleKeyPress}
+            role="button"
+            tabIndex={0}
+            aria-label={`Post de ${post.author}: ${post.texto.substring(0, 50)}...`}
+        >
             <div className={s.postHeader}>
                 <div className={s.postAvatar}>{avatarLetter(post.author)}</div>
                 <span
                     className={s.postAuthor}
                     onClick={e => { e.stopPropagation(); onOpenProfile(post.author); }}
+                    onKeyDown={handleAuthorKeyPress}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Ver perfil de ${post.author}`}
                 >
                     {post.author}
                 </span>

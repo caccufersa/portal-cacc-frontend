@@ -203,6 +203,7 @@ const Forum: React.FC = () => {
                         onOpenThread={id => setView({ type: 'thread', id })}
                         likedSet={likedSet}
                         onLike={toggleLike}
+                        onOpenProfile={u => setView({ type: 'profile', username: u })}
                     />
                 ) : view.type === 'thread' ? (
                     <ThreadView
