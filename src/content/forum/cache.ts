@@ -10,7 +10,10 @@ const DEFAULT_TTL = 30_000;
 export function getCached<T>(key: string, ttl = DEFAULT_TTL): T | null {
     const entry = store.get(key);
     if (!entry) return null;
-    if (Date.now() - entry.ts > ttl) return null;
+    if (Date.now() - entry.ts > ttl) {
+        store.delete(key);
+        return null;
+    }
     return entry.data as T;
 }
 
