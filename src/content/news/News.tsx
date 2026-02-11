@@ -16,24 +16,26 @@ const News: React.FC = () => {
     const [view, setView] = useState<NewsView>({ type: 'list' });
     const [catFilter, setCatFilter] = useState<string | null>(null);
 
-    const load = useCallback(async () => {
-        const [list, dest] = await Promise.all([fetchNoticias(), fetchDestaques()]);
-        setNoticias(list);
-        setDestaques(dest);
-        setLoading(false);
-    }, []);
-
-    useEffect(() => {
-        let active = true;
-        Promise.all([fetchNoticias(), fetchDestaques()]).then(([list, dest]) => {
-            if (!active) return;
+    const load = useCallback(
+        async (shouldProceed?: () => boolean) => {
+            const [list, dest] = await Promise.all([fetchNoticias(), fetchDestaques()]);
+            if (shouldProceed && !shouldProceed()) {
+                return;
+            }
             setNoticias(list);
             setDestaques(dest);
             setLoading(false);
-        });
-        return () => { active = false; };
-    }, []);
+        },
+        [],
+    );
 
+    useEffect(() => {
+        let active = true;
+        load(() => active);
+        return () => {
+            active = false;
+        };
+    }, [load]);
     const filtered = catFilter
         ? noticias.filter(n => n.categoria === catFilter)
         : noticias;
