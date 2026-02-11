@@ -11,7 +11,10 @@ const store = new Map<string, CacheEntry<unknown>>();
 function getCached<T>(key: string, ttl: number): T | null {
     const e = store.get(key);
     if (!e) return null;
-    if (Date.now() - e.ts > ttl) return null;
+    if (Date.now() - e.ts > ttl) {
+        store.delete(key);
+        return null;
+    }
     return e.data as T;
 }
 
