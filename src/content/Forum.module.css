@@ -1,0 +1,780 @@
+.container {
+    background: #c0c0c0;
+    font-family: var(--font-main);
+    font-size: 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    color: #000;
+    overflow: hidden;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    background: #c0c0c0;
+    border-bottom: 1px solid #808080;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.toolbarBtn {
+    background: #c0c0c0;
+    border: none;
+    padding: 4px 12px;
+    font-family: var(--font-main);
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #fff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    white-space: nowrap;
+    color: #000;
+}
+
+.toolbarBtn:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #fff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+}
+
+.toolbarBtn:disabled {
+    color: #808080;
+    cursor: default;
+}
+
+.toolbarBtnActive {
+    background: #dfdfdf;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #fff;
+}
+
+.toolbarSep {
+    width: 2px;
+    height: 22px;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #fff;
+    margin: 0 3px;
+}
+
+.toolbarUser {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #000080;
+    font-weight: bold;
+}
+
+.toolbarUser img {
+    width: 16px;
+    height: 16px;
+}
+
+.addressBar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px;
+    background: #c0c0c0;
+    border-bottom: 1px solid #808080;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.addressLabel {
+    font-weight: bold;
+    font-size: 14px;
+    color: #000;
+    white-space: nowrap;
+}
+
+.addressInput {
+    flex: 1;
+    padding: 3px 6px;
+    font-family: var(--font-main);
+    font-size: 14px;
+    border: none;
+    background: #fff;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #fff,
+        inset 2px 2px 0 #404040,
+        inset -2px -2px 0 #dfdfdf;
+    outline: none;
+    color: #000;
+}
+
+.feed {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #dfdfdf;
+    margin: 0;
+}
+
+.composeBox {
+    padding: 10px 12px;
+    border-bottom: 2px groove #fff;
+    background: #f0f0f0;
+}
+
+.composeRow {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.composeTextarea {
+    flex: 1;
+    min-height: 52px;
+    max-height: 120px;
+    padding: 6px;
+    font-family: var(--font-main);
+    font-size: 16px;
+    border: none;
+    resize: vertical;
+    background: #fff;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #fff,
+        inset 2px 2px 0 #404040,
+        inset -2px -2px 0 #dfdfdf;
+    outline: none;
+}
+
+.composeTextarea::placeholder {
+    color: #808080;
+}
+
+.composeBtn {
+    composes: toolbarBtn;
+    background: #c0c0c0;
+    min-width: 80px;
+    font-weight: bold;
+    font-size: 15px;
+    padding: 8px 14px;
+    align-self: flex-end;
+}
+
+.composeCharCount {
+    font-size: 12px;
+    color: #808080;
+    text-align: right;
+    margin-top: 3px;
+}
+
+.composeCharCountWarn {
+    color: #800000;
+    font-weight: bold;
+}
+
+.post {
+    padding: 12px 14px;
+    border-bottom: 1px solid #d0d0d0;
+    cursor: pointer;
+    transition: background 0.05s;
+}
+
+.post:hover {
+    background: #f0f0ff;
+}
+
+.postHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.postAvatar {
+    width: 34px;
+    height: 34px;
+    background: #c0c0c0;
+    border: 1px solid #808080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: bold;
+    color: #000080;
+    flex-shrink: 0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #fff;
+}
+
+.postAuthor {
+    font-weight: bold;
+    color: #000080;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.postAuthor:hover {
+    text-decoration: underline;
+}
+
+.postDate {
+    color: #808080;
+    font-size: 13px;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.postBody {
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 6px 0 8px 42px;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.postActions {
+    display: flex;
+    gap: 16px;
+    margin-left: 42px;
+    font-size: 14px;
+}
+
+.postActionBtn {
+    background: none;
+    border: none;
+    font-family: var(--font-main);
+    font-size: 14px;
+    color: #808080;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 6px;
+}
+
+.postActionBtn:hover {
+    color: #000080;
+}
+
+.postActionBtnLiked {
+    color: #c00000;
+    font-weight: bold;
+}
+
+.postActionBtnLiked:hover {
+    color: #900000;
+}
+
+.threadBack {
+    composes: toolbarBtn;
+    margin: 8px 10px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.threadPost {
+    padding: 14px 16px;
+    border-bottom: 2px groove #fff;
+    background: #f8f8f8;
+}
+
+.threadReplies {
+    padding: 0;
+}
+
+.replyItem {
+    padding: 10px 14px 10px 52px;
+    border-bottom: 1px dotted #c0c0c0;
+    position: relative;
+}
+
+.replyItem::before {
+    content: '';
+    position: absolute;
+    left: 30px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: #c0c0c0;
+}
+
+.replyCompose {
+    padding: 10px 14px 10px 52px;
+    border-top: 1px solid #c0c0c0;
+    background: #f0f0f0;
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.replyInput {
+    flex: 1;
+    padding: 6px;
+    font-family: var(--font-main);
+    font-size: 15px;
+    border: none;
+    background: #fff;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #fff,
+        inset 2px 2px 0 #404040,
+        inset -2px -2px 0 #dfdfdf;
+    outline: none;
+    min-height: 36px;
+    resize: none;
+}
+
+.loginWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #c0c0c0;
+}
+
+.loginBox {
+    width: 340px;
+    background: #c0c0c0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #fff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    padding: 0;
+}
+
+.loginHeader {
+    background: linear-gradient(90deg, #000080, #1084d0);
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loginHeader img {
+    width: 16px;
+    height: 16px;
+}
+
+.authTabs {
+    display: flex;
+    background: #c0c0c0;
+    border-bottom: 2px groove #fff;
+}
+
+.authTab {
+    flex: 1;
+    padding: 7px 0;
+    text-align: center;
+    font-family: var(--font-main);
+    font-size: 14px;
+    background: #c0c0c0;
+    border: none;
+    cursor: pointer;
+    border-right: 1px solid #808080;
+    color: #404040;
+    box-shadow:
+        inset 0 -1px 0 #808080,
+        inset 0 1px 0 #fff;
+}
+
+.authTab:last-child {
+    border-right: none;
+}
+
+.authTabActive {
+    background: #fff;
+    font-weight: bold;
+    color: #000080;
+    box-shadow: none;
+}
+
+.authTab:disabled {
+    cursor: default;
+}
+
+.loginBody {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.loginIcon {
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+.loginIcon img {
+    width: 48px;
+    height: 48px;
+}
+
+.loginLabel {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.loginInput {
+    width: 100%;
+    padding: 5px 6px;
+    font-family: var(--font-main);
+    font-size: 16px;
+    border: none;
+    background: #fff;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #fff,
+        inset 2px 2px 0 #404040,
+        inset -2px -2px 0 #dfdfdf;
+    outline: none;
+}
+
+.loginError {
+    background: #fff0f0;
+    border: 1px dotted #c00;
+    padding: 6px 8px;
+    font-size: 14px;
+    color: #c00;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loginSuccess {
+    background: #f0fff0;
+    border: 1px dotted #080;
+    padding: 6px 8px;
+    font-size: 14px;
+    color: #080;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loginBtns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.statusbar {
+    display: flex;
+    align-items: center;
+    padding: 3px 6px;
+    background: #c0c0c0;
+    border-top: 1px solid #808080;
+    font-size: 13px;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.statusSection {
+    padding: 2px 8px;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #fff;
+    white-space: nowrap;
+}
+
+.skeletonPost {
+    padding: 14px;
+    border-bottom: 1px solid #e8e8e8;
+    animation: skeletonFade 0.6s ease-in-out infinite alternate;
+}
+
+.skeletonRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.skeletonAvatar {
+    width: 34px;
+    height: 34px;
+    background: #e0e0e0;
+    box-shadow:
+        inset -1px -1px 0 #c0c0c0,
+        inset 1px 1px 0 #f0f0f0;
+}
+
+.skeletonLine {
+    height: 12px;
+    background: #e0e0e0;
+    border-radius: 1px;
+}
+
+.skeletonLineShort {
+    composes: skeletonLine;
+    width: 30%;
+}
+
+.skeletonLineMed {
+    composes: skeletonLine;
+    width: 60%;
+}
+
+.skeletonLineLong {
+    composes: skeletonLine;
+    width: 85%;
+}
+
+.skeletonActions {
+    display: flex;
+    gap: 14px;
+    margin-left: 42px;
+    margin-top: 10px;
+}
+
+.skeletonActionPill {
+    width: 48px;
+    height: 12px;
+    background: #e0e0e0;
+}
+
+@keyframes skeletonFade {
+    0% { opacity: 0.45; }
+    100% { opacity: 1; }
+}
+
+.loadingFull {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #c0c0c0;
+    gap: 12px;
+}
+
+.loadingText {
+    font-size: 15px;
+    color: #404040;
+}
+
+.progressBar {
+    width: 200px;
+    height: 18px;
+    background: #fff;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #fff,
+        inset 2px 2px 0 #404040,
+        inset -2px -2px 0 #dfdfdf;
+    overflow: hidden;
+    position: relative;
+}
+
+.progressFill {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    display: flex;
+    gap: 2px;
+    animation: progressSlide 1.2s linear infinite;
+}
+
+.progressBlock {
+    width: 12px;
+    height: 100%;
+    background: #000080;
+    flex-shrink: 0;
+}
+
+@keyframes progressSlide {
+    0% { transform: translateX(-80px); }
+    100% { transform: translateX(200px); }
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 10px;
+    color: #808080;
+    font-size: 15px;
+    padding: 40px;
+    text-align: center;
+}
+
+.emptyState img {
+    width: 48px;
+    height: 48px;
+    opacity: 0.5;
+}
+
+.profileWrap {
+    padding: 0;
+}
+
+.profileHeader {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: #f0f0f0;
+    border-bottom: 2px groove #fff;
+}
+
+.profileAvatar {
+    width: 52px;
+    height: 52px;
+    background: #c0c0c0;
+    border: 2px solid #808080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #000080;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #fff;
+    flex-shrink: 0;
+}
+
+.profileInfo {
+    flex: 1;
+}
+
+.profileName {
+    font-size: 18px;
+    font-weight: bold;
+    color: #000080;
+    margin-bottom: 4px;
+}
+
+.profileStats {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    color: #404040;
+}
+
+.profileStatVal {
+    font-weight: bold;
+    color: #000;
+}
+
+.profileTabs {
+    display: flex;
+    border-bottom: 2px groove #fff;
+    background: #c0c0c0;
+}
+
+.profileTab {
+    flex: 1;
+    padding: 7px 0;
+    text-align: center;
+    font-family: var(--font-main);
+    font-size: 14px;
+    background: #c0c0c0;
+    border: none;
+    cursor: pointer;
+    border-right: 1px solid #808080;
+    color: #000;
+    box-shadow:
+        inset 0 -1px 0 #808080,
+        inset 0 1px 0 #fff;
+}
+
+.profileTab:last-child {
+    border-right: none;
+}
+
+.profileTabActive {
+    background: #fff;
+    font-weight: bold;
+    color: #000080;
+    box-shadow: none;
+}
+
+.profilePosts {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+@media (max-width: 600px) {
+    .toolbar {
+        gap: 2px;
+        padding: 2px 4px;
+    }
+
+    .toolbarBtn {
+        font-size: 13px;
+        padding: 3px 8px;
+    }
+
+    .addressBar {
+        display: none;
+    }
+
+    .postBody {
+        margin-left: 0;
+        font-size: 15px;
+    }
+
+    .postActions {
+        margin-left: 0;
+    }
+
+    .replyItem {
+        padding-left: 24px;
+    }
+
+    .replyItem::before {
+        left: 12px;
+    }
+
+    .replyCompose {
+        padding-left: 14px;
+    }
+
+    .loginBox {
+        width: 92vw;
+    }
+
+    .profileHeader {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profileStats {
+        justify-content: center;
+    }
+}
+
+.wsIndicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.wsOn {
+    background: #00a000;
+    box-shadow: 0 0 4px #00a000;
+}
+
+.wsOff {
+    background: #808080;
+}

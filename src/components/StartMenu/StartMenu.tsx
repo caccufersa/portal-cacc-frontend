@@ -20,7 +20,7 @@ export default function StartMenu() {
         }
     };
 
-    const mainItems = windows.filter(w => ['about', 'courses', 'projects', 'contact', 'documents', 'help', 'balance'].includes(w.id));
+    const mainItems = windows.filter(w => ['about', 'courses', 'projects', 'contact', 'documents', 'help', 'balance', 'forum', 'news'].includes(w.id));
     const toolItems = windows.filter(w => ['calculator', 'notepad'].includes(w.id));
 
     return (
