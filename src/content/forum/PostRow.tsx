@@ -20,8 +20,22 @@ export default function PostRow({
 }) {
     const liked = likedSet.has(post.id);
 
+    const handleContainerKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onOpenThread(post.id);
+        }
+    };
+
     return (
-        <div className={s.post} onClick={() => onOpenThread(post.id)}>
+        <div
+            className={s.post}
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpenThread(post.id)}
+            onKeyDown={handleContainerKeyDown}
+        >
             <div className={s.postHeader}>
                 <div className={s.postAvatar}>{avatarLetter(post.author)}</div>
                 <span
