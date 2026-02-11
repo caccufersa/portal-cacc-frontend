@@ -17,9 +17,22 @@ const getMonthNumber = (month: string): number => {
     return months[month] || 0;
 };
 
+const extractMonthName = (monthString: string): string => {
+    // Extract month name from formats like "Janeiro", "2025 - Janeiro 2026", etc.
+    const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    
+    for (const monthName of monthNames) {
+        if (monthString.includes(monthName)) {
+            return monthName;
+        }
+    }
+    return '';
+};
+
 const sortedBalances = [...balances].sort((a, b) => {
     if (b.year !== a.year) return b.year - a.year;
-    return getMonthNumber(b.month.split(' ').pop() || '') - getMonthNumber(a.month.split(' ').pop() || '');
+    return getMonthNumber(extractMonthName(b.month)) - getMonthNumber(extractMonthName(a.month));
 });
 
 const sortedMinutes = [...minutes].sort((a, b) => {
