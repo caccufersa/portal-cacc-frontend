@@ -42,7 +42,7 @@ export default function PostRow({
             onKeyDown={handleKeyPress}
             role="button"
             tabIndex={0}
-            aria-label={`Post de ${post.author}: ${post.texto.substring(0, 50)}...`}
+            aria-label={`Post de ${post.author}: ${post.texto.substring(0, 50)}${post.texto.length > 50 ? '...' : ''}`}
         >
             <div className={s.postHeader}>
                 <div className={s.postAvatar}>{avatarLetter(post.author)}</div>
