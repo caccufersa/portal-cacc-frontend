@@ -106,7 +106,6 @@ export default function ProfileView({
                                 post={p}
                                 onOpenThread={onOpenThread}
                                 onLike={onLike}
-                                onOpenProfile={() => {}}
                                 likedSet={likedSet}
                             />
                         ))
