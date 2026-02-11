@@ -8,18 +8,29 @@ const minutes = [
     { year: 2025, month: 'Dezembro', link: '/atas/Ata - Dezembro 2025.pdf', icon: '/icons-95/notepad_file.ico', type: 'Ata' },
 ];
 
+const MONTHS: Record<string, number> = {
+    'Janeiro': 1, 'Fevereiro': 2, 'Março': 3, 'Abril': 4,
+    'Maio': 5, 'Junho': 6, 'Julho': 7, 'Agosto': 8,
+    'Setembro': 9, 'Outubro': 10, 'Novembro': 11, 'Dezembro': 12
+};
+
 const getMonthNumber = (month: string): number => {
-    const months: Record<string, number> = {
-        'Janeiro': 1, 'Fevereiro': 2, 'Março': 3, 'Abril': 4,
-        'Maio': 5, 'Junho': 6, 'Julho': 7, 'Agosto': 8,
-        'Setembro': 9, 'Outubro': 10, 'Novembro': 11, 'Dezembro': 12
-    };
-    return months[month] || 0;
+    return MONTHS[month] || 0;
+};
+
+const extractMonthName = (monthString: string): string => {
+    // Extract month name from formats like "Janeiro", "2025 - Janeiro 2026", etc.
+    for (const monthName of Object.keys(MONTHS)) {
+        if (monthString.includes(monthName)) {
+            return monthName;
+        }
+    }
+    return '';
 };
 
 const sortedBalances = [...balances].sort((a, b) => {
     if (b.year !== a.year) return b.year - a.year;
-    return getMonthNumber(b.month.split(' ').pop() || '') - getMonthNumber(a.month.split(' ').pop() || '');
+    return getMonthNumber(extractMonthName(b.month)) - getMonthNumber(extractMonthName(a.month));
 });
 
 const sortedMinutes = [...minutes].sort((a, b) => {
