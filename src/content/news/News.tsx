@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Noticia, NewsView } from './types';
 import { CATEGORIAS } from './types';
 import { fetchNoticias, fetchDestaques } from './api';
@@ -16,58 +16,43 @@ const News: React.FC = () => {
     const [view, setView] = useState<NewsView>({ type: 'list' });
     const [catFilter, setCatFilter] = useState<string | null>(null);
 
-    const load = useCallback(async () => {
-        const [list, dest] = await Promise.all([fetchNoticias(), fetchDestaques()]);
-        setNoticias(list);
-        setDestaques(dest);
-        setLoading(false);
-    }, []);
-
     useEffect(() => {
         let active = true;
-        Promise.all([fetchNoticias(), fetchDestaques()]).then(([list, dest]) => {
+        (async () => {
+            const [list, dest] = await Promise.all([fetchNoticias(), fetchDestaques()]);
             if (!active) return;
             setNoticias(list);
             setDestaques(dest);
             setLoading(false);
-        });
+        })();
         return () => { active = false; };
     }, []);
 
     const filtered = catFilter
-        ? noticias.filter(n => n.categoria === catFilter)
+        ? noticias.filter(n => n.categoria.toLowerCase() === catFilter)
         : noticias;
 
-    const addressText = view.type === 'detail'
-        ? `cacc://noticias/${view.id}`
-        : 'cacc://noticias';
+    const topDestaque = destaques.length > 0 ? destaques[0] : null;
 
     return (
         <div className={s.container}>
-            <div className={s.toolbar}>
+            <div className={s.catBar}>
                 <button
-                    className={s.toolbarBtn}
-                    onClick={() => { setLoading(true); load(); }}
+                    className={`${s.catBtn} ${catFilter === null ? s.catBtnActive : ''}`}
+                    onClick={() => setCatFilter(null)}
                 >
-                    Atualizar
+                    Todas
                 </button>
-                <div className={s.toolbarSep} />
-                <button
-                    className={`${s.toolbarBtn} ${view.type === 'list' ? s.toolbarBtnActive : ''}`}
-                    onClick={() => setView({ type: 'list' })}
-                >
-                    Noticias
-                </button>
-                {view.type === 'detail' && (
-                    <button className={s.toolbarBtn} onClick={() => setView({ type: 'list' })}>
-                        Voltar
+                {Object.entries(CATEGORIAS).map(([key, val]) => (
+                    <button
+                        key={key}
+                        className={`${s.catBtn} ${catFilter === key ? s.catBtnActive : ''}`}
+                        onClick={() => setCatFilter(catFilter === key ? null : key)}
+                    >
+                        <img src={val.icon} alt="" className={s.catIcon} />
+                        {val.label}
                     </button>
-                )}
-            </div>
-
-            <div className={s.addressBar}>
-                <span className={s.addressLabel}>Endereco:</span>
-                <div className={s.addressInput}>{addressText}</div>
+                ))}
             </div>
 
             <div className={s.content}>
@@ -75,44 +60,18 @@ const News: React.FC = () => {
                     <NewsDetail id={view.id} onBack={() => setView({ type: 'list' })} />
                 ) : (
                     <>
-                        {destaques.length > 0 && (
-                            <div className={s.marqueeWrap}>
-                                <div className={s.marqueeTrack}>
-                                    {destaques.map((d, i) => (
-                                        <React.Fragment key={d.id}>
-                                            <span
-                                                className={s.marqueeItem}
-                                                onClick={() => setView({ type: 'detail', id: d.id })}
-                                            >
-                                                {d.titulo}
-                                            </span>
-                                            {i < destaques.length - 1 && (
-                                                <span className={s.marqueeSep}>|</span>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
+                        {topDestaque && !catFilter && (
+                            <div
+                                className={s.featuredBanner}
+                                onClick={() => setView({ type: 'detail', id: topDestaque.id })}
+                            >
+                                <div className={s.featuredText}>
+                                    <div className={s.featuredLabel}>Destaque</div>
+                                    <div className={s.featuredTitle}>{topDestaque.titulo}</div>
                                 </div>
+                                <span className={s.featuredArrow}>→</span>
                             </div>
                         )}
-
-                        <div className={s.catBar}>
-                            <button
-                                className={`${s.catBtn} ${catFilter === null ? s.catBtnActive : ''}`}
-                                onClick={() => setCatFilter(null)}
-                            >
-                                Todas
-                            </button>
-                            {Object.entries(CATEGORIAS).map(([key, val]) => (
-                                <button
-                                    key={key}
-                                    className={`${s.catBtn} ${catFilter === key ? s.catBtnActive : ''}`}
-                                    onClick={() => setCatFilter(catFilter === key ? null : key)}
-                                >
-                                    <img src={val.icon} alt="" className={s.catIcon} />
-                                    {val.label}
-                                </button>
-                            ))}
-                        </div>
 
                         <div className={s.newsList}>
                             {loading ? (
@@ -123,29 +82,18 @@ const News: React.FC = () => {
                                     <span>Nenhuma noticia encontrada.</span>
                                 </div>
                             ) : (
-                                filtered.map(n => (
+                                filtered.map((n, idx) => (
                                     <NewsCard
                                         key={n.id}
                                         noticia={n}
                                         onClick={() => setView({ type: 'detail', id: n.id })}
+                                        index={idx}
                                     />
                                 ))
                             )}
                         </div>
                     </>
                 )}
-            </div>
-
-            <div className={s.statusbar}>
-                <div className={s.statusSection}>
-                    {loading ? 'Carregando...' : `${filtered.length} noticias`}
-                </div>
-                <div className={s.statusSection}>
-                    {catFilter ? CATEGORIAS[catFilter]?.label || catFilter : 'Todas'}
-                </div>
-                <div className={s.statusSection} style={{ marginLeft: 'auto' }}>
-                    {view.type === 'detail' ? `Noticia #${view.id}` : 'Lista'}
-                </div>
             </div>
         </div>
     );

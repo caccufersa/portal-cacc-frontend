@@ -1,80 +1,127 @@
-import { API } from './types';
-import type { Post, UserProfile } from './types';
-import { cachedFetch, setCache, invalidate, getStale } from './cache';
+import type { Post, UserProfile, LikeResult, DeleteResult } from './types';
+import { setCache, invalidate, getStale, getCached } from './cache';
+import { WebSocketService } from '@/lib/websocket/WebSocketService';
 
-export async function fetchPosts(): Promise<Post[]> {
-    const data = await cachedFetch<Post[]>('feed', `${API}/posts`, 15_000);
-    return Array.isArray(data) ? data : [];
+function getWs(): WebSocketService | null {
+    const ws = WebSocketService.getInstance();
+    return ws.status === 'connected' ? ws : null;
 }
 
-export async function fetchThread(postId: number): Promise<Post | null> {
-    return cachedFetch<Post>(`thread:${postId}`, `${API}/posts/${postId}`, 20_000);
-}
+async function wsQuery<T>(
+    cacheKey: string,
+    action: string,
+    data: Record<string, unknown>,
+    ttl: number,
+): Promise<T | null> {
+    const cached = getCached<T>(cacheKey, ttl);
+    if (cached) return cached;
 
-export async function fetchProfile(username: string): Promise<UserProfile | null> {
-    return cachedFetch<UserProfile>(
-        `profile:${username}`,
-        `${API}/users/${encodeURIComponent(username)}`,
-        60_000,
-    );
-}
+    const ws = getWs();
+    if (!ws) return getStale<T>(cacheKey);
 
-export async function createPost(texto: string, author: string, token: string): Promise<Post | null> {
     try {
-        const res = await fetch(`${API}/posts`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ texto, author }),
-        });
-        if (!res.ok) return null;
-        const post: Post = await res.json();
-        invalidate('feed');
-        return post;
+        const result = await ws.sendAction<T>(action, data, 12_000);
+        if (result != null) setCache(cacheKey, result);
+        return result;
+    } catch {
+        return getStale<T>(cacheKey);
+    }
+}
+
+async function wsMutate<T>(
+    action: string,
+    data: Record<string, unknown>,
+    timeoutMs = 8_000,
+): Promise<T | null> {
+    const ws = getWs();
+    if (!ws) return null;
+
+    try {
+        return await ws.sendAction<T>(action, data, timeoutMs);
     } catch {
         return null;
     }
 }
 
-export async function createComment(
-    postId: number,
-    texto: string,
-    author: string,
-    token: string,
-): Promise<boolean> {
+export async function fetchPosts(limit = 30, offset = 0): Promise<Post[]> {
+    const key = `feed:${limit}:${offset}`;
+    const data = await wsQuery<Post[]>(key, 'social.feed', { limit, offset }, 15_000);
+    return Array.isArray(data) ? data : [];
+}
+
+export async function fetchThread(postId: number): Promise<Post | null> {
+    return wsQuery<Post>(`thread:${postId}`, 'social.thread', { id: postId }, 30_000);
+}
+
+export async function fetchProfile(username: string): Promise<UserProfile | null> {
+    const ws = getWs();
+    if (!ws) return null;
     try {
-        const res = await fetch(`${API}/posts/${postId}/comment`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ texto, author }),
-        });
-        if (res.ok) {
-            invalidate(`thread:${postId}`);
-            invalidate('feed');
-        }
-        return res.ok;
+        return await ws.sendAction<UserProfile>('social.profile', { username }, 12_000);
     } catch {
-        return false;
+        return null;
     }
 }
 
-export async function toggleLikeApi(postId: number, liked: boolean, token: string): Promise<boolean> {
+export async function fetchOwnProfile(): Promise<UserProfile | null> {
+    const ws = getWs();
+    if (!ws) return null;
     try {
-        const res = await fetch(`${API}/posts/${postId}/like`, {
-            method: liked ? 'DELETE' : 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return res.ok;
+        return await ws.sendAction<UserProfile>('social.profile', {}, 12_000);
     } catch {
-        return false;
+        return null;
     }
+}
+
+export async function createPost(texto: string): Promise<Post | null> {
+    const post = await wsMutate<Post>('social.post.create', { texto });
+    invalidate('feed:*');
+    return post;
+}
+
+export async function createComment(postId: number, texto: string): Promise<Post | null> {
+    const comment = await wsMutate<Post>('social.post.comment', {
+        parent_id: postId,
+        texto,
+    });
+    invalidate(`thread:${postId}`);
+    invalidate('feed:*');
+    return comment;
+}
+
+export async function likePost(postId: number): Promise<LikeResult | null> {
+    return wsMutate<LikeResult>('social.post.like', { id: postId }, 6_000);
+}
+
+export async function unlikePost(postId: number): Promise<LikeResult | null> {
+    return wsMutate<LikeResult>('social.post.unlike', { id: postId }, 6_000);
+}
+
+export async function deletePost(postId: number): Promise<DeleteResult | null> {
+    const result = await wsMutate<DeleteResult>('social.post.delete', { id: postId });
+    invalidate('feed:*');
+    invalidate(`thread:${postId}`);
+    return result;
 }
 
 export function patchPostLikes(postId: number, delta: number): void {
-    const feed = getStale<Post[]>('feed');
-    if (feed) {
+    for (const [key, entry] of Array.from(getCacheEntries())) {
+        if (!key.startsWith('feed:')) continue;
+        const feed = entry as Post[];
+        if (!Array.isArray(feed)) continue;
         const updated = feed.map(p =>
             p.id === postId ? { ...p, likes: Math.max(0, p.likes + delta) } : p,
         );
-        setCache('feed', updated);
+        setCache(key, updated);
     }
+}
+
+function getCacheEntries(): [string, unknown][] {
+    const stale: [string, unknown][] = [];
+    const keys = ['feed:30:0', 'feed:50:0'];
+    for (const k of keys) {
+        const d = getStale<unknown>(k);
+        if (d) stale.push([k, d]);
+    }
+    return stale;
 }

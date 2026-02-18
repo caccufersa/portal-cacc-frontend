@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { WindowsProvider } from '@/context/WindowsContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { WebSocketProvider } from '@/context/WebSocketContext';
 import Desktop from '@/components/Desktop/Desktop';
 import Taskbar from '@/components/Taskbar/Taskbar';
 import WelcomePopup from '@/components/WelcomePopup/WelcomePopup';
@@ -30,11 +31,13 @@ export default function Home() {
 
   return (
     <AuthProvider>
-      <WindowsProvider>
-        <Desktop />
-        <Taskbar />
-        {showWelcome && <WelcomePopup onClose={() => setShowWelcome(false)} />}
-      </WindowsProvider>
+      <WebSocketProvider>
+        <WindowsProvider>
+          <Desktop />
+          <Taskbar />
+          {showWelcome && <WelcomePopup onClose={() => setShowWelcome(false)} />}
+        </WindowsProvider>
+      </WebSocketProvider>
     </AuthProvider>
   );
 }

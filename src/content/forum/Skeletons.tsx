@@ -7,16 +7,16 @@ export function SkeletonPost() {
     return (
         <div className={s.skeletonPost}>
             <div className={s.skeletonRow}>
-                <div className={s.skeletonAvatar} />
-                <div className={s.skeletonLineShort} />
+                <div className={`${s.skeletonAvatar} ${s.skeletonShimmer}`} />
+                <div className={`${s.skeletonLineShort} ${s.skeletonShimmer}`} />
             </div>
             <div style={{ marginLeft: 42, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div className={s.skeletonLineLong} />
-                <div className={s.skeletonLineMed} />
+                <div className={`${s.skeletonLineLong} ${s.skeletonShimmer}`} />
+                <div className={`${s.skeletonLineMed} ${s.skeletonShimmer}`} />
             </div>
             <div className={s.skeletonActions}>
-                <div className={s.skeletonActionPill} />
-                <div className={s.skeletonActionPill} />
+                <div className={`${s.skeletonActionPill} ${s.skeletonShimmer}`} />
+                <div className={`${s.skeletonActionPill} ${s.skeletonShimmer}`} />
             </div>
         </div>
     );
@@ -25,9 +25,11 @@ export function SkeletonPost() {
 export function FeedSkeleton() {
     return (
         <>
-            <SkeletonPost />
-            <SkeletonPost />
-            <SkeletonPost />
+            {[0, 1, 2, 3].map(i => (
+                <div key={i} style={{ animationDelay: `${i * 80}ms` }}>
+                    <SkeletonPost />
+                </div>
+            ))}
         </>
     );
 }
@@ -47,3 +49,4 @@ export function FullLoading({ text }: { text: string }) {
         </div>
     );
 }
+

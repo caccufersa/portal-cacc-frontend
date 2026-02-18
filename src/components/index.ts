@@ -14,3 +14,4 @@ export { default as Tooltip } from './Tooltip/Tooltip';
 export { default as GroupBox } from './GroupBox/GroupBox';
 export { default as WelcomePopup } from './WelcomePopup/WelcomePopup';
 export { default as BootScreen } from './BootScreen/BootScreen';
+export { default as FirebaseAnalytics } from './FirebaseAnalytics/FirebaseAnalytics';

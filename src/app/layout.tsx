@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import FirebaseAnalytics from '../components/FirebaseAnalytics/FirebaseAnalytics';
 
 export const metadata: Metadata = {
   title: {
-    absolute: '\u200B',
+    absolute: '\u200B', // vazio
   },
   description: 'Site oficial do Centro Acadêmico de Ciência da Computação da Universidade Federal Rural do Semi-Árido (UFERSA). Informações sobre o curso, grade curricular, projetos, eventos e contato.',
   keywords: 'CACC, Centro Acadêmico, Ciência da Computação, UFERSA, Mossoró, RN, Universidade, Curso, Programação',
@@ -33,7 +34,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <FirebaseAnalytics />
+        {children}
+      </body>
     </html>
   );
 }

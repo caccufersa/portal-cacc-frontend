@@ -1,7 +1,11 @@
+/* ================================================================== */
+/*  Forum / Social — Win98/2000 Classic Theme                         */
+/* ================================================================== */
+
 .container {
-    background: #c0c0c0;
+    background: #d4d0c8;
     font-family: var(--font-main);
-    font-size: 16px;
+    font-size: 13px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -12,28 +16,32 @@
 .toolbar {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 6px;
-    background: #c0c0c0;
+    gap: 2px;
+    padding: 3px 4px;
+    background: #d4d0c8;
     border-bottom: 1px solid #808080;
     flex-shrink: 0;
     flex-wrap: wrap;
+    min-height: 30px;
 }
 
 .toolbarBtn {
-    background: #c0c0c0;
+    background: #d4d0c8;
     border: none;
-    padding: 4px 12px;
+    padding: 4px 10px;
     font-family: var(--font-main);
-    font-size: 15px;
+    font-size: 12px;
     cursor: pointer;
     box-shadow:
         inset -1px -1px 0 #404040,
         inset 1px 1px 0 #fff,
         inset -2px -2px 0 #808080,
-        inset 2px 2px 0 #dfdfdf;
+        inset 2px 2px 0 #d4d0c8;
     white-space: nowrap;
     color: #000;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .toolbarBtn:active {
@@ -41,42 +49,67 @@
         inset 1px 1px 0 #404040,
         inset -1px -1px 0 #fff,
         inset 2px 2px 0 #808080,
-        inset -2px -2px 0 #dfdfdf;
+        inset -2px -2px 0 #d4d0c8;
+    padding: 5px 9px 3px 11px;
 }
 
 .toolbarBtn:disabled {
     color: #808080;
+    text-shadow: 1px 1px 0 #fff;
     cursor: default;
 }
 
 .toolbarBtnActive {
-    background: #dfdfdf;
+    background: #c0bdb5;
     box-shadow:
-        inset 1px 1px 0 #404040,
+        inset 1px 1px 0 #808080,
         inset -1px -1px 0 #fff;
+}
+
+.toolbarBtnSmall {
+    composes: toolbarBtn;
+    padding: 3px 8px;
+}
+
+.toolbarIco {
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    flex-shrink: 0;
 }
 
 .toolbarSep {
     width: 2px;
-    height: 22px;
+    height: 20px;
     border-left: 1px solid #808080;
     border-right: 1px solid #fff;
     margin: 0 3px;
+    flex-shrink: 0;
 }
 
 .toolbarUser {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
+    gap: 6px;
+    font-size: 12px;
     color: #000080;
     font-weight: bold;
 }
 
-.toolbarUser img {
-    width: 16px;
-    height: 16px;
+.toolbarUserAvatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #000080;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    flex-shrink: 0;
+    border: 1px solid #404040;
 }
 
 .addressBar {
@@ -84,33 +117,35 @@
     align-items: center;
     gap: 6px;
     padding: 3px 6px;
-    background: #c0c0c0;
+    background: #d4d0c8;
     border-bottom: 1px solid #808080;
     flex-shrink: 0;
-    font-size: 14px;
+    font-size: 12px;
+    min-height: 24px;
 }
 
 .addressLabel {
     font-weight: bold;
-    font-size: 14px;
+    font-size: 12px;
     color: #000;
     white-space: nowrap;
 }
 
 .addressInput {
     flex: 1;
-    padding: 3px 6px;
+    padding: 2px 6px;
     font-family: var(--font-main);
-    font-size: 14px;
+    font-size: 12px;
     border: none;
     background: #fff;
     box-shadow:
         inset 1px 1px 0 #808080,
-        inset -1px -1px 0 #fff,
-        inset 2px 2px 0 #404040,
-        inset -2px -2px 0 #dfdfdf;
-    outline: none;
+        inset -1px -1px 0 #fff;
     color: #000;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .feed {
@@ -119,106 +154,171 @@
     background: #fff;
     box-shadow:
         inset 1px 1px 0 #808080,
-        inset -1px -1px 0 #dfdfdf;
-    margin: 0;
+        inset -1px -1px 0 #d4d0c8;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.feedList {
+    animation: feedFadeIn 0.15s ease both;
 }
 
 .composeBox {
-    padding: 10px 12px;
-    border-bottom: 2px groove #fff;
-    background: #f0f0f0;
+    padding: 10px 14px;
+    background: #d4d0c8;
+    border-bottom: 2px solid #808080;
+    flex-shrink: 0;
 }
 
-.composeRow {
+.composeHeader {
     display: flex;
+    align-items: center;
     gap: 8px;
-    align-items: flex-end;
+    margin-bottom: 8px;
+}
+
+.composeAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #000080;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    flex-shrink: 0;
+    border: 1px solid #404040;
+}
+
+.composeLabel {
+    font-size: 12px;
+    color: #404040;
+    font-style: italic;
 }
 
 .composeTextarea {
-    flex: 1;
-    min-height: 52px;
-    max-height: 120px;
-    padding: 6px;
+    width: 100%;
+    min-height: 64px;
+    max-height: 140px;
+    padding: 6px 8px;
     font-family: var(--font-main);
-    font-size: 16px;
+    font-size: 13px;
     border: none;
     resize: vertical;
     background: #fff;
     box-shadow:
         inset 1px 1px 0 #808080,
-        inset -1px -1px 0 #fff,
-        inset 2px 2px 0 #404040,
-        inset -2px -2px 0 #dfdfdf;
+        inset -1px -1px 0 #fff;
     outline: none;
+    line-height: 1.5;
+    box-sizing: border-box;
+    display: block;
 }
 
 .composeTextarea::placeholder {
     color: #808080;
 }
 
-.composeBtn {
-    composes: toolbarBtn;
-    background: #c0c0c0;
-    min-width: 80px;
-    font-weight: bold;
-    font-size: 15px;
-    padding: 8px 14px;
-    align-self: flex-end;
+.composeFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
 }
 
 .composeCharCount {
-    font-size: 12px;
+    font-size: 11px;
     color: #808080;
-    text-align: right;
-    margin-top: 3px;
 }
 
 .composeCharCountWarn {
-    color: #800000;
+    color: #c00;
     font-weight: bold;
 }
 
+.composeBtn {
+    composes: toolbarBtn;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 4px 20px;
+}
+
+.composeBtn:hover:not(:disabled) {
+    background: #e0ddd5;
+}
+
+.composeBtn:disabled {
+    color: #808080;
+    text-shadow: 1px 1px 0 #fff;
+    cursor: default;
+}
+
 .post {
-    padding: 12px 14px;
-    border-bottom: 1px solid #d0d0d0;
+    padding: 12px 16px;
+    border-bottom: 1px solid #d0cdc5;
     cursor: pointer;
-    transition: background 0.05s;
+    background: #fff;
 }
 
 .post:hover {
-    background: #f0f0ff;
+    background: #eef0f8;
+}
+
+.post:active {
+    background: #e8eaf0;
+}
+
+.postOptimistic {
+    opacity: 0.55;
+}
+
+.postEnter {
+    animation: postSlideIn 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
 .postHeader {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     margin-bottom: 6px;
 }
 
 .postAvatar {
-    width: 34px;
-    height: 34px;
-    background: #c0c0c0;
-    border: 1px solid #808080;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #000080;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 15px;
     font-weight: bold;
-    color: #000080;
     flex-shrink: 0;
-    box-shadow:
-        inset -1px -1px 0 #404040,
-        inset 1px 1px 0 #fff;
+    cursor: pointer;
+    border: 1px solid #404040;
+}
+
+.postAvatar:hover {
+    background: #0000a0;
+}
+
+.postMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
 }
 
 .postAuthor {
     font-weight: bold;
     color: #000080;
-    font-size: 15px;
+    font-size: 13px;
     cursor: pointer;
+    line-height: 1.3;
 }
 
 .postAuthor:hover {
@@ -227,56 +327,117 @@
 
 .postDate {
     color: #808080;
-    font-size: 13px;
-    margin-left: auto;
-    white-space: nowrap;
+    font-size: 11px;
+    line-height: 1.3;
 }
 
 .postBody {
-    font-size: 16px;
-    line-height: 1.5;
-    margin: 6px 0 8px 42px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 4px 0 8px 46px;
     word-break: break-word;
     white-space: pre-wrap;
+    color: #000;
+}
+
+.threadBody {
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 6px 0 10px 0;
+    word-break: break-word;
+    white-space: pre-wrap;
+    color: #000;
+    padding: 0 2px;
 }
 
 .postActions {
     display: flex;
-    gap: 16px;
-    margin-left: 42px;
-    font-size: 14px;
+    gap: 2px;
+    margin-left: 46px;
 }
 
-.postActionBtn {
+.actionBtn {
     background: none;
-    border: none;
+    border: 1px solid transparent;
     font-family: var(--font-main);
-    font-size: 14px;
-    color: #808080;
+    font-size: 12px;
+    color: #606060;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 3px 6px;
+    gap: 5px;
+    padding: 3px 8px;
+    transition: background 0.1s ease, border-color 0.1s ease;
 }
 
-.postActionBtn:hover {
-    color: #000080;
+.actionBtn:hover:not(:disabled) {
+    background: #d4d0c8;
+    border-color: #808080;
+    color: #000;
 }
 
-.postActionBtnLiked {
-    color: #c00000;
+.actionBtn:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.actionBtnLiked {
+    color: #990000;
     font-weight: bold;
 }
 
-.postActionBtnLiked:hover {
-    color: #900000;
+.actionBtnLiked:hover:not(:disabled) {
+    background: #f8e8e8;
+    border-color: #e0a0a0;
 }
 
-.threadBack {
+.actionIco {
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    flex-shrink: 0;
+}
+
+.actionIcoLiked {
+    composes: actionIco;
+    filter: sepia(1) saturate(5) hue-rotate(320deg);
+}
+
+.heartPop {
+    animation: heartPopAnim 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.deleteBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.post:hover .deleteBtn,
+.threadPost:hover .deleteBtn {
+    opacity: 1;
+}
+
+.deleteBtn:hover {
+    opacity: 1 !important;
+}
+
+.deleteBtnIco {
+    width: 14px;
+    height: 14px;
+    image-rendering: pixelated;
+}
+
+.backBtn {
     composes: toolbarBtn;
-    margin: 8px 10px;
-    font-size: 14px;
+    margin: 8px 12px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -284,18 +445,40 @@
 
 .threadPost {
     padding: 14px 16px;
-    border-bottom: 2px groove #fff;
-    background: #f8f8f8;
+    background: #efefeb;
+    border-bottom: 2px solid #808080;
 }
 
-.threadReplies {
+.repliesSection {
     padding: 0;
 }
 
+.repliesHeader {
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    background: #000080;
+    padding: 5px 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.repliesHeaderIco {
+    width: 14px;
+    height: 14px;
+    image-rendering: pixelated;
+    filter: brightness(0) invert(1);
+}
+
 .replyItem {
-    padding: 10px 14px 10px 52px;
-    border-bottom: 1px dotted #c0c0c0;
+    padding: 10px 16px 10px 52px;
+    border-bottom: 1px solid #e8e6e0;
     position: relative;
+    animation: replyItemIn 0.2s ease both;
+    background: #fff;
 }
 
 .replyItem::before {
@@ -305,33 +488,62 @@
     top: 0;
     bottom: 0;
     width: 1px;
-    background: #c0c0c0;
+    background: #c0bdb5;
+}
+
+.replyAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #404080;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+    cursor: pointer;
+    border: 1px solid #404040;
+}
+
+.replyBody {
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 4px 0 6px 38px;
+    word-break: break-word;
+    white-space: pre-wrap;
+    color: #000;
 }
 
 .replyCompose {
-    padding: 10px 14px 10px 52px;
-    border-top: 1px solid #c0c0c0;
-    background: #f0f0f0;
+    padding: 10px 14px;
+    border-top: 2px solid #808080;
+    background: #d4d0c8;
     display: flex;
     gap: 8px;
     align-items: flex-end;
+    flex-shrink: 0;
 }
 
 .replyInput {
     flex: 1;
-    padding: 6px;
+    padding: 5px 8px;
     font-family: var(--font-main);
-    font-size: 15px;
+    font-size: 13px;
     border: none;
     background: #fff;
     box-shadow:
         inset 1px 1px 0 #808080,
-        inset -1px -1px 0 #fff,
-        inset 2px 2px 0 #404040,
-        inset -2px -2px 0 #dfdfdf;
+        inset -1px -1px 0 #fff;
     outline: none;
     min-height: 36px;
     resize: none;
+    line-height: 1.4;
+}
+
+.replyOptimistic {
+    opacity: 0.55;
 }
 
 .loginWrap {
@@ -339,25 +551,24 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    background: #c0c0c0;
+    background: #d4d0c8;
 }
 
 .loginBox {
     width: 340px;
-    background: #c0c0c0;
+    background: #d4d0c8;
     box-shadow:
         inset -1px -1px 0 #404040,
         inset 1px 1px 0 #fff,
         inset -2px -2px 0 #808080,
-        inset 2px 2px 0 #dfdfdf;
-    padding: 0;
+        inset 2px 2px 0 #d4d0c8;
 }
 
 .loginHeader {
     background: linear-gradient(90deg, #000080, #1084d0);
     color: #fff;
     padding: 5px 10px;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -367,21 +578,22 @@
 .loginHeader img {
     width: 16px;
     height: 16px;
+    image-rendering: pixelated;
 }
 
 .authTabs {
     display: flex;
-    background: #c0c0c0;
-    border-bottom: 2px groove #fff;
+    background: #d4d0c8;
+    border-bottom: 1px solid #808080;
 }
 
 .authTab {
     flex: 1;
-    padding: 7px 0;
+    padding: 5px 0;
     text-align: center;
     font-family: var(--font-main);
-    font-size: 14px;
-    background: #c0c0c0;
+    font-size: 12px;
+    background: #d4d0c8;
     border: none;
     cursor: pointer;
     border-right: 1px solid #808080;
@@ -407,10 +619,10 @@
 }
 
 .loginBody {
-    padding: 18px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .loginIcon {
@@ -421,34 +633,33 @@
 .loginIcon img {
     width: 48px;
     height: 48px;
+    image-rendering: pixelated;
 }
 
 .loginLabel {
-    font-size: 15px;
+    font-size: 12px;
     font-weight: bold;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
 }
 
 .loginInput {
     width: 100%;
-    padding: 5px 6px;
+    padding: 4px 6px;
     font-family: var(--font-main);
-    font-size: 16px;
+    font-size: 13px;
     border: none;
     background: #fff;
     box-shadow:
         inset 1px 1px 0 #808080,
-        inset -1px -1px 0 #fff,
-        inset 2px 2px 0 #404040,
-        inset -2px -2px 0 #dfdfdf;
+        inset -1px -1px 0 #fff;
     outline: none;
 }
 
 .loginError {
     background: #fff0f0;
-    border: 1px dotted #c00;
-    padding: 6px 8px;
-    font-size: 14px;
+    border: 1px solid #c00;
+    padding: 5px 8px;
+    font-size: 12px;
     color: #c00;
     display: flex;
     align-items: center;
@@ -457,9 +668,9 @@
 
 .loginSuccess {
     background: #f0fff0;
-    border: 1px dotted #080;
-    padding: 6px 8px;
-    font-size: 14px;
+    border: 1px solid #080;
+    padding: 5px 8px;
+    font-size: 12px;
     color: #080;
     display: flex;
     align-items: center;
@@ -470,18 +681,19 @@
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    margin-top: 6px;
+    margin-top: 4px;
 }
 
 .statusbar {
     display: flex;
     align-items: center;
-    padding: 3px 6px;
-    background: #c0c0c0;
+    padding: 2px 4px;
+    background: #d4d0c8;
     border-top: 1px solid #808080;
-    font-size: 13px;
+    font-size: 12px;
     flex-shrink: 0;
-    gap: 8px;
+    gap: 4px;
+    min-height: 22px;
 }
 
 .statusSection {
@@ -490,12 +702,22 @@
         inset 1px 1px 0 #808080,
         inset -1px -1px 0 #fff;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.statusIco {
+    width: 14px;
+    height: 14px;
+    image-rendering: pixelated;
+    flex-shrink: 0;
 }
 
 .skeletonPost {
-    padding: 14px;
-    border-bottom: 1px solid #e8e8e8;
-    animation: skeletonFade 0.6s ease-in-out infinite alternate;
+    padding: 12px 16px;
+    border-bottom: 1px solid #d0cdc5;
+    background: #fff;
 }
 
 .skeletonRow {
@@ -506,18 +728,16 @@
 }
 
 .skeletonAvatar {
-    width: 34px;
-    height: 34px;
-    background: #e0e0e0;
-    box-shadow:
-        inset -1px -1px 0 #c0c0c0,
-        inset 1px 1px 0 #f0f0f0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #d0cdc5;
+    flex-shrink: 0;
 }
 
 .skeletonLine {
     height: 12px;
-    background: #e0e0e0;
-    border-radius: 1px;
+    background: #d0cdc5;
 }
 
 .skeletonLineShort {
@@ -537,20 +757,216 @@
 
 .skeletonActions {
     display: flex;
-    gap: 14px;
-    margin-left: 42px;
+    gap: 12px;
+    margin-left: 46px;
     margin-top: 10px;
 }
 
 .skeletonActionPill {
-    width: 48px;
+    width: 50px;
     height: 12px;
-    background: #e0e0e0;
+    background: #d0cdc5;
 }
 
-@keyframes skeletonFade {
-    0% { opacity: 0.45; }
-    100% { opacity: 1; }
+.skeletonShimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.skeletonShimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 40%,
+        rgba(255, 255, 255, 0.6) 50%,
+        rgba(255, 255, 255, 0.4) 60%,
+        transparent 100%
+    );
+    animation: shimmerSlide 1.4s ease-in-out infinite;
+}
+
+.viewTransition {
+    animation: viewFadeIn 0.2s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.viewEntering {
+    opacity: 0;
+}
+
+.profileWrap {
+    padding: 0;
+}
+
+.profileHeader {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: #d4d0c8;
+    border-bottom: 2px solid #808080;
+}
+
+.profileAvatarLg {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #000080;
+    border: 2px solid #fff;
+    box-shadow: 1px 1px 0 #404040;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.profileInfo {
+    flex: 1;
+}
+
+.profileName {
+    font-size: 16px;
+    font-weight: bold;
+    color: #000080;
+    margin-bottom: 6px;
+}
+
+.profileStats {
+    display: flex;
+    gap: 20px;
+}
+
+.profileStat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profileStatVal {
+    font-weight: bold;
+    font-size: 15px;
+    color: #000;
+    line-height: 1.2;
+}
+
+.profileStatLabel {
+    font-size: 11px;
+    color: #808080;
+}
+
+.profileTabs {
+    display: flex;
+    border-bottom: 1px solid #808080;
+    background: #d4d0c8;
+}
+
+.profileTab {
+    flex: 1;
+    padding: 6px 0;
+    text-align: center;
+    font-family: var(--font-main);
+    font-size: 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #404040;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.profileTab:hover {
+    color: #000080;
+}
+
+.profileTabActive {
+    color: #000080;
+    font-weight: bold;
+    border-bottom-color: #000080;
+}
+
+.profilePosts {
+    overflow-y: auto;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 10px;
+    color: #808080;
+    padding: 48px 24px;
+    text-align: center;
+    min-height: 180px;
+}
+
+.emptyIcon {
+    margin-bottom: 4px;
+    opacity: 0.85;
+}
+
+.emptyIco {
+    width: 48px;
+    height: 48px;
+    image-rendering: pixelated;
+}
+
+.emptyIcoSm {
+    width: 32px;
+    height: 32px;
+    image-rendering: pixelated;
+}
+
+.emptyTitle {
+    font-size: 14px;
+    font-weight: bold;
+    color: #404040;
+}
+
+.emptySubtitle {
+    font-size: 12px;
+    color: #808080;
+}
+
+.connectingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 60px 24px;
+    color: #404040;
+    font-size: 13px;
+}
+
+.connectingDots {
+    display: flex;
+    gap: 4px;
+}
+
+.connectingDots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #000080;
+    animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+.connectingDots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.connectingDots span:nth-child(3) {
+    animation-delay: 0.4s;
 }
 
 .loadingFull {
@@ -559,24 +975,22 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    background: #c0c0c0;
-    gap: 12px;
+    background: #d4d0c8;
+    gap: 10px;
 }
 
 .loadingText {
-    font-size: 15px;
+    font-size: 12px;
     color: #404040;
 }
 
 .progressBar {
-    width: 200px;
-    height: 18px;
+    width: 180px;
+    height: 16px;
     background: #fff;
     box-shadow:
         inset 1px 1px 0 #808080,
-        inset -1px -1px 0 #fff,
-        inset 2px 2px 0 #404040,
-        inset -2px -2px 0 #dfdfdf;
+        inset -1px -1px 0 #fff;
     overflow: hidden;
     position: relative;
 }
@@ -592,175 +1006,10 @@
 }
 
 .progressBlock {
-    width: 12px;
+    width: 10px;
     height: 100%;
     background: #000080;
     flex-shrink: 0;
-}
-
-@keyframes progressSlide {
-    0% { transform: translateX(-80px); }
-    100% { transform: translateX(200px); }
-}
-
-.emptyState {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    gap: 10px;
-    color: #808080;
-    font-size: 15px;
-    padding: 40px;
-    text-align: center;
-}
-
-.emptyState img {
-    width: 48px;
-    height: 48px;
-    opacity: 0.5;
-}
-
-.profileWrap {
-    padding: 0;
-}
-
-.profileHeader {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px;
-    background: #f0f0f0;
-    border-bottom: 2px groove #fff;
-}
-
-.profileAvatar {
-    width: 52px;
-    height: 52px;
-    background: #c0c0c0;
-    border: 2px solid #808080;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    color: #000080;
-    box-shadow:
-        inset -1px -1px 0 #404040,
-        inset 1px 1px 0 #fff;
-    flex-shrink: 0;
-}
-
-.profileInfo {
-    flex: 1;
-}
-
-.profileName {
-    font-size: 18px;
-    font-weight: bold;
-    color: #000080;
-    margin-bottom: 4px;
-}
-
-.profileStats {
-    display: flex;
-    gap: 16px;
-    font-size: 14px;
-    color: #404040;
-}
-
-.profileStatVal {
-    font-weight: bold;
-    color: #000;
-}
-
-.profileTabs {
-    display: flex;
-    border-bottom: 2px groove #fff;
-    background: #c0c0c0;
-}
-
-.profileTab {
-    flex: 1;
-    padding: 7px 0;
-    text-align: center;
-    font-family: var(--font-main);
-    font-size: 14px;
-    background: #c0c0c0;
-    border: none;
-    cursor: pointer;
-    border-right: 1px solid #808080;
-    color: #000;
-    box-shadow:
-        inset 0 -1px 0 #808080,
-        inset 0 1px 0 #fff;
-}
-
-.profileTab:last-child {
-    border-right: none;
-}
-
-.profileTabActive {
-    background: #fff;
-    font-weight: bold;
-    color: #000080;
-    box-shadow: none;
-}
-
-.profilePosts {
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-@media (max-width: 600px) {
-    .toolbar {
-        gap: 2px;
-        padding: 2px 4px;
-    }
-
-    .toolbarBtn {
-        font-size: 13px;
-        padding: 3px 8px;
-    }
-
-    .addressBar {
-        display: none;
-    }
-
-    .postBody {
-        margin-left: 0;
-        font-size: 15px;
-    }
-
-    .postActions {
-        margin-left: 0;
-    }
-
-    .replyItem {
-        padding-left: 24px;
-    }
-
-    .replyItem::before {
-        left: 12px;
-    }
-
-    .replyCompose {
-        padding-left: 14px;
-    }
-
-    .loginBox {
-        width: 92vw;
-    }
-
-    .profileHeader {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .profileStats {
-        justify-content: center;
-    }
 }
 
 .wsIndicator {
@@ -771,10 +1020,92 @@
 }
 
 .wsOn {
-    background: #00a000;
-    box-shadow: 0 0 4px #00a000;
+    background: #00c000;
+    box-shadow: 0 0 3px #00c000;
 }
 
 .wsOff {
-    background: #808080;
+    background: #c08000;
+    animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes postSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes heartPopAnim {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+@keyframes viewFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateX(4px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes feedFadeIn {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+@keyframes replyItemIn {
+    0% {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shimmerSlide {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+@keyframes skeletonFade {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+@keyframes progressSlide {
+    0% { transform: translateX(-60px); }
+    100% { transform: translateX(180px); }
+}
+
+@keyframes dotPulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 600px) {
+    .toolbar { gap: 1px; padding: 2px 3px; }
+    .toolbarBtn { font-size: 11px; padding: 3px 6px; }
+    .addressBar { display: none; }
+    .postBody, .threadBody { margin-left: 0; font-size: 13px; }
+    .postActions { margin-left: 0; }
+    .replyItem { padding-left: 28px; }
+    .replyItem::before { left: 14px; }
+    .replyBody { margin-left: 0; }
+    .replyCompose { padding-left: 8px; }
+    .loginBox { width: 92vw; }
+    .profileHeader { flex-direction: column; text-align: center; }
+    .profileStats { justify-content: center; }
+    .composeHeader { display: none; }
+    .deleteBtn { opacity: 1; }
 }

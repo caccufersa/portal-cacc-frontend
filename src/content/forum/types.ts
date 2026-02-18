@@ -2,10 +2,12 @@ export interface Post {
     id: number;
     texto: string;
     author: string;
+    user_id: number;
     parent_id?: number | null;
     likes: number;
-    data_criacao: string;
-    replies?: Post[];
+    reply_count: number;
+    created_at: string;
+    replies: Post[];
 }
 
 export interface UserProfile {
@@ -15,11 +17,19 @@ export interface UserProfile {
     posts: Post[];
 }
 
+export interface LikeResult {
+    post_id: number;
+    likes: number;
+}
+
+export interface DeleteResult {
+    id: number;
+    status: string;
+}
+
 export type View =
     | { type: 'feed' }
     | { type: 'thread'; id: number }
     | { type: 'profile'; username: string };
 
-export const API = 'https://backend-go-portal-5k1k.onrender.com/api';
-export const WS_URL = 'wss://backend-go-portal-5k1k.onrender.com/ws';
-export const MAX_CHARS = 280;
+export const MAX_CHARS = 5000;

@@ -6,6 +6,7 @@ import DesktopIcon from '@/components/DesktopIcon/DesktopIcon';
 import Window from '@/components/Window/Window';
 import AboutContent from '@/content/About';
 import CoursesContent from '@/content/Courses';
+import GaleriaContent from '@/content/Galeria';
 import ProjectsContent from '@/content/Projects';
 import ContactContent from '@/content/Contact';
 import HelpContent from '@/content/Help';
@@ -21,6 +22,7 @@ import News from '@/content/news/News';
 const windowContents: Record<string, React.ReactNode> = {
     about: <AboutContent />,
     courses: <CoursesContent />,
+    galeria: <GaleriaContent />,
     projects: <ProjectsContent />,
     contact: <ContactContent />,
     help: <HelpContent />,

@@ -160,6 +160,146 @@
     cursor: pointer;
 }
 
+/* --- Tray items with popups --- */
+.trayItem {
+    position: relative;
+}
+
+.trayBtn {
+    background: none;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.trayBtn:hover {
+    background: var(--win95-blue);
+}
+
+/* Profile button */
+.profileBtn {
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+}
+
+.profileBtn:hover {
+    background: var(--win95-blue);
+    color: var(--win95-white);
+}
+
+.profileName {
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Popup (shared between network + profile) --- */
+.popup {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    width: 220px;
+    margin-bottom: 6px;
+    background: var(--win95-gray);
+    z-index: 10001;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-light-gray),
+        3px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.popupTitle {
+    background: var(--win95-title-active);
+    color: var(--win95-white);
+    padding: 4px 8px;
+    font-family: var(--font-main);
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+}
+
+.popupBody {
+    padding: 10px;
+}
+
+.statusRow {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-main);
+    font-size: 13px;
+    padding: 3px 0;
+    border-bottom: 1px dotted var(--win95-border-dark);
+}
+
+.statusRow:last-child {
+    border-bottom: none;
+}
+
+/* Profile popup */
+.profileInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.profileBigIcon {
+    width: 32px;
+    height: 32px;
+}
+
+.profileUsername {
+    font-family: var(--font-main);
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.profileStatus {
+    font-family: var(--font-main);
+    font-size: 12px;
+    color: var(--win95-darker-gray);
+}
+
+.popupDivider {
+    height: 1px;
+    background: linear-gradient(to right, var(--win95-border-dark), var(--win95-border-light));
+    margin: 8px 0;
+}
+
+.popupAction {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 4px 6px;
+    background: none;
+    border: none;
+    font-family: var(--font-main);
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.popupAction:hover {
+    background: var(--win95-blue);
+    color: var(--win95-white);
+}
+
 @media (max-width: 768px) {
     .taskbar {
         height: 44px;
@@ -226,5 +366,13 @@
 
     .clock {
         font-size: 11px;
+    }
+
+    .profileName {
+        display: none;
+    }
+
+    .popup {
+        width: 200px;
     }
 }

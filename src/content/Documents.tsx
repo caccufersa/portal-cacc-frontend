@@ -3,10 +3,8 @@ import styles from './Content.module.css';
 const documents = [
     { icon: '/icons-95/notepad_file.ico', name: 'PPC - Projeto Pedagógico do Curso', description: 'Documento oficial com toda estrutura do curso' },
     { icon: '/icons-95/calendar.ico', name: 'Calendário Acadêmico 2025', description: 'Datas importantes do ano letivo' },
-    { icon: '/icons-95/help_book_cool.ico', name: 'Manual do Calouro', description: 'Guia completo para novos estudantes' },
-    { icon: '/icons-95/help_book_cool.ico', name: 'Ementas das Disciplinas', description: 'Conteúdo programático de cada disciplina' },
+    { icon: '/icons-95/document.ico', name: 'Ementas das Disciplinas', description: 'Conteúdo programático de cada disciplina' },
     { icon: '/icons-95/certificate.ico', name: 'Regulamento de TCC', description: 'Normas para o Trabalho de Conclusão de Curso' },
-    { icon: '/icons-95/document.ico', name: 'Regulamento de Estágio', description: 'Informações sobre estágio obrigatório e não-obrigatório' },
     { icon: '/icons-95/write_file.ico', name: 'Modelo de Requerimento', description: 'Template para solicitações à coordenação' },
     { icon: '/icons-95/check.ico', name: 'Atividades Complementares', description: 'Lista de atividades válidas e formulários' }
 ];

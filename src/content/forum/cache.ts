@@ -24,26 +24,19 @@ export function setCache<T>(key: string, data: T): void {
 }
 
 export function invalidate(key?: string): void {
-    if (key) store.delete(key);
-    else store.clear();
-}
-
-export async function cachedFetch<T>(
-    key: string,
-    url: string,
-    ttl = DEFAULT_TTL,
-    opts?: RequestInit,
-): Promise<T | null> {
-    const cached = getCached<T>(key, ttl);
-    if (cached) return cached;
-
-    try {
-        const res = await fetch(url, { ...opts, cache: 'no-store' });
-        if (!res.ok) return getStale<T>(key);
-        const data: T = await res.json();
-        setCache(key, data);
-        return data;
-    } catch {
-        return getStale<T>(key);
+    if (!key) {
+        store.clear();
+        return;
+    }
+    // Support wildcard invalidation: "feed:*" clears all feed keys
+    if (key.endsWith(':*')) {
+        const prefix = key.slice(0, -1);
+        for (const k of store.keys()) {
+            if (k.startsWith(prefix)) store.delete(k);
+        }
+    } else {
+        store.delete(key);
     }
 }
+
+

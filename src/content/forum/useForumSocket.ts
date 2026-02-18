@@ -1,88 +1,57 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { WS_URL } from './types';
+import { useEffect, useRef } from 'react';
+import { useWebSocket } from '@/lib/websocket';
 import type { Post } from './types';
 
-export interface WsMessage {
-    type: 'new_post' | 'new_comment' | 'like_update';
-    post?: Post;
-    post_id?: number;
-    parent_id?: number;
-    likes?: number;
-    comment?: Post;
+export interface ForumSocketCallbacks {
+    onNewPost: (post: Post) => void;
+    onLikeUpdate: (postId: number, likes: number) => void;
+    onNewComment: (parentId: number, comment: Post) => void;
+    onPostDeleted: (postId: number) => void;
 }
 
-export function useForumSocket(
-    enabled: boolean,
-    onNewPost: (post: Post) => void,
-    onLikeUpdate: (postId: number, likes: number) => void,
-    onNewComment: (parentId: number, comment: Post) => void,
-) {
-    const [connected, setConnected] = useState(false);
-    const wsRef = useRef<WebSocket | null>(null);
-    const mountedRef = useRef(true);
-
-    const onNewPostRef = useRef(onNewPost);
-    const onLikeUpdateRef = useRef(onLikeUpdate);
-    const onNewCommentRef = useRef(onNewComment);
-
+export function useForumSocket(callbacks: ForumSocketCallbacks) {
+    const cbRef = useRef(callbacks);
     useEffect(() => {
-        onNewPostRef.current = onNewPost;
-        onLikeUpdateRef.current = onLikeUpdate;
-        onNewCommentRef.current = onNewComment;
-    }, [onNewPost, onLikeUpdate, onNewComment]);
+        cbRef.current = callbacks;
+    });
 
-    useEffect(() => {
-        if (!enabled) return;
-        mountedRef.current = true;
-        let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
-
-        function connect() {
-            if (!mountedRef.current) return;
-            if (wsRef.current && wsRef.current.readyState <= 1) return;
-
-            try {
-                const ws = new WebSocket(WS_URL);
-                wsRef.current = ws;
-
-                ws.onopen = () => {
-                    if (mountedRef.current) setConnected(true);
-                };
-
-                ws.onclose = () => {
-                    if (mountedRef.current) {
-                        setConnected(false);
-                        reconnectTimer = setTimeout(connect, 3000);
-                    }
-                };
-
-                ws.onerror = () => { ws.close(); };
-
-                ws.onmessage = (ev) => {
-                    try {
-                        const msg: WsMessage = JSON.parse(ev.data);
-                        if (msg.type === 'new_post' && msg.post) {
-                            onNewPostRef.current(msg.post);
-                        } else if (msg.type === 'like_update' && msg.post_id != null && msg.likes != null) {
-                            onLikeUpdateRef.current(msg.post_id, msg.likes);
-                        } else if (msg.type === 'new_comment' && msg.parent_id != null && msg.comment) {
-                            onNewCommentRef.current(msg.parent_id, msg.comment);
-                        }
-                    } catch { /* ignore */ }
-                };
-            } catch { /* ignore */ }
+    const { status, sendAction } = useWebSocket('new_post', (msg) => {
+        if (msg.data && typeof msg.data === 'object' && 'id' in msg.data) {
+            cbRef.current.onNewPost(msg.data as Post);
         }
+    });
 
-        connect();
+    useWebSocket('like_updated', (msg) => {
+        if (msg.data && typeof msg.data === 'object') {
+            const d = msg.data as Record<string, unknown>;
+            if (typeof d.post_id === 'number' && typeof d.likes === 'number') {
+                cbRef.current.onLikeUpdate(d.post_id, d.likes);
+            }
+        }
+    });
 
-        return () => {
-            mountedRef.current = false;
-            clearTimeout(reconnectTimer);
-            wsRef.current?.close();
-            wsRef.current = null;
-        };
-    }, [enabled]);
+    useWebSocket('new_comment', (msg) => {
+        if (msg.data && typeof msg.data === 'object') {
+            const comment = msg.data as Post;
+            if (typeof comment.parent_id === 'number') {
+                cbRef.current.onNewComment(comment.parent_id, comment);
+            }
+        }
+    });
 
-    return connected;
+    useWebSocket('post_deleted', (msg) => {
+        if (msg.data && typeof msg.data === 'object') {
+            const d = msg.data as Record<string, unknown>;
+            if (typeof d.id === 'number') {
+                cbRef.current.onPostDeleted(d.id);
+            }
+        }
+    });
+
+    return {
+        connected: status === 'connected',
+        sendAction,
+    };
 }

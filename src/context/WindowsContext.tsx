@@ -41,15 +41,15 @@ const WindowsContext = createContext<WindowsContextType | null>(null);
 const initialWindows: WindowState[] = [
   { id: 'about', title: 'Sobre o CACC', icon: 'icons-95/directory_closed.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 50, y: 50 }, size: { width: 500, height: 400 } },
   { id: 'courses', title: 'Grade Curricular', icon: 'icons-95/calendar.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 100, y: 80 }, size: { width: 600, height: 450 } },
-  { id: 'projects', title: 'Projetos', icon: 'icons-95/directory_program_group.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 150, y: 60 }, size: { width: 550, height: 420 } },
+  { id: 'galeria', title: 'Galeria', icon: 'icons-95/camera.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 150, y: 60 }, size: { width: 550, height: 420 } },
   { id: 'contact', title: 'Contato', icon: 'icons-95/phone_desk.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 200, y: 100 }, size: { width: 450, height: 400 } },
-  { id: 'documents', title: 'Documentos', icon: 'icons-95/notepad_file.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 80, y: 90 }, size: { width: 520, height: 420 } },
-  { id: 'help', title: 'FAQ - Perguntas Frequentes', icon: 'icons-95/help_question_mark.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 120, y: 70 }, size: { width: 500, height: 450 } },
-  { id: 'calouroGuide', title: 'Guia do Calouro', icon: 'icons-95/user_world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 600, y: 250 }, size: { width: 700, height: 500 } },
-  { id: 'sugest', title: 'Sugestões', icon: 'icons-95/message_envelope_open.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 300, y: 150 }, size: { width: 600, height: 400 } },
-  { id: 'balance', title: 'Balancetes', icon: 'icons-95/calculator.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 400, y: 120 }, size: { width: 600, height: 450 } },
   { id: 'forum', title: 'Fórum CACC', icon: 'icons-95/connected_world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 180, y: 80 }, size: { width: 620, height: 500 } },
   { id: 'news', title: 'Notícias', icon: 'icons-95/msg_information.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 140, y: 60 }, size: { width: 600, height: 480 } },
+  { id: 'help', title: 'FAQ - Perguntas Frequentes', icon: 'icons-95/help_question_mark.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 120, y: 70 }, size: { width: 500, height: 450 } },
+  { id: 'documents', title: 'Documentos', icon: 'icons-95/notepad_file.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 80, y: 90 }, size: { width: 520, height: 420 } },
+  { id: 'balance', title: 'Transparência', icon: 'icons-95/calculator.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 400, y: 120 }, size: { width: 600, height: 450 } },
+  { id: 'sugest', title: 'Sugestões', icon: 'icons-95/message_tack.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 300, y: 150 }, size: { width: 550, height: 500 } },
+  { id: 'calouroGuide', title: 'Guia do Calouro', icon: 'icons-95/user_world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 600, y: 250 }, size: { width: 700, height: 500 } },
 ];
 
 const getInitialIconPositions = (): IconPosition[] => {
@@ -57,14 +57,14 @@ const getInitialIconPositions = (): IconPosition[] => {
     return [
       { id: 'about', position: { x: 20, y: 20 } },
       { id: 'courses', position: { x: 20, y: 110 } },
-      { id: 'projects', position: { x: 20, y: 200 } },
+      { id: 'galeria', position: { x: 20, y: 200 } },
       { id: 'contact', position: { x: 20, y: 290 } },
-      { id: 'documents', position: { x: 20, y: 380 } },
-      { id: 'help', position: { x: 20, y: 470 } },
-      { id: 'balance', position: { x: 20, y: 560 } },
-      { id: 'sugest', position: { x: 20, y: 650 } },
-      { id: 'forum', position: { x: 20, y: 740 } },
-      { id: 'news', position: { x: 20, y: 830 } },
+      { id: 'forum', position: { x: 20, y: 380 } },
+      { id: 'news', position: { x: 20, y: 470 } },
+      { id: 'help', position: { x: 20, y: 560 } },
+      { id: 'documents', position: { x: 20, y: 650 } },
+      { id: 'balance', position: { x: 20, y: 740 } },
+      { id: 'sugest', position: { x: 20, y: 830 } },
       { id: 'calouroGuide', position: { x: 400, y: 300 } },
     ];
   }
@@ -81,19 +81,18 @@ const getInitialIconPositions = (): IconPosition[] => {
   
   if (screenWidth >= 1024 && screenHeight >= 768) {
     const rightColumn = screenWidth - 120;
-    const bottomRight = screenHeight - 150; 
-    
+
     return [
       { id: 'about', position: { x: leftColumn, y: 20 } },
       { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
-      { id: 'projects', position: { x: leftColumn, y: 20 + iconSpacing * 2 } },
+      { id: 'galeria', position: { x: leftColumn, y: 20 + iconSpacing * 2 } },
       { id: 'contact', position: { x: leftColumn, y: 20 + iconSpacing * 3 } },
-      { id: 'documents', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
-      { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
-      { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
-      { id: 'sugest', position: { x: rightColumn, y: bottomRight } },
-      { id: 'forum', position: { x: rightColumn, y: bottomRight - iconSpacing } },
-      { id: 'news', position: { x: rightColumn, y: bottomRight - iconSpacing * 2 } },
+      { id: 'forum', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
+      { id: 'news', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
+      { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
+      { id: 'documents', position: { x: rightColumn, y: 20 } },
+      { id: 'balance', position: { x: rightColumn, y: 20 + iconSpacing } },
+      { id: 'sugest', position: { x: rightColumn, y: 20 + iconSpacing * 2 } },
       { id: 'calouroGuide', position: { x: centerX, y: centerY } },
     ];
   }
@@ -102,14 +101,14 @@ const getInitialIconPositions = (): IconPosition[] => {
   return [
     { id: 'about', position: { x: leftColumn, y: 20 } },
     { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
-    { id: 'projects', position: { x: leftColumn, y: 20 + iconSpacing * 2 } },
+    { id: 'galeria', position: { x: leftColumn, y: 20 + iconSpacing * 2 } },
     { id: 'contact', position: { x: leftColumn, y: 20 + iconSpacing * 3 } },
-    { id: 'documents', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
-    { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
-    { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
-    { id: 'sugest', position: { x: leftColumn, y: 20 + iconSpacing * 7 } },
-    { id: 'forum', position: { x: leftColumn, y: 20 + iconSpacing * 8 } },
-    { id: 'news', position: { x: leftColumn, y: 20 + iconSpacing * 9 } },
+    { id: 'forum', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
+    { id: 'news', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
+    { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
+    { id: 'documents', position: { x: leftColumn, y: 20 + iconSpacing * 7 } },
+    { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 8 } },
+    { id: 'sugest', position: { x: leftColumn, y: 20 + iconSpacing * 9 } },
     { id: 'calouroGuide', position: { x: centerX, y: centerY } },
   ];
 };

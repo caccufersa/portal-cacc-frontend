@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
+'use client';
+
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useAuth } from '@/context/AuthContext';
+
+const API = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'https://backend-go-portal-u9o8.onrender.com';
 
 interface Suggestion {
     id: number;
     texto: string;
-    data_criacao: string;
+    created_at: string;
     author: string;
     categoria: string;
 }
@@ -18,19 +23,19 @@ const CATEGORIAS = [
 
 const Sugest: React.FC = () => {
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-    const [author, setAuthor] = useState('');
     const [message, setMessage] = useState('');
     const [categoria, setCategoria] = useState<string>('Sugestão');
     const [loading, setLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    
+
     // Filtros
     const [filterCategoria, setFilterCategoria] = useState<string>('Todas');
     const [filterDate, setFilterDate] = useState<string>('');
 
+    const { accessToken } = useAuth();
+
     const winGray = '#c0c0c0';
-    const winDark = '#808080';
     const winLight = '#ffffff';
     const winBlue = '#000080';
 
@@ -218,13 +223,11 @@ const Sugest: React.FC = () => {
         }
     };
 
-    const API_URL = 'https://sugests-portal-c.onrender.com/api/sugestoes'; // hard code por cors no backend, usar variável de ambiente em produção
-
     // Filtragem de sugestões
     const filteredSuggestions = useMemo(() => {
         return suggestions.filter(s => {
             const matchCategoria = filterCategoria === 'Todas' || s.categoria === filterCategoria;
-            const matchDate = !filterDate || new Date(s.data_criacao).toLocaleDateString('pt-BR') === new Date(filterDate).toLocaleDateString('pt-BR');
+            const matchDate = !filterDate || new Date(s.created_at).toLocaleDateString('pt-BR') === new Date(filterDate).toLocaleDateString('pt-BR');
             return matchCategoria && matchDate;
         });
     }, [suggestions, filterCategoria, filterDate]);
@@ -236,56 +239,41 @@ const Sugest: React.FC = () => {
             counts[s.categoria] = (counts[s.categoria] || 0) + 1;
         });
         return counts;
-    }, [suggestions]);   
+    }, [suggestions]);
 
-    const fetchSuggestions = async () => {
+    const fetchSuggestions = useCallback(async () => {
         setIsFetching(true);
         try {
-            const response = await fetch(API_URL, {
-                cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
-                }
-            });
-            if (!response.ok) throw new Error('Failed to fetch suggestions');
-            const data = await response.json();
+            const res = await fetch(`${API}/sugestoes`);
+            if (!res.ok) throw new Error('fetch failed');
+            const data = await res.json();
             setSuggestions(Array.isArray(data) ? data : []);
-        } catch (err) {
-            console.error('Error fetching suggestions:', err);
+        } catch {
+            /* ignore */
         } finally {
             setIsFetching(false);
         }
-    };
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!author || !message || !categoria) return;
+        if (!message || !categoria) return;
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(API_URL, {
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+            const res = await fetch(`${API}/sugestoes`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    author: author, 
-                    texto: message,
-                    categoria: categoria 
-                }),
+                headers,
+                body: JSON.stringify({ texto: message, categoria }),
             });
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('POST failed:', errorText);
-                throw new Error('Failed to post suggestion');
-            }
-            
-            fetchSuggestions();
-            
-            setAuthor('');
+            if (!res.ok) throw new Error('create failed');
+            const created: Suggestion = await res.json();
+            setSuggestions(prev => [created, ...prev]);
             setMessage('');
             setCategoria('Sugestão');
-        } catch (err) {
-            console.error('Error posting suggestion:', err);
+        } catch {
             setError('Erro ao enviar dados. Por favor, tente novamente.');
         } finally {
             setLoading(false);
@@ -294,13 +282,7 @@ const Sugest: React.FC = () => {
 
     useEffect(() => {
         fetchSuggestions();
-        
-        const interval = setInterval(() => {
-            fetchSuggestions();
-        }, 3000);
-        
-        return () => clearInterval(interval);
-    }, []);
+    }, [fetchSuggestions]);
 
     return (
         <div style={styles.container}>
@@ -308,16 +290,6 @@ const Sugest: React.FC = () => {
                 <legend style={styles.legend}>✉ Nova Mensagem</legend>
                 
                 <form onSubmit={handleSubmit}>
-                    <label style={styles.label}>De:</label>
-                    <input
-                        type="text"
-                        style={styles.input}
-                        value={author}
-                        onChange={(e) => setAuthor(e.target.value)}
-                        placeholder="JuninhoAnônimo123..."
-                        required
-                    />
-
                     <label style={styles.label}>Categoria:</label>
                     <select
                         style={styles.select}
@@ -445,7 +417,7 @@ const Sugest: React.FC = () => {
                                 </div>
                                 <div style={styles.messageBody}>{s.texto}</div>
                                 <div style={styles.messageDate}>
-                                     {new Date(s.data_criacao).toLocaleString('pt-BR')}
+                                 {new Date(s.created_at).toLocaleString('pt-BR')}
                                 </div>
                             </div>
                         ))
@@ -454,7 +426,7 @@ const Sugest: React.FC = () => {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
                     <span style={{ fontSize: '10px', color: '#666', alignSelf: 'center' }}>
-                        {isFetching ? 'Atualizando…' : 'Atualização automática'}
+                        {isFetching ? 'Atualizando…' : `${suggestions.length} mensagens`}
                     </span>
                     <button onClick={fetchSuggestions} style={styles.button}>
                         Atualizar

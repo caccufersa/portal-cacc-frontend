@@ -146,18 +146,6 @@
     color: var(--win95-white);
 }
 
-.faqItem {
-    margin-bottom: 16px;
-    padding: 12px;
-    background: var(--win95-light-gray);
-}
-
-.faqQuestion {
-    font-weight: bold;
-    color: var(--win95-blue);
-    margin-bottom: 8px;
-}
-
 .docItem {
     display: flex;
     align-items: center;
@@ -182,6 +170,55 @@
 .contentIcon {
     width: 48px;
     height: 48px;
+}
+
+.faqItem {
+    margin-bottom: 8px;
+    user-select: none;
+    touch-action: pan-y;
+}
+
+.faqButton {
+    width: 100%;
+    background: var(--win95-gray);
+    border: none;
+    padding: 6px 8px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-base);
+    color: var(--win95-black);
+    cursor: pointer;
+    text-align: left;
+    box-shadow:
+        inset -1px -1px 0 var(--win95-border-darker),
+        inset 1px 1px 0 var(--win95-border-light),
+        inset -2px -2px 0 var(--win95-border-dark),
+        inset 2px 2px 0 var(--win95-white);
+}
+
+.faqButton:active {
+    box-shadow:
+        inset 1px 1px 0 var(--win95-border-dark),
+        inset -1px -1px 0 var(--win95-white);
+    padding: 7px 7px 5px 9px;
+}
+
+.faqButtonOpen {
+    background: var(--win95-blue);
+    color: var(--win95-white);
+}
+
+.faqIcon {
+    display: inline-block;
+    width: 16px;
+    margin-right: 6px;
+    font-size: 10px;
+}
+
+.faqAnswer {
+    padding: 8px 12px;
+    background: var(--win95-white);
+    border: 1px solid var(--win95-dark-gray);
+    margin-top: 2px;
 }
 
 @media (max-width: 768px) {
@@ -255,8 +292,18 @@
     }
 
     .faqItem {
-        padding: 10px;
-        margin-bottom: 10px;
+        padding: 0;
+        margin-bottom: 8px;
+    }
+
+    .faqButton {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .faqAnswer {
+        padding: 8px 10px;
+        font-size: 13px;
     }
 
     .docItem {
