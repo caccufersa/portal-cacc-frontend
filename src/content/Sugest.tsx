@@ -55,13 +55,13 @@ const Sugest: React.FC = () => {
         container: {
             backgroundColor: winGray,
             fontFamily: '"MS Sans Serif", "Segoe UI", Tahoma, sans-serif',
-            fontSize: '11px', 
+            fontSize: '11px',
             padding: '10px',
             height: '100%',
             color: 'black',
         },
         fieldset: {
-            border: `2px groove ${winLight}`, 
+            border: `2px groove ${winLight}`,
             padding: '10px',
             marginBottom: '10px',
         },
@@ -70,14 +70,14 @@ const Sugest: React.FC = () => {
             marginBottom: '4px',
         },
         label: {
-            display: 'block', 
+            display: 'block',
             marginBottom: '2px',
         },
         input: {
             width: '100%',
             padding: '3px',
             marginBottom: '8px',
-            border: '2px inset #ffffff', 
+            border: '2px inset #ffffff',
             backgroundColor: 'white',
             fontFamily: 'inherit',
             outline: 'none',
@@ -108,7 +108,7 @@ const Sugest: React.FC = () => {
         },
         button: {
             backgroundColor: winGray,
-            border: '2px outset #ffffff', 
+            border: '2px outset #ffffff',
             padding: '4px 12px',
             cursor: 'pointer',
             fontFamily: 'inherit',
@@ -117,9 +117,9 @@ const Sugest: React.FC = () => {
             minWidth: '75px'
         },
         buttonContainer: {
-            display: 'flex', 
-            justifyContent: 'flex-end', 
-            gap: '6px' 
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '6px'
         },
         filterBar: {
             display: 'flex',
@@ -136,19 +136,19 @@ const Sugest: React.FC = () => {
         listBox: {
             border: '2px inset #ffffff',
             backgroundColor: 'white',
-            height: '300px', 
+            height: '300px',
             overflowY: 'auto',
             padding: '4px',
         },
         messageItem: {
-            marginBottom: '8px', 
+            marginBottom: '8px',
             paddingBottom: '8px',
             borderBottom: '1px dotted #808080',
             padding: '6px',
             backgroundColor: '#f0f0f0'
         },
-        messageHeader: { 
-            fontWeight: 'bold', 
+        messageHeader: {
+            fontWeight: 'bold',
             marginBottom: '4px',
             display: 'flex',
             justifyContent: 'space-between',
@@ -164,15 +164,15 @@ const Sugest: React.FC = () => {
             border: '1px solid rgba(0,0,0,0.3)',
             textTransform: 'uppercase' as const
         },
-        messageBody: { 
-            fontFamily: '"Courier New", monospace', 
+        messageBody: {
+            fontFamily: '"Courier New", monospace',
             fontSize: '12px',
             marginTop: '4px',
             marginBottom: '4px'
         },
-        messageDate: { 
-            fontSize: '9px', 
-            color: '#666', 
+        messageDate: {
+            fontSize: '9px',
+            color: '#666',
             marginTop: '4px',
             textAlign: 'right' as const
         },
@@ -257,9 +257,16 @@ const Sugest: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
+
+        if (!accessToken) {
+            setError('Você precisa estar logado para enviar uma sugestão.');
+            return;
+        }
+
         if (!message || !categoria) return;
         setLoading(true);
-        setError(null);
+
         try {
             const headers: Record<string, string> = { 'Content-Type': 'application/json' };
             if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
@@ -288,7 +295,7 @@ const Sugest: React.FC = () => {
         <div style={styles.container}>
             <fieldset style={styles.fieldset}>
                 <legend style={styles.legend}>✉ Nova Mensagem</legend>
-                
+
                 <form onSubmit={handleSubmit}>
                     <label style={styles.label}>Categoria:</label>
                     <select
@@ -321,9 +328,9 @@ const Sugest: React.FC = () => {
                 </form>
             </fieldset>
 
-            <fieldset style={{...styles.fieldset, flex: 1, display: 'flex', flexDirection: 'column'}}>
+            <fieldset style={{ ...styles.fieldset, flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <legend style={styles.legend}> Mural de Mensagens ({filteredSuggestions.length})</legend>
-                
+
                 <div style={styles.statsBar}>
                     <strong>Estatísticas:</strong>
                     {CATEGORIAS.map(cat => (
@@ -342,9 +349,9 @@ const Sugest: React.FC = () => {
 
                 <div style={styles.filterBar}>
                     <div style={styles.filterGroup}>
-                        <label style={{...styles.label, fontSize: '10px'}}>Filtrar por Categoria:</label>
+                        <label style={{ ...styles.label, fontSize: '10px' }}>Filtrar por Categoria:</label>
                         <select
-                            style={{...styles.select, width: 'auto', minWidth: '120px'}}
+                            style={{ ...styles.select, width: 'auto', minWidth: '120px' }}
                             value={filterCategoria}
                             onChange={(e) => setFilterCategoria(e.target.value)}
                         >
@@ -356,28 +363,28 @@ const Sugest: React.FC = () => {
                     </div>
 
                     <div style={styles.filterGroup}>
-                        <label style={{...styles.label, fontSize: '10px'}}>Filtrar por Data:</label>
+                        <label style={{ ...styles.label, fontSize: '10px' }}>Filtrar por Data:</label>
                         <input
                             type="date"
-                            style={{...styles.input, width: 'auto', marginBottom: '0'}}
+                            style={{ ...styles.input, width: 'auto', marginBottom: '0' }}
                             value={filterDate}
                             onChange={(e) => setFilterDate(e.target.value)}
                         />
                     </div>
 
                     {(filterCategoria !== 'Todas' || filterDate) && (
-                        <button 
+                        <button
                             onClick={() => {
                                 setFilterCategoria('Todas');
                                 setFilterDate('');
                             }}
-                            style={{...styles.button, height: '30px', alignSelf: 'flex-end'}}
+                            style={{ ...styles.button, height: '30px', alignSelf: 'flex-end' }}
                         >
-                             Limpar
+                            Limpar
                         </button>
                     )}
                 </div>
-                
+
                 <div style={styles.listBox}>
                     {suggestions.length === 0 && isFetching ? (
                         <div style={styles.loadingWrap}>
@@ -393,20 +400,20 @@ const Sugest: React.FC = () => {
                         </div>
                     ) : suggestions.length === 0 ? (
                         <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>
-                            Nenhuma mensagem ainda. Que tal inaugurar o mural?
+                            Já deve ter mensagem, faça LOGIN PARA VISUALIZAR
                         </p>
                     ) : filteredSuggestions.length === 0 ? (
                         <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>
-                            Nenhuma mensagem encontrada, ALGUÉM MANDA ALGO
+                            Nenhuma mensagem encontrada, ALGUÉM MANDA AQUI
                         </p>
                     ) : (
                         filteredSuggestions.map((s) => (
                             <div key={s.id} style={styles.messageItem}>
                                 <div style={styles.messageHeader}>
                                     <span style={{ color: winBlue }}>
-                                         {s.author}
+                                        {s.author}
                                     </span>
-                                    <span 
+                                    <span
                                         style={{
                                             ...styles.categoryBadge,
                                             backgroundColor: getCategoryColor(s.categoria)
@@ -417,7 +424,7 @@ const Sugest: React.FC = () => {
                                 </div>
                                 <div style={styles.messageBody}>{s.texto}</div>
                                 <div style={styles.messageDate}>
-                                 {new Date(s.created_at).toLocaleString('pt-BR')}
+                                    {new Date(s.created_at).toLocaleString('pt-BR')}
                                 </div>
                             </div>
                         ))

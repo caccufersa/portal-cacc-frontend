@@ -49,6 +49,7 @@ const initialWindows: WindowState[] = [
   { id: 'documents', title: 'Documentos', icon: 'icons-95/notepad_file.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 80, y: 90 }, size: { width: 520, height: 420 } },
   { id: 'balance', title: 'Transparência', icon: 'icons-95/calculator.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 400, y: 120 }, size: { width: 600, height: 450 } },
   { id: 'sugest', title: 'Sugestões', icon: 'icons-95/message_tack.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 300, y: 150 }, size: { width: 550, height: 500 } },
+  { id: 'bus', title: 'Reserva de Passagens', icon: 'icons-95/world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 350, y: 180 }, size: { width: 800, height: 600 } },
   { id: 'calouroGuide', title: 'Guia do Calouro', icon: 'icons-95/user_world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 600, y: 250 }, size: { width: 700, height: 500 } },
 ];
 
@@ -65,20 +66,21 @@ const getInitialIconPositions = (): IconPosition[] => {
       { id: 'documents', position: { x: 20, y: 650 } },
       { id: 'balance', position: { x: 20, y: 740 } },
       { id: 'sugest', position: { x: 20, y: 830 } },
+      { id: 'bus', position: { x: 20, y: 920 } },
       { id: 'calouroGuide', position: { x: 400, y: 300 } },
     ];
   }
 
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
-  
+
   const leftColumn = 20;
   const iconSpacing = 90;
-  
+
   // Calcula posição centralizada para o Guia do Calouro
-  const centerX = Math.max(20, (screenWidth / 2) - 50); 
-  const centerY = Math.max(20, (screenHeight / 2) - 150); 
-  
+  const centerX = Math.max(20, (screenWidth / 2) - 50);
+  const centerY = Math.max(20, (screenHeight / 2) - 150);
+
   if (screenWidth >= 1024 && screenHeight >= 768) {
     const rightColumn = screenWidth - 120;
 
@@ -93,10 +95,11 @@ const getInitialIconPositions = (): IconPosition[] => {
       { id: 'documents', position: { x: rightColumn, y: 20 } },
       { id: 'balance', position: { x: rightColumn, y: 20 + iconSpacing } },
       { id: 'sugest', position: { x: rightColumn, y: 20 + iconSpacing * 2 } },
+      { id: 'bus', position: { x: rightColumn, y: 20 + iconSpacing * 3 } },
       { id: 'calouroGuide', position: { x: centerX, y: centerY } },
     ];
   }
-  
+
   // Para telas menores
   return [
     { id: 'about', position: { x: leftColumn, y: 20 } },
@@ -109,6 +112,7 @@ const getInitialIconPositions = (): IconPosition[] => {
     { id: 'documents', position: { x: leftColumn, y: 20 + iconSpacing * 7 } },
     { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 8 } },
     { id: 'sugest', position: { x: leftColumn, y: 20 + iconSpacing * 9 } },
+    { id: 'bus', position: { x: leftColumn, y: 20 + iconSpacing * 10 } },
     { id: 'calouroGuide', position: { x: centerX, y: centerY } },
   ];
 };
@@ -130,13 +134,16 @@ export function WindowsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const openWindow = useCallback((id: string) => {
-    setHighestZIndex(prev => prev + 1);
-    setWindows(prev => prev.map(w =>
-      w.id === id ? { ...w, isOpen: true, isMinimized: false, zIndex: highestZIndex + 1 } : w
-    ));
+    setHighestZIndex(prev => {
+      const newZ = prev + 1;
+      setWindows(currentWindows => currentWindows.map(w =>
+        w.id === id ? { ...w, isOpen: true, isMinimized: false, zIndex: newZ } : w
+      ));
+      return newZ;
+    });
     setActiveWindowId(id);
     setStartMenuOpen(false);
-  }, [highestZIndex]);
+  }, []);
 
   const closeWindow = useCallback((id: string) => {
     setWindows(prev => prev.map(w =>
@@ -159,21 +166,27 @@ export function WindowsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const restoreWindow = useCallback((id: string) => {
-    setHighestZIndex(prev => prev + 1);
-    setWindows(prev => prev.map(w =>
-      w.id === id ? { ...w, isMinimized: false, isMaximized: false, zIndex: highestZIndex + 1 } : w
-    ));
+    setHighestZIndex(prev => {
+      const newZ = prev + 1;
+      setWindows(currentWindows => currentWindows.map(w =>
+        w.id === id ? { ...w, isMinimized: false, isMaximized: false, zIndex: newZ } : w
+      ));
+      return newZ;
+    });
     setActiveWindowId(id);
-  }, [highestZIndex]);
+  }, []);
 
   const focusWindow = useCallback((id: string) => {
-    setHighestZIndex(prev => prev + 1);
-    setWindows(prev => prev.map(w =>
-      w.id === id ? { ...w, zIndex: highestZIndex + 1 } : w
-    ));
+    setHighestZIndex(prev => {
+      const newZ = prev + 1;
+      setWindows(currentWindows => currentWindows.map(w =>
+        w.id === id ? { ...w, zIndex: newZ } : w
+      ));
+      return newZ;
+    });
     setActiveWindowId(id);
     setStartMenuOpen(false);
-  }, [highestZIndex]);
+  }, []);
 
   const updateWindowPosition = useCallback((id: string, position: { x: number; y: number }) => {
     setWindows(prev => prev.map(w =>

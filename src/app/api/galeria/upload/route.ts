@@ -25,10 +25,17 @@ export async function POST(request: NextRequest) {
     const base64 = buffer.toString('base64');
     const dataURI = `data:${file.type};base64,${base64}`;
 
+    const user = (formData.get('user') as string) || 'Anônimo';
+    const album = (formData.get('album') as string) || 'Geral';
+
     // Upload para o Cloudinary
     const result = await cloudinary.uploader.upload(dataURI, {
       folder: 'cacc-galeria',
       resource_type: 'auto',
+      context: {
+        user,
+        album,
+      },
     });
 
     return NextResponse.json({

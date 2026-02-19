@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { Post } from './types';
 import { MAX_CHARS } from './types';
-import { fetchThread as apiFetchThread, createComment } from './api';
+import { fetchThread as apiFetchThread, createComment, likePost, unlikePost } from './api';
 import { timeAgo, avatarLetter } from './helpers';
 import { SkeletonPost } from './Skeletons';
 import s from '../Forum.module.css';
@@ -14,15 +14,11 @@ export default function ThreadView({
     postId,
     onBack,
     username,
-    likedSet,
-    toggleLike,
     onOpenProfile,
 }: {
     postId: number;
     onBack: () => void;
     username: string;
-    likedSet: Set<number>;
-    toggleLike: (id: number) => void;
     onOpenProfile: (username: string) => void;
 }) {
     const [thread, setThread] = useState<Post | null>(null);
@@ -31,6 +27,7 @@ export default function ThreadView({
     const [sending, setSending] = useState(false);
     const repliesEndRef = useRef<HTMLDivElement>(null);
     const [entering, setEntering] = useState(true);
+    const [likingId, setLikingId] = useState<number | null>(null);
 
     useEffect(() => {
         requestAnimationFrame(() => setEntering(false));
@@ -60,6 +57,7 @@ export default function ThreadView({
             user_id: 0,
             parent_id: postId,
             likes: 0,
+            liked: false,
             reply_count: 0,
             created_at: new Date().toISOString(),
             replies: [],
@@ -94,6 +92,87 @@ export default function ThreadView({
         setSending(false);
     }, [replyText, sending, postId, username]);
 
+    const handleLike = useCallback(async (targetId: number) => {
+        if (!thread || likingId === targetId) return;
+
+        let isLiked = false;
+        let currentLikes = 0;
+
+        if (targetId === thread.id) {
+            isLiked = thread.liked;
+            currentLikes = thread.likes;
+        } else {
+            const reply = thread.replies.find(r => r.id === targetId);
+            if (!reply) return;
+            isLiked = reply.liked;
+            currentLikes = reply.likes;
+        }
+
+        const delta = isLiked ? -1 : 1;
+
+        // Optimistic update
+        setThread(prev => {
+            if (!prev) return prev;
+            if (prev.id === targetId) {
+                return { ...prev, likes: Math.max(0, currentLikes + delta), liked: !isLiked };
+            }
+            return {
+                ...prev,
+                replies: prev.replies.map(r =>
+                    r.id === targetId ? { ...r, likes: Math.max(0, currentLikes + delta), liked: !isLiked } : r
+                )
+            };
+        });
+
+        setLikingId(targetId);
+
+        try {
+            const result = isLiked ? await unlikePost(targetId) : await likePost(targetId);
+            if (result) {
+                setThread(prev => {
+                    if (!prev) return prev;
+                    if (prev.id === targetId) {
+                        return { ...prev, likes: result.likes };
+                    }
+                    return {
+                        ...prev,
+                        replies: prev.replies.map(r => r.id === targetId ? { ...r, likes: result.likes } : r)
+                    };
+                });
+            } else {
+                // Revert
+                setThread(prev => {
+                    if (!prev) return prev;
+                    if (prev.id === targetId) {
+                        return { ...prev, likes: Math.max(0, currentLikes), liked: isLiked };
+                    }
+                    return {
+                        ...prev,
+                        replies: prev.replies.map(r =>
+                            r.id === targetId ? { ...r, likes: Math.max(0, currentLikes), liked: isLiked } : r
+                        )
+                    };
+                });
+            }
+        } catch {
+            // Revert
+            setThread(prev => {
+                if (!prev) return prev;
+                if (prev.id === targetId) {
+                    return { ...prev, likes: Math.max(0, currentLikes), liked: isLiked };
+                }
+                return {
+                    ...prev,
+                    replies: prev.replies.map(r =>
+                        r.id === targetId ? { ...r, likes: Math.max(0, currentLikes), liked: isLiked } : r
+                    )
+                };
+            });
+        } finally {
+            setLikingId(null);
+        }
+    }, [thread, likingId]);
+
     if (loading) {
         return (
             <div className={`${s.viewTransition} ${entering ? s.viewEntering : ''}`}>
@@ -127,7 +206,7 @@ export default function ThreadView({
         );
     }
 
-    const liked = likedSet.has(thread.id);
+    // const liked = likedSet.has(thread.id); // removed
 
     return (
         <div className={`${s.viewTransition} ${entering ? s.viewEntering : ''}`}>
@@ -153,19 +232,20 @@ export default function ThreadView({
                 <div className={s.threadBody}>{thread.texto}</div>
                 <div className={s.postActions}>
                     <button
-                        className={`${s.actionBtn} ${liked ? s.actionBtnLiked : ''}`}
-                        onClick={() => toggleLike(thread.id)}
-                        title={liked ? 'Remover curtida' : 'Curtir'}
+                        className={`${s.actionBtn} ${thread.liked ? s.actionBtnLiked : ''}`}
+                        onClick={() => handleLike(thread.id)}
+                        disabled={likingId === thread.id}
+                        title={thread.liked ? 'Descurtir' : 'Curtir'}
                     >
                         <img
                             src="/icons-95/world_star.ico"
                             alt=""
-                            className={liked ? s.actionIcoLiked : s.actionIco}
+                            className={thread.liked ? s.actionIcoLiked : s.actionIco}
                         />
                         <span>{thread.likes || 0}</span>
                     </button>
                     <span className={s.actionBtn}>
-                        <img src="/icons-95/message_empty_tack.ico" alt="" className={s.actionIco} />
+                        <img src="/icons-95/message_envelope_open.ico" alt="" className={s.actionIco} />
                         <span>{thread.reply_count ?? thread.replies?.length ?? 0} respostas</span>
                     </span>
                 </div>
@@ -204,15 +284,15 @@ export default function ThreadView({
                                 <div className={s.replyBody}>{r.texto}</div>
                                 <div className={s.postActions}>
                                     <button
-                                        className={`${s.actionBtn} ${likedSet.has(r.id) ? s.actionBtnLiked : ''}`}
-                                        onClick={() => toggleLike(r.id)}
-                                        disabled={isOptimistic}
-                                        title={likedSet.has(r.id) ? 'Remover curtida' : 'Curtir'}
+                                        className={`${s.actionBtn} ${r.liked ? s.actionBtnLiked : ''}`}
+                                        onClick={() => handleLike(r.id)}
+                                        disabled={isOptimistic || likingId === r.id}
+                                        title={r.liked ? 'Descurtir' : 'Curtir'}
                                     >
                                         <img
                                             src="/icons-95/world_star.ico"
                                             alt=""
-                                            className={likedSet.has(r.id) ? s.actionIcoLiked : s.actionIco}
+                                            className={r.liked ? s.actionIcoLiked : s.actionIco}
                                         />
                                         <span>{r.likes || 0}</span>
                                     </button>
@@ -221,8 +301,8 @@ export default function ThreadView({
                         );
                     })
                 ) : (
-                    <div className={s.emptyState} style={{ height: 'auto', padding: 24 }}>
-                        <span className={s.emptySubtitle}>Nenhuma resposta ainda. Seja o primeiro!</span>
+                    <div className={s.emptyState}>
+                        <span>ALGUÉM POR FAVOR COMENTE ALGUMA COISA!</span>
                     </div>
                 )}
                 <div ref={repliesEndRef} />

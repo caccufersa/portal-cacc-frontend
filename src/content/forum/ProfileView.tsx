@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, memo } from 'react';
 import type { Post, UserProfile } from './types';
-import { fetchProfile } from './api';
+import { fetchProfile, likePost, unlikePost } from './api';
 import { avatarLetter } from './helpers';
 import PostRow from './PostRow';
 import { FeedSkeleton } from './Skeletons';
@@ -12,19 +12,16 @@ const ProfileView = memo(function ProfileView({
     username,
     onBack,
     onOpenThread,
-    likedSet,
-    onLike,
 }: {
     username: string;
     onBack: () => void;
     onOpenThread: (id: number) => void;
-    likedSet: Set<number>;
-    onLike: (id: number) => void;
 }) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState<'posts' | 'likes'>('posts');
     const [entering, setEntering] = useState(true);
+    const [likingId, setLikingId] = useState<number | null>(null);
 
     useEffect(() => {
         requestAnimationFrame(() => setEntering(false));
@@ -40,6 +37,42 @@ const ProfileView = memo(function ProfileView({
         });
         return () => { cancelled = true; };
     }, [username]);
+
+    const handleLike = React.useCallback(async (postId: number) => {
+        if (!profile || likingId === postId) return;
+
+        const postIndex = profile.posts.findIndex(p => p.id === postId);
+        if (postIndex === -1) return;
+
+        const post = profile.posts[postIndex];
+        const isLiked = post.liked;
+
+        setLikingId(postId);
+
+        try {
+            const result = isLiked ? await unlikePost(postId) : await likePost(postId);
+            if (result) {
+                setProfile(prev => {
+                    if (!prev) return prev;
+                    const newPosts = [...prev.posts];
+                    const idx = newPosts.findIndex(p => p.id === postId);
+                    if (idx !== -1) {
+                        // Only update on success
+                        newPosts[idx] = { ...newPosts[idx], likes: result.likes, liked: !isLiked };
+                    }
+                    // Update total likes? Ideally server returns this or we recalculate, but simple toggle is okay
+                    // However result only gives post likes. 
+                    // Let's assume total_likes change matches delta for now until full profile refresh
+                    const delta = isLiked ? -1 : 1;
+                    return { ...prev, posts: newPosts, total_likes: prev.total_likes + delta };
+                });
+            }
+        } catch (err) {
+            console.error("Like failed", err);
+        } finally {
+            setLikingId(null);
+        }
+    }, [profile, likingId]);
 
     if (loading) {
         return (
@@ -127,9 +160,9 @@ const ProfileView = memo(function ProfileView({
                                 key={p.id}
                                 post={p}
                                 onOpenThread={onOpenThread}
-                                onLike={onLike}
-                                onOpenProfile={() => {}}
-                                liked={likedSet.has(p.id)}
+                                onLike={handleLike}
+                                onOpenProfile={() => { }}
+                                liked={p.liked}
                             />
                         ))
                     )

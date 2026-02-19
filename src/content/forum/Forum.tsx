@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import ConfirmDialog from './ConfirmDialog';
 import type { Post, View } from './types';
 import { MAX_CHARS } from './types';
 import { fetchPosts, createPost, likePost, unlikePost, deletePost, patchPostLikes } from './api';
@@ -24,20 +25,15 @@ const Forum: React.FC = () => {
     const [posting, setPosting] = useState(false);
     const [view, setView] = useState<View>({ type: 'feed' });
     const [newPostIds, setNewPostIds] = useState<Set<number>>(new Set());
-    const [likedSet, setLikedSet] = useState<Set<number>>(() => {
-        if (typeof window === 'undefined') return new Set();
-        try {
-            const stored = localStorage.getItem('cacc-forum-likes');
-            if (stored) return new Set(JSON.parse(stored));
-        } catch { /* ignore */ }
-        return new Set();
-    });
-    const likingRef = useRef<Set<number>>(new Set());
+    const [likingId, setLikingId] = useState<number | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+    }>({ isOpen: false, title: '', message: '', onConfirm: () => { } });
     const feedRef = useRef<HTMLDivElement>(null);
-
-    const persistLikes = useCallback((set: Set<number>) => {
-        localStorage.setItem('cacc-forum-likes', JSON.stringify([...set]));
-    }, []);
 
     const onWsNewPost = useCallback((post: Post) => {
         setPosts(prev => {
@@ -134,6 +130,7 @@ const Forum: React.FC = () => {
             user_id: 0,
             parent_id: null,
             likes: 0,
+            liked: false,
             reply_count: 0,
             created_at: new Date().toISOString(),
             replies: [],
@@ -176,56 +173,67 @@ const Forum: React.FC = () => {
 
     const toggleLike = useCallback(async (postId: number) => {
         if (!user) return;
-        if (likingRef.current.has(postId)) return;
-        likingRef.current.add(postId);
+        if (likingId === postId) return;
 
-        const liked = likedSet.has(postId);
-        const delta = liked ? -1 : 1;
+        // Find post to get current state
+        const currentPost = posts.find(p => p.id === postId);
+        if (!currentPost) return;
 
-        setLikedSet(prev => {
-            const next = new Set(prev);
-            if (liked) next.delete(postId); else next.add(postId);
-            persistLikes(next);
-            return next;
+        const isLiked = currentPost.liked;
+        // Comment out optimistic update
+        /*
+        const delta = isLiked ? -1 : 1;
+        setPosts(prev => ...);
+        */
+
+        setLikingId(postId);
+
+        try {
+            const result = isLiked ? await unlikePost(postId) : await likePost(postId);
+
+            // Update only after server confirms
+            if (result) {
+                setPosts(prev =>
+                    prev.map(p => p.id === postId ? {
+                        ...p,
+                        likes: result.likes,
+                        liked: !isLiked // ensure we toggle locally based on success
+                    } : p)
+                );
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLikingId(null);
+        }
+    }, [user, posts, likingId]);
+
+    const handleDelete = useCallback((postId: number) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Excluir Post',
+            message: 'Tem certeza que deseja excluir este post permanentemente?',
+            onConfirm: async () => {
+                const result = await deletePost(postId);
+                if (result) {
+                    setPosts(prev => prev.filter(p => p.id !== postId));
+                }
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            }
         });
-        setPosts(prev =>
-            prev.map(p => p.id === postId ? { ...p, likes: Math.max(0, p.likes + delta) } : p),
-        );
-        patchPostLikes(postId, delta);
-
-        const result = liked ? await unlikePost(postId) : await likePost(postId);
-        if (!result) {
-            setLikedSet(prev => {
-                const rb = new Set(prev);
-                if (liked) rb.add(postId); else rb.delete(postId);
-                persistLikes(rb);
-                return rb;
-            });
-            setPosts(prev =>
-                prev.map(p => p.id === postId ? { ...p, likes: Math.max(0, p.likes - delta) } : p),
-            );
-            patchPostLikes(postId, -delta);
-        }
-
-        likingRef.current.delete(postId);
-    }, [user, likedSet, persistLikes]);
-
-    const handleDelete = useCallback(async (postId: number) => {
-        const result = await deletePost(postId);
-        if (result) {
-            setPosts(prev => prev.filter(p => p.id !== postId));
-        }
     }, []);
 
-    const navigateFeed = useCallback(() => setView({ type: 'feed' }), []);
-    const navigateThread = useCallback((id: number) => setView({ type: 'thread', id }), []);
-    const navigateProfile = useCallback((username: string) => setView({ type: 'profile', username }), []);
-
-    const addressText = useMemo(() => {
-        if (view.type === 'thread') return `cacc://social/thread/${view.id}`;
-        if (view.type === 'profile') return `cacc://social/user/${view.username}`;
-        return 'cacc://social/feed';
-    }, [view]);
+    const handleLogout = useCallback(() => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Sair do Sistema',
+            message: 'Tem certeza que deseja sair do Social CACC?',
+            onConfirm: () => {
+                logout();
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            }
+        });
+    }, [logout]);
 
     const refreshFeed = useCallback(() => {
         invalidate('feed:*');
@@ -236,9 +244,31 @@ const Forum: React.FC = () => {
         });
     }, []);
 
-    /* ------------------------------------------------------------------ */
-    /*  Render                                                             */
-    /* ------------------------------------------------------------------ */
+    const navigateFeed = useCallback(() => {
+        setView({ type: 'feed' });
+        refreshFeed();
+    }, [refreshFeed]);
+    const navigateThread = useCallback((id: number) => setView({ type: 'thread', id }), []);
+    const navigateProfile = useCallback((username: string) => setView({ type: 'profile', username }), []);
+
+    const filteredPosts = useMemo(() => {
+        if (!searchQuery) return posts;
+        const lowerQ = searchQuery.toLowerCase();
+        return posts.filter(p =>
+            p.texto.toLowerCase().includes(lowerQ) ||
+            p.author.toLowerCase().includes(lowerQ)
+        );
+    }, [posts, searchQuery]);
+
+    // addressText logic removed or kept if needed for other views? 
+    // User requested to remove address bar and add search.
+    // I will keep addressText calculation but not display it in JSX below.
+
+    const addressText = useMemo(() => {
+        if (view.type === 'thread') return `cacc://social/thread/${view.id}`;
+        if (view.type === 'profile') return `cacc://social/user/${view.username}`;
+        return 'cacc://social/feed';
+    }, [view]);
 
     if (authLoading) return <FullLoading text="Verificando credenciais..." />;
     if (!user) return (
@@ -255,10 +285,16 @@ const Forum: React.FC = () => {
 
     return (
         <div className={s.container}>
-            {/* Toolbar */}
+            <ConfirmDialog
+                isOpen={confirmModal.isOpen}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+            />
             <div className={s.toolbar}>
                 <button className={s.toolbarBtn} onClick={refreshFeed} title="Atualizar feed">
-                    <img src="/icons-95/overlay_refresh.ico" alt="" className={s.toolbarIco} />
+                    <img src="/icons-95/directory_open_refresh.ico" alt="" className={s.toolbarIco} />
                     Atualizar
                 </button>
                 <div className={s.toolbarSep} />
@@ -287,40 +323,45 @@ const Forum: React.FC = () => {
                     <div className={s.toolbarUserAvatar}>{user.username[0].toUpperCase()}</div>
                     <span>{user.username}</span>
                     <div className={`${s.wsIndicator} ${wsConnected ? s.wsOn : s.wsOff}`} title={wsConnected ? 'Conectado' : 'Reconectando...'} />
-                    <button className={s.toolbarBtnSmall} onClick={logout}>
+                    <button className={s.toolbarBtnSmall} onClick={handleLogout}>
                         Sair
                     </button>
                 </div>
             </div>
 
-            {/* Address bar */}
-            <div className={s.addressBar}>
-                <span className={s.addressLabel}>Endereco:</span>
-                <div className={s.addressInput}>{addressText}</div>
-            </div>
+            {view.type === 'feed' ? (
+                <div className={s.searchBar}>
+                    <img src="/icons-95/search_file.ico" alt="" className={s.actionIco} style={{ width: 16, height: 16 }} />
+                    <input
+                        className={s.searchInput}
+                        placeholder="Pesquisar posts por texto ou autor..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+            ) : (
+                <div className={s.addressBar}>
+                    <span className={s.addressLabel}>Endereco:</span>
+                    <div className={s.addressInput}>{addressText}</div>
+                </div>
+            )}
 
-            {/* Content */}
             <div className={s.feed} ref={feedRef}>
                 {view.type === 'profile' ? (
                     <ProfileView
                         username={view.username}
                         onBack={navigateFeed}
                         onOpenThread={navigateThread}
-                        likedSet={likedSet}
-                        onLike={toggleLike}
                     />
                 ) : view.type === 'thread' ? (
                     <ThreadView
                         postId={view.id}
                         onBack={navigateFeed}
                         username={user.username}
-                        likedSet={likedSet}
-                        toggleLike={toggleLike}
                         onOpenProfile={navigateProfile}
                     />
                 ) : (
                     <>
-                        {/* Compose */}
                         <div className={s.composeBox}>
                             <div className={s.composeHeader}>
                                 <div className={s.composeAvatar}>{user.username[0].toUpperCase()}</div>
@@ -354,7 +395,6 @@ const Forum: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Feed */}
                         {!wsConnected && feedLoading ? (
                             <div className={s.connectingState}>
                                 <div className={s.connectingDots}>
@@ -374,26 +414,31 @@ const Forum: React.FC = () => {
                             </div>
                         ) : (
                             <div className={s.feedList}>
-                                {posts.map(p => (
+                                {filteredPosts.map(p => (
                                     <PostRow
                                         key={p.id}
                                         post={p}
                                         onOpenThread={navigateThread}
                                         onLike={toggleLike}
                                         onOpenProfile={navigateProfile}
+                                        isOptimistic={likingId === p.id}
                                         onDelete={handleDelete}
-                                        liked={likedSet.has(p.id)}
+                                        liked={p.liked}
                                         isNew={newPostIds.has(p.id)}
                                         isOwner={user.username === p.author}
                                     />
                                 ))}
+                                {filteredPosts.length === 0 && searchQuery && (
+                                    <div style={{ padding: 20, textAlign: 'center', color: '#666', fontStyle: 'italic' }}>
+                                        Nenhum resultado para "{searchQuery}"
+                                    </div>
+                                )}
                             </div>
                         )}
                     </>
                 )}
             </div>
 
-            {/* Status bar */}
             <div className={s.statusbar}>
                 <div className={s.statusSection}>
                     {feedLoading ? 'Carregando...' : `${posts.length} posts`}
@@ -410,7 +455,7 @@ const Forum: React.FC = () => {
                     {wsConnected ? 'Online' : 'Reconectando'}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

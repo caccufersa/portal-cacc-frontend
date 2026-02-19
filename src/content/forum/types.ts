@@ -5,6 +5,7 @@ export interface Post {
     user_id: number;
     parent_id?: number | null;
     likes: number;
+    liked: boolean; // [NOVO]
     reply_count: number;
     created_at: string;
     replies: Post[];

@@ -12,6 +12,7 @@ export async function GET() {
     const result = await cloudinary.search
       .expression('folder:cacc-galeria')
       .sort_by('created_at', 'desc')
+      .with_field('context')
       .max_results(100)
       .execute();
 
@@ -21,6 +22,8 @@ export async function GET() {
       createdAt: resource.created_at,
       width: resource.width,
       height: resource.height,
+      user: resource.context?.custom?.user || 'Anônimo',
+      album: resource.context?.custom?.album || 'Geral',
     }));
 
     return NextResponse.json({ images });

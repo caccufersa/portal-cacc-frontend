@@ -18,6 +18,7 @@ import Sugest from '@/content/Sugest';
 import BalanceContent from '@/content/Balance';
 import Forum from '@/content/forum/Forum';
 import News from '@/content/news/News';
+import BusContent from '@/content/Bus';
 
 const windowContents: Record<string, React.ReactNode> = {
     about: <AboutContent />,
@@ -32,6 +33,7 @@ const windowContents: Record<string, React.ReactNode> = {
     balance: <BalanceContent />,
     forum: <Forum />,
     news: <News />,
+    bus: <BusContent />,
 };
 
 interface SelectionBox {

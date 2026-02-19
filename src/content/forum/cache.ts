@@ -28,7 +28,6 @@ export function invalidate(key?: string): void {
         store.clear();
         return;
     }
-    // Support wildcard invalidation: "feed:*" clears all feed keys
     if (key.endsWith(':*')) {
         const prefix = key.slice(0, -1);
         for (const k of store.keys()) {
