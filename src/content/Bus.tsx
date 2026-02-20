@@ -256,6 +256,20 @@ export default function BusContent() {
         return grid;
     };
 
+    if (!user) {
+        return (
+            <div className={styles.container}>
+                <div className={styles.emptyState}>
+                    <div className={styles.emptyIcon}>
+                        <img src="/icons-95/key_padlock.ico" alt="" className={styles.emptyIco} />
+                    </div>
+                    <span className={styles.emptyTitle}>Faça login para acessar o Turismo CACC</span>
+                    <span className={styles.emptySubtitle}>Clique no ícone de perfil na barra de tarefas para entrar.</span>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={styles.container}>
             {confirmModal.open && (

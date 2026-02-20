@@ -160,6 +160,16 @@ export default function GaleriaContent() {
         );
     }
 
+    if (!user) {
+        return (
+            <div className={styles.content} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
+                <img src="/icons-95/key_padlock.ico" alt="" style={{ width: 64, height: 64, marginBottom: 12, imageRendering: 'pixelated', opacity: 0.8 }} />
+                <h2 style={{ color: '#000080', fontSize: '16px', margin: '0 0 8px 0' }}>Faça login para acessar a Galeria</h2>
+                <p style={{ color: '#606060', fontSize: '13px', margin: 0 }}>Clique no ícone de perfil na barra de tarefas para entrar.</p>
+            </div>
+        );
+    }
+
     return (
         <div className={styles.content}>
             <div style={{ marginBottom: '20px' }}>

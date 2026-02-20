@@ -51,6 +51,7 @@ const initialWindows: WindowState[] = [
   { id: 'sugest', title: 'Sugestões', icon: 'icons-95/message_tack.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 300, y: 150 }, size: { width: 550, height: 500 } },
   { id: 'bus', title: 'Reserva de Passagens', icon: 'icons-95/world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 350, y: 180 }, size: { width: 800, height: 600 } },
   { id: 'calouroGuide', title: 'Guia do Calouro', icon: 'icons-95/user_world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 600, y: 250 }, size: { width: 700, height: 500 } },
+  { id: 'map', title: 'Mapa UFERSA', icon: 'icons-95/globe_map.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 250, y: 150 }, size: { width: 750, height: 550 } },
 ];
 
 const getInitialIconPositions = (): IconPosition[] => {
@@ -67,6 +68,7 @@ const getInitialIconPositions = (): IconPosition[] => {
       { id: 'balance', position: { x: 20, y: 740 } },
       { id: 'sugest', position: { x: 20, y: 830 } },
       { id: 'bus', position: { x: 20, y: 920 } },
+      { id: 'map', position: { x: 20, y: 1010 } },
       { id: 'calouroGuide', position: { x: 400, y: 300 } },
     ];
   }
@@ -96,6 +98,7 @@ const getInitialIconPositions = (): IconPosition[] => {
       { id: 'balance', position: { x: rightColumn, y: 20 + iconSpacing } },
       { id: 'sugest', position: { x: rightColumn, y: 20 + iconSpacing * 2 } },
       { id: 'bus', position: { x: rightColumn, y: 20 + iconSpacing * 3 } },
+      { id: 'map', position: { x: rightColumn, y: 20 + iconSpacing * 4 } },
       { id: 'calouroGuide', position: { x: centerX, y: centerY } },
     ];
   }
@@ -113,6 +116,7 @@ const getInitialIconPositions = (): IconPosition[] => {
     { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 8 } },
     { id: 'sugest', position: { x: leftColumn, y: 20 + iconSpacing * 9 } },
     { id: 'bus', position: { x: leftColumn, y: 20 + iconSpacing * 10 } },
+    { id: 'map', position: { x: leftColumn, y: 20 + iconSpacing * 11 } },
     { id: 'calouroGuide', position: { x: centerX, y: centerY } },
   ];
 };

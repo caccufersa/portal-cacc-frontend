@@ -288,8 +288,20 @@ const Sugest: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchSuggestions();
-    }, [fetchSuggestions]);
+        if (accessToken) {
+            fetchSuggestions();
+        }
+    }, [fetchSuggestions, accessToken]);
+
+    if (!accessToken) {
+        return (
+            <div style={{ ...styles.container, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                <img src="/icons-95/key_padlock.ico" alt="" style={{ width: 64, height: 64, marginBottom: 12, imageRendering: 'pixelated', opacity: 0.8 }} />
+                <h2 style={{ color: '#000080', fontSize: '16px', margin: '0 0 8px 0', fontFamily: 'initial' }}>Faça login para acessar a Ouvidoria</h2>
+                <p style={{ color: '#606060', fontSize: '13px', margin: 0 }}>Clique no ícone de perfil na barra de tarefas para entrar.</p>
+            </div>
+        );
+    }
 
     return (
         <div style={styles.container}>

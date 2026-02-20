@@ -14,6 +14,7 @@ export interface AuthUser {
     id: number;
     uuid: string;
     username: string;
+    avatar_url?: string;
     created_at: string;
 }
 
@@ -32,6 +33,7 @@ interface AuthContextType {
     logout: () => void;
     clearError: () => void;
     apiCall: <T = unknown>(url: string, options?: RequestInit) => Promise<T>;
+    updateAuthUser: (updates: Partial<AuthUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -111,6 +113,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAccessToken(null);
         setUser(null);
         clearStorage();
+    }, []);
+
+    const updateAuthUser = useCallback((updates: Partial<AuthUser>) => {
+        setUser((prev) => {
+            if (!prev) return null;
+            const updated = { ...prev, ...updates };
+            saveUser(updated);
+            return updated;
+        });
     }, []);
 
     const refreshAccessToken = useCallback(async (): Promise<string | null> => {
@@ -460,6 +471,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             logout,
             clearError,
             apiCall,
+            updateAuthUser,
         }}>
             {children}
         </AuthContext.Provider>

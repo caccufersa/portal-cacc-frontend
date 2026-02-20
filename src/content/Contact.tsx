@@ -1,16 +1,15 @@
 import styles from './Content.module.css';
 
 const socialLinks = [
-    { icon: '📸', name: 'Instagram', url: 'https://instagram.com/cacc.ufersa' },
-    { icon: '💬', name: 'WhatsApp', url: 'https://wa.me/5584992152351' },
-    { icon: '📧', name: 'E-mail', url: 'mailto:caccufersa@gmail.com' },
-    { icon: '🐙', name: 'GitHub', url: 'https://github.com/caccufersa' }
+    { icon: '📸', name: 'Instagram', url: 'https://instagram.com/cacc.ufersa', iconFile: 'camera.ico' },
+    { icon: '💬', name: 'WhatsApp', url: 'https://wa.me/5584992152351', iconFile: 'telephony.ico' },
+    { icon: '📧', name: 'E-mail', url: 'mailto:caccufersa@gmail.com', iconFile: 'envelope_closed.ico' },
+    { icon: '🐙', name: 'GitHub', url: 'https://github.com/caccufersa', iconFile: 'connected_world.ico' }
 ];
 
 export default function ContactContent() {
     return (
         <div className={styles.content}>
-            <img src="icons-95/phone_desk.ico" alt="Contato" className={styles.contentIcon} />
             <p>
                 Entre em contato conosco! Estamos sempre disponíveis para ajudar
                 os estudantes e ouvir sugestões.
@@ -26,7 +25,7 @@ export default function ContactContent() {
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        <img src={`icons-95/${link.name.toLowerCase()}.ico`} alt={link.name} className={styles.contentIcon} />
+                        <img src={`icons-95/${link.iconFile}`} alt={link.name} className={styles.contentIcon} />
                         <span>{link.name}</span>
                     </a>
                 ))}
@@ -50,7 +49,8 @@ export default function ContactContent() {
             <h2>Coordenação do Curso</h2>
             <p>
                 Para assuntos acadêmicos oficiais, procure a coordenação:<br />
-                <strong>E-mail:</strong> [EMAIL_ADDRESS]<br />
+                Fale com Danielle (COORDENADORA)
+                <strong>E-mail:</strong> <a href="mailto:[EMAIL_ADDRESS]"></a> <br />
                 <strong>Telefone:</strong> (84) 3317-8200
             </p>
         </div>
