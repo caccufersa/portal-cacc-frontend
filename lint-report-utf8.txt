@@ -1,0 +1,94 @@
+﻿
+> cacc-portal-frontend@0.0.1 lint
+> eslint
+
+
+C:\DEV\portal-cacc-frontend\src\app\api\avatar\upload\route.ts
+  54:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\DEV\portal-cacc-frontend\src\app\api\galeria\list\route.ts
+  19:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\DEV\portal-cacc-frontend\src\components\Dialog\Dialog.tsx
+  5:8  warning  'Image' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\DEV\portal-cacc-frontend\src\components\Taskbar\Taskbar.tsx
+  97:11  warning  'wsIcon' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\DEV\portal-cacc-frontend\src\components\TutorialPopup\TutorialPopup.tsx
+  13:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\DEV\portal-cacc-frontend\src\components\TutorialPopup\TutorialPopup.tsx:13:9
+  11 |
+  12 |     useEffect(() => {
+> 13 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  14 |         const isDismissed = localStorage.getItem('cacc-tutorial-login-dismissed');
+  15 |         if (isDismissed) {
+  16 |             setHidden(true);  react-hooks/set-state-in-effect
+
+C:\DEV\portal-cacc-frontend\src\components\WelcomePopup\WelcomePopup.tsx
+  29:8  warning  React Hook useEffect has a missing dependency: 'handleClose'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\DEV\portal-cacc-frontend\src\content\Bus.tsx
+  48:10  warning  'BusSeat' is defined but never used        @typescript-eslint/no-unused-vars
+  48:19  warning  'MyReservation' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\DEV\portal-cacc-frontend\src\content\Help.tsx
+  52:52  warning  'index' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  54:67  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\DEV\portal-cacc-frontend\src\content\Help.tsx:54:67
+  52 |     const handleTouchStart = (e: React.TouchEvent, index: number) => {
+  53 |         const touch = e.touches[0];
+> 54 |         setTouchStart({ x: touch.clientX, y: touch.clientY, time: Date.now() });
+     |                                                                   ^^^^^^^^^^ Cannot call impure function
+  55 |     };
+  56 |
+  57 |     const handleTouchMove = (e: React.TouchEvent, index: number) => {  react-hooks/purity
+  76:29  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\DEV\portal-cacc-frontend\src\content\Help.tsx:76:29
+  74 |         const deltaX = touch.clientX - touchStart.x;
+  75 |         const deltaY = touch.clientY - touchStart.y;
+> 76 |         const currentTime = Date.now();
+     |                             ^^^^^^^^^^ Cannot call impure function
+  77 |         const deltaTime = currentTime - touchStart.time;
+  78 |
+  79 |         const isQuickSwipe = deltaTime < 300 && Math.abs(deltaX) > 30;                               react-hooks/purity
+
+C:\DEV\portal-cacc-frontend\src\content\Map.tsx
+   3:17  warning  'useEffect' is defined but never used              @typescript-eslint/no-unused-vars
+   9:7   warning  'MapContainer' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  13:7   warning  'TileLayer' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  17:7   warning  'Polygon' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  21:7   warning  'Marker' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  25:7   warning  'Popup' is assigned a value but never used         @typescript-eslint/no-unused-vars
+
+C:\DEV\portal-cacc-frontend\src\content\forum\Forum.tsx
+    8:68  warning  'patchPostLikes' is defined but never used                       @typescript-eslint/no-unused-vars
+  433:63  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  433:77  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\DEV\portal-cacc-frontend\src\context\AuthContext.tsx
+   74:14  warning  '_e' is defined but never used         @typescript-eslint/no-unused-vars
+  224:22  warning  '_e' is defined but never used         @typescript-eslint/no-unused-vars
+  339:26  warning  '_parseErr' is defined but never used  @typescript-eslint/no-unused-vars
+  402:26  warning  '_parseErr' is defined but never used  @typescript-eslint/no-unused-vars
+  457:22  warning  '_e' is defined but never used         @typescript-eslint/no-unused-vars
+
+C:\DEV\portal-cacc-frontend\src\context\WindowsContext.tsx
+  133:10  warning  'highestZIndex' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 26 problems (7 errors, 19 warnings)
+

@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import ConfirmDialog from './ConfirmDialog';
 import type { Post, View } from './types';
 import { MAX_CHARS } from './types';
-import { fetchPosts, createPost, likePost, unlikePost, deletePost, patchPostLikes } from './api';
+import { useForumApi } from './api';
 import { invalidate, setCache } from './cache';
 import { useForumSocket } from './useForumSocket';
 import PostRow from './PostRow';
@@ -18,6 +18,7 @@ let optimisticPostId = -1000;
 
 const Forum: React.FC = () => {
     const { user, isLoading: authLoading, logout } = useAuth();
+    const { fetchPosts, createPost, likePost, unlikePost, deletePost, createRepost } = useForumApi();
 
     const [posts, setPosts] = useState<Post[]>([]);
     const [feedLoading, setFeedLoading] = useState(true);
@@ -78,6 +79,23 @@ const Forum: React.FC = () => {
         invalidate(`thread:${parentId}`);
     }, []);
 
+    // new_reply: same as new_comment but comes from backend's "new_reply" broadcast
+    // Update reply_count on the parent post in the feed and bust thread cache
+    const onWsNewReply = useCallback((parentId: number, reply: Post) => {
+        setPosts(prev => {
+            const next = prev.map(p => {
+                if (p.id !== parentId) return p;
+                const replies = p.replies || [];
+                if (replies.some(r => r.id === reply.id)) return p;
+                return { ...p, reply_count: p.reply_count + 1, replies: [...replies, reply] };
+            });
+            setCache('feed:30:0', next);
+            return next;
+        });
+        // Bust thread cache so ThreadView fetches fresh data when opened
+        invalidate(`thread:${parentId}`);
+    }, []);
+
     const onWsPostDeleted = useCallback((postId: number) => {
         setPosts(prev => {
             const next = prev.filter(p => p.id !== postId);
@@ -94,8 +112,10 @@ const Forum: React.FC = () => {
         onNewPost: onWsNewPost,
         onLikeUpdate: onWsLikeUpdate,
         onNewComment: onWsNewComment,
+        onNewReply: onWsNewReply,
         onPostDeleted: onWsPostDeleted,
     });
+
 
     useEffect(() => {
         if (!user) return;
@@ -114,7 +134,7 @@ const Forum: React.FC = () => {
         const iv = setInterval(() => { if (active) run(); }, interval);
 
         return () => { active = false; clearInterval(iv); };
-    }, [user, wsConnected]);
+    }, [user, wsConnected, fetchPosts]);
 
     const handlePost = useCallback(async () => {
         if (!composeText.trim() || posting || !user) return;
@@ -127,8 +147,10 @@ const Forum: React.FC = () => {
             id: tempId,
             texto: text,
             author: user.username,
+            author_name: user.display_name || user.username,
             user_id: 0,
             parent_id: null,
+            repost_id: undefined,
             likes: 0,
             liked: false,
             reply_count: 0,
@@ -169,44 +191,58 @@ const Forum: React.FC = () => {
         }
 
         setPosting(false);
-    }, [composeText, posting, user]);
+    }, [composeText, posting, user, createPost]);
 
-    const toggleLike = useCallback(async (postId: number) => {
-        if (!user) return;
-        if (likingId === postId) return;
+    const handleLike = useCallback(async (targetId: number) => {
+        if (likingId === targetId) return;
 
-        // Find post to get current state
-        const currentPost = posts.find(p => p.id === postId);
-        if (!currentPost) return;
+        const post = posts.find(p => p.id === targetId);
+        if (!post) return;
 
-        const isLiked = currentPost.liked;
-        // Comment out optimistic update
-        /*
+        const isLiked = post.liked;
+        const currentLikes = post.likes;
         const delta = isLiked ? -1 : 1;
-        setPosts(prev => ...);
-        */
 
-        setLikingId(postId);
+        // Optimistic update
+        setPosts(prev =>
+            prev.map(p =>
+                p.id === targetId
+                    ? { ...p, likes: Math.max(0, currentLikes + delta), liked: !isLiked }
+                    : p
+            )
+        );
+
+        setLikingId(targetId);
 
         try {
-            const result = isLiked ? await unlikePost(postId) : await likePost(postId);
-
-            // Update only after server confirms
+            const result = isLiked ? await unlikePost(targetId) : await likePost(targetId);
             if (result) {
                 setPosts(prev =>
-                    prev.map(p => p.id === postId ? {
-                        ...p,
-                        likes: result.likes,
-                        liked: !isLiked // ensure we toggle locally based on success
-                    } : p)
+                    prev.map(p => p.id === targetId ? { ...p, likes: result.likes } : p)
+                );
+            } else {
+                // Revert
+                setPosts(prev =>
+                    prev.map(p =>
+                        p.id === targetId
+                            ? { ...p, likes: currentLikes, liked: isLiked }
+                            : p
+                    )
                 );
             }
-        } catch (err) {
-            console.error(err);
+        } catch {
+            // Revert
+            setPosts(prev =>
+                prev.map(p =>
+                    p.id === targetId
+                        ? { ...p, likes: currentLikes, liked: isLiked }
+                        : p
+                )
+            );
         } finally {
             setLikingId(null);
         }
-    }, [user, posts, likingId]);
+    }, [posts, likingId, likePost, unlikePost]);
 
     const handleDelete = useCallback((postId: number) => {
         setConfirmModal({
@@ -221,7 +257,23 @@ const Forum: React.FC = () => {
                 setConfirmModal(prev => ({ ...prev, isOpen: false }));
             }
         });
-    }, []);
+    }, [deletePost]);
+
+    const handleRepost = useCallback((postId: number) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Repostar',
+            message: 'Deseja repostar este post no seu perfil?',
+            onConfirm: async () => {
+                const result = await createRepost(postId);
+                if (result) {
+                    setPosts(prev => [result, ...prev]);
+                    setNewPostIds(prev => new Set(prev).add(result.id));
+                }
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            }
+        });
+    }, [createRepost]);
 
     const handleLogout = useCallback(() => {
         setConfirmModal({
@@ -242,7 +294,7 @@ const Forum: React.FC = () => {
             setPosts(data);
             setFeedLoading(false);
         });
-    }, []);
+    }, [fetchPosts]);
 
     const navigateFeed = useCallback(() => {
         setView({ type: 'feed' });
@@ -320,7 +372,13 @@ const Forum: React.FC = () => {
                     Meu Perfil
                 </button>
                 <div className={s.toolbarUser}>
-                    <div className={s.toolbarUserAvatar}>{user.username[0].toUpperCase()}</div>
+                    <div className={s.toolbarUserAvatar}>
+                        {user.avatar_url ? (
+                            <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            user.username[0].toUpperCase()
+                        )}
+                    </div>
                     <span>{user.username}</span>
                     <div className={`${s.wsIndicator} ${wsConnected ? s.wsOn : s.wsOff}`} title={wsConnected ? 'Conectado' : 'Reconectando...'} />
                     <button className={s.toolbarBtnSmall} onClick={handleLogout}>
@@ -358,13 +416,20 @@ const Forum: React.FC = () => {
                         postId={view.id}
                         onBack={navigateFeed}
                         username={user.username}
+                        currentUserAvatar={user.avatar_url}
                         onOpenProfile={navigateProfile}
                     />
                 ) : (
                     <>
                         <div className={s.composeBox}>
                             <div className={s.composeHeader}>
-                                <div className={s.composeAvatar}>{user.username[0].toUpperCase()}</div>
+                                <div className={s.composeAvatar}>
+                                    {user.avatar_url ? (
+                                        <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        user.username[0].toUpperCase()
+                                    )}
+                                </div>
                                 <span className={s.composeLabel}>No que voce esta pensando?</span>
                             </div>
                             <textarea
@@ -419,10 +484,11 @@ const Forum: React.FC = () => {
                                         key={p.id}
                                         post={p}
                                         onOpenThread={navigateThread}
-                                        onLike={toggleLike}
+                                        onLike={handleLike}
                                         onOpenProfile={navigateProfile}
                                         isOptimistic={likingId === p.id}
                                         onDelete={handleDelete}
+                                        onRepost={handleRepost}
                                         liked={p.liked}
                                         isNew={newPostIds.has(p.id)}
                                         isOwner={user.username === p.author}
@@ -430,7 +496,7 @@ const Forum: React.FC = () => {
                                 ))}
                                 {filteredPosts.length === 0 && searchQuery && (
                                     <div style={{ padding: 20, textAlign: 'center', color: '#666', fontStyle: 'italic' }}>
-                                        Nenhum resultado para "{searchQuery}"
+                                        Nenhum resultado para &quot;{searchQuery}&quot;
                                     </div>
                                 )}
                             </div>

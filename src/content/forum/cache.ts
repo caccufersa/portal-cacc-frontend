@@ -6,6 +6,8 @@ interface CacheEntry<T> {
 const store = new Map<string, CacheEntry<unknown>>();
 
 const DEFAULT_TTL = 30_000;
+// Max entries to prevent unbounded memory growth over long sessions
+const MAX_ENTRIES = 100;
 
 export function getCached<T>(key: string, ttl = DEFAULT_TTL): T | null {
     const entry = store.get(key);
@@ -20,6 +22,11 @@ export function getStale<T>(key: string): T | null {
 }
 
 export function setCache<T>(key: string, data: T): void {
+    // Evict oldest entry if we're at capacity (LRU-lite: remove insertion-order first)
+    if (!store.has(key) && store.size >= MAX_ENTRIES) {
+        const oldestKey = store.keys().next().value;
+        if (oldestKey !== undefined) store.delete(oldestKey);
+    }
     store.set(key, { data, ts: Date.now() });
 }
 
@@ -37,5 +44,3 @@ export function invalidate(key?: string): void {
         store.delete(key);
     }
 }
-
-

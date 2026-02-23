@@ -20,6 +20,7 @@ import Forum from '@/content/forum/Forum';
 import News from '@/content/news/News';
 import BusContent from '@/content/Bus';
 import MapContent from '@/content/Map';
+import Lojinha from '@/content/Lojinha';
 
 const windowContents: Record<string, React.ReactNode> = {
     about: <AboutContent />,
@@ -36,6 +37,7 @@ const windowContents: Record<string, React.ReactNode> = {
     news: <News />,
     bus: <BusContent />,
     map: <MapContent />,
+    lojinha: <Lojinha />,
 };
 
 interface SelectionBox {
@@ -114,6 +116,7 @@ export default function Desktop() {
                             id={w.id}
                             icon={w.icon}
                             label={w.title}
+                            iconSize={w.iconSize}
                             initialPosition={iconPos?.position || { x: 20, y: 20 }}
                             isSelected={selectedIconId === w.id}
                             onSelect={handleIconSelect}

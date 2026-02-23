@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { Post } from './types';
 import { MAX_CHARS } from './types';
-import { fetchThread as apiFetchThread, createComment, likePost, unlikePost } from './api';
+import { useForumApi } from './api';
 import { timeAgo, avatarLetter } from './helpers';
 import { SkeletonPost } from './Skeletons';
+import { useWebSocket } from '@/lib/websocket';
+import LikeButton from './LikeButton';
 import s from '../Forum.module.css';
 
 let optimisticId = -1;
@@ -14,11 +16,13 @@ export default function ThreadView({
     postId,
     onBack,
     username,
+    currentUserAvatar,
     onOpenProfile,
 }: {
     postId: number;
     onBack: () => void;
     username: string;
+    currentUserAvatar?: string;
     onOpenProfile: (username: string) => void;
 }) {
     const [thread, setThread] = useState<Post | null>(null);
@@ -28,6 +32,7 @@ export default function ThreadView({
     const repliesEndRef = useRef<HTMLDivElement>(null);
     const [entering, setEntering] = useState(true);
     const [likingId, setLikingId] = useState<number | null>(null);
+    const { fetchThread: apiFetchThread, createComment, likePost, unlikePost } = useForumApi();
 
     useEffect(() => {
         requestAnimationFrame(() => setEntering(false));
@@ -42,7 +47,46 @@ export default function ThreadView({
             setLoading(false);
         });
         return () => { active = false; };
-    }, [postId]);
+    }, [postId, apiFetchThread]);
+
+    // Listen for real-time replies from other users
+    const threadRef = useRef(thread);
+    useEffect(() => { threadRef.current = thread; }, [thread]);
+    const postIdRef = useRef(postId);
+    useEffect(() => { postIdRef.current = postId; }, [postId]);
+
+    useWebSocket('new_reply', (msg) => {
+        if (!msg.data || typeof msg.data !== 'object') return;
+        const raw = msg.data as Record<string, unknown>;
+
+        // Backend shape: { reply: Post, parent_id: number }
+        const parentId = typeof raw.parent_id === 'number' ? raw.parent_id : null;
+        const incoming = raw.reply as Post | undefined ?? msg.data as Post;
+        const effectiveParentId = parentId ?? incoming.parent_id;
+
+        if (effectiveParentId !== postIdRef.current) return; // not our thread
+
+        setThread(prev => {
+            if (!prev) return prev;
+            const replies = prev.replies || [];
+            if (replies.some(r => r.id === incoming.id)) return prev; // dedup
+            // Replace matching optimistic reply (same text + same author) if exists
+            const withoutOptimistic = replies.filter(r =>
+                r.id >= 0 ||
+                !(r.texto === incoming.texto && r.author === incoming.author)
+            );
+            return {
+                ...prev,
+                reply_count: prev.reply_count + 1,
+                replies: [...withoutOptimistic, { ...incoming, id: incoming.id }],
+            };
+        });
+
+        // Scroll to new reply
+        requestAnimationFrame(() => {
+            repliesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
 
     const handleReply = useCallback(async () => {
         if (!replyText.trim() || sending) return;
@@ -54,8 +98,11 @@ export default function ThreadView({
             id: tempId,
             texto: text,
             author: username,
+            author_name: username, // Fallback since we don't have AuthUser here directly, but the server will fix it
+            avatar_url: currentUserAvatar,
             user_id: 0,
             parent_id: postId,
+            repost_id: undefined,
             likes: 0,
             liked: false,
             reply_count: 0,
@@ -90,7 +137,7 @@ export default function ThreadView({
         // The broadcast event will eventually replace it.
 
         setSending(false);
-    }, [replyText, sending, postId, username]);
+    }, [replyText, sending, postId, username, currentUserAvatar, createComment]);
 
     const handleLike = useCallback(async (targetId: number) => {
         if (!thread || likingId === targetId) return;
@@ -102,7 +149,7 @@ export default function ThreadView({
             isLiked = thread.liked;
             currentLikes = thread.likes;
         } else {
-            const reply = thread.replies.find(r => r.id === targetId);
+            const reply = (thread.replies || []).find(r => r.id === targetId);
             if (!reply) return;
             isLiked = reply.liked;
             currentLikes = reply.likes;
@@ -118,7 +165,7 @@ export default function ThreadView({
             }
             return {
                 ...prev,
-                replies: prev.replies.map(r =>
+                replies: (prev.replies || []).map(r =>
                     r.id === targetId ? { ...r, likes: Math.max(0, currentLikes + delta), liked: !isLiked } : r
                 )
             };
@@ -136,7 +183,7 @@ export default function ThreadView({
                     }
                     return {
                         ...prev,
-                        replies: prev.replies.map(r => r.id === targetId ? { ...r, likes: result.likes } : r)
+                        replies: (prev.replies || []).map(r => r.id === targetId ? { ...r, likes: result.likes } : r)
                     };
                 });
             } else {
@@ -148,7 +195,7 @@ export default function ThreadView({
                     }
                     return {
                         ...prev,
-                        replies: prev.replies.map(r =>
+                        replies: (prev.replies || []).map(r =>
                             r.id === targetId ? { ...r, likes: Math.max(0, currentLikes), liked: isLiked } : r
                         )
                     };
@@ -163,7 +210,7 @@ export default function ThreadView({
                 }
                 return {
                     ...prev,
-                    replies: prev.replies.map(r =>
+                    replies: (prev.replies || []).map(r =>
                         r.id === targetId ? { ...r, likes: Math.max(0, currentLikes), liked: isLiked } : r
                     )
                 };
@@ -171,7 +218,7 @@ export default function ThreadView({
         } finally {
             setLikingId(null);
         }
-    }, [thread, likingId]);
+    }, [thread, likingId, likePost, unlikePost]);
 
     if (loading) {
         return (
@@ -218,7 +265,11 @@ export default function ThreadView({
             <div className={s.threadPost}>
                 <div className={s.postHeader}>
                     <div className={s.postAvatar} onClick={() => onOpenProfile(thread.author)}>
-                        {avatarLetter(thread.author)}
+                        {thread.avatar_url ? (
+                            <img src={thread.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            avatarLetter(thread.author)
+                        )}
                     </div>
                     <div className={s.postMeta}>
                         <span className={s.postAuthor} onClick={() => onOpenProfile(thread.author)}>
@@ -231,19 +282,12 @@ export default function ThreadView({
                 </div>
                 <div className={s.threadBody}>{thread.texto}</div>
                 <div className={s.postActions}>
-                    <button
-                        className={`${s.actionBtn} ${thread.liked ? s.actionBtnLiked : ''}`}
-                        onClick={() => handleLike(thread.id)}
+                    <LikeButton
+                        liked={thread.liked}
+                        count={thread.likes || 0}
                         disabled={likingId === thread.id}
-                        title={thread.liked ? 'Descurtir' : 'Curtir'}
-                    >
-                        <img
-                            src="/icons-95/world_star.ico"
-                            alt=""
-                            className={thread.liked ? s.actionIcoLiked : s.actionIco}
-                        />
-                        <span>{thread.likes || 0}</span>
-                    </button>
+                        onClick={() => handleLike(thread.id)}
+                    />
                     <span className={s.actionBtn}>
                         <img src="/icons-95/message_envelope_open.ico" alt="" className={s.actionIco} />
                         <span>{thread.reply_count ?? thread.replies?.length ?? 0} respostas</span>
@@ -270,7 +314,11 @@ export default function ThreadView({
                                         className={s.replyAvatar}
                                         onClick={() => onOpenProfile(r.author)}
                                     >
-                                        {avatarLetter(r.author)}
+                                        {r.avatar_url ? (
+                                            <img src={r.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            avatarLetter(r.author)
+                                        )}
                                     </div>
                                     <div className={s.postMeta}>
                                         <span className={s.postAuthor} onClick={() => onOpenProfile(r.author)}>
@@ -283,19 +331,12 @@ export default function ThreadView({
                                 </div>
                                 <div className={s.replyBody}>{r.texto}</div>
                                 <div className={s.postActions}>
-                                    <button
-                                        className={`${s.actionBtn} ${r.liked ? s.actionBtnLiked : ''}`}
-                                        onClick={() => handleLike(r.id)}
+                                    <LikeButton
+                                        liked={r.liked}
+                                        count={r.likes || 0}
                                         disabled={isOptimistic || likingId === r.id}
-                                        title={r.liked ? 'Descurtir' : 'Curtir'}
-                                    >
-                                        <img
-                                            src="/icons-95/world_star.ico"
-                                            alt=""
-                                            className={r.liked ? s.actionIcoLiked : s.actionIco}
-                                        />
-                                        <span>{r.likes || 0}</span>
-                                    </button>
+                                        onClick={() => handleLike(r.id)}
+                                    />
                                 </div>
                             </div>
                         );
@@ -309,7 +350,13 @@ export default function ThreadView({
             </div>
 
             <div className={s.replyCompose}>
-                <div className={s.replyAvatar}>{avatarLetter(username)}</div>
+                <div className={s.replyAvatar}>
+                    {currentUserAvatar ? (
+                        <img src={currentUserAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                        avatarLetter(username)
+                    )}
+                </div>
                 <textarea
                     className={s.replyInput}
                     value={replyText}

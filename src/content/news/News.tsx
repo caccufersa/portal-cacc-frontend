@@ -28,11 +28,14 @@ const News: React.FC = () => {
         return () => { active = false; };
     }, []);
 
-    const filtered = catFilter
-        ? noticias.filter(n => n.categoria.toLowerCase() === catFilter)
-        : noticias;
+    const safeNoticias = Array.isArray(noticias) ? noticias : [];
+    const safeDestaques = Array.isArray(destaques) ? destaques : [];
 
-    const topDestaque = destaques.length > 0 ? destaques[0] : null;
+    const filtered = catFilter
+        ? safeNoticias.filter(n => n.categoria.toLowerCase() === catFilter)
+        : safeNoticias;
+
+    const topDestaque = safeDestaques.length > 0 ? safeDestaques[0] : null;
 
     return (
         <div className={s.container}>
@@ -78,8 +81,8 @@ const News: React.FC = () => {
                                 <ListSkeleton />
                             ) : filtered.length === 0 ? (
                                 <div className={s.emptyState}>
-                                    <img src="/icons-95/message_empty_tack.ico" alt="" />
-                                    <span>Nenhuma noticia encontrada.</span>
+                                    <img src="/images/cat.jpg" alt="Sem noticias" style={{ maxWidth: '120px', imageRendering: 'pixelated', marginBottom: '8px' }} />
+                                    <span>Nenhuma notícia encontrada.</span>
                                 </div>
                             ) : (
                                 filtered.map((n, idx) => (

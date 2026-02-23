@@ -26,6 +26,7 @@ export default function WelcomePopup({ onClose }: WelcomePopupProps) {
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dontShowAgain]);
 
     return (
@@ -47,8 +48,8 @@ export default function WelcomePopup({ onClose }: WelcomePopupProps) {
                     </span>
                     <div className={styles.textContent}>
                         <div className={styles.rowtitle}>
-                        <h2>Olá, Calouro! 👋</h2>
-                        <Image src="/gifs/linux.gif" alt="pinguim" width={64} height={64} className={styles.gifIcon} />
+                            <h2>Olá, Calouro! 👋</h2>
+                            <Image src="/gifs/linux.gif" alt="pinguim" width={64} height={64} className={styles.gifIcon} />
                         </div>
                         <p>
                             Seja muito bem-vindo ao <span className={styles.highlight}>CACC</span> -

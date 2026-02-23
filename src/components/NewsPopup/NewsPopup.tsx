@@ -91,7 +91,7 @@ export default function NewsPopup() {
     return (
         <div className={styles.wrapper} ref={popupRef}>
             <button className={styles.trayButton} onClick={handleToggle} title="Noticias">
-                <Image src="/icons-95/msg_information.ico" alt="Noticias" width={16} height={16} />
+                <Image src="/icons-95/newspaper.ico" alt="Noticias" width={16} height={16} />
                 {newsCount > 0 && (
                     <span className={styles.badge}>
                         {newsCount > 9 ? '9+' : newsCount}
@@ -101,7 +101,7 @@ export default function NewsPopup() {
             {open && (
                 <div className={styles.popup}>
                     <div className={styles.titleBar}>
-                        <Image src="/icons-95/msg_information.ico" alt="" width={16} height={16} />
+                        <Image src="/icons-95/newspaper.ico" alt="" width={16} height={16} />
                         <span className={styles.titleText}>Ultimas Noticias</span>
                         <button className={styles.closeBtn} onClick={() => setOpen(false)}>✕</button>
                     </div>

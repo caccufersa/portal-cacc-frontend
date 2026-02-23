@@ -411,13 +411,19 @@ const Sugest: React.FC = () => {
                             </div>
                         </div>
                     ) : suggestions.length === 0 ? (
-                        <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>
-                            Já deve ter mensagem, faça LOGIN PARA VISUALIZAR
-                        </p>
+                        <div style={{ ...styles.loadingWrap, padding: '20px' }}>
+                            <img src="/images/cat.jpg" alt="Vazio" style={{ maxWidth: '120px', imageRendering: 'pixelated', marginBottom: '8px' }} />
+                            <p style={{ fontStyle: 'italic', color: '#808080', textAlign: 'center', margin: 0 }}>
+                                Nenhuma sugestão por aqui (ainda bem...).
+                            </p>
+                        </div>
                     ) : filteredSuggestions.length === 0 ? (
-                        <p style={{ padding: '5px', fontStyle: 'italic', color: '#808080' }}>
-                            Nenhuma mensagem encontrada, ALGUÉM MANDA AQUI
-                        </p>
+                        <div style={{ ...styles.loadingWrap, padding: '20px' }}>
+                            <img src="/images/cat.jpg" alt="Vazio" style={{ maxWidth: '120px', imageRendering: 'pixelated', marginBottom: '8px' }} />
+                            <p style={{ fontStyle: 'italic', color: '#808080', textAlign: 'center', margin: 0 }}>
+                                Nenhum registro pra essa filtragem.
+                            </p>
+                        </div>
                     ) : (
                         filteredSuggestions.map((s) => (
                             <div key={s.id} style={styles.messageItem}>

@@ -15,6 +15,8 @@ export interface AuthUser {
     uuid: string;
     username: string;
     avatar_url?: string;
+    display_name?: string;
+    bio?: string;
     created_at: string;
 }
 
@@ -29,7 +31,8 @@ interface AuthContextType {
     isLoading: boolean;
     error: string | null;
     login: (username: string, password: string) => Promise<boolean>;
-    register: (username: string, password: string) => Promise<boolean>;
+    register: (username: string, password: string) => Promise<{ success: boolean; recoveryKey?: string }>;
+    resetPassword: (username: string, recovery_key: string, new_password: string) => Promise<boolean>;
     logout: () => void;
     clearError: () => void;
     apiCall: <T = unknown>(url: string, options?: RequestInit) => Promise<T>;
@@ -71,7 +74,7 @@ function loadUser(): AuthUser | null {
         const raw = localStorage.getItem(STORAGE_USER);
         if (!raw) return null;
         return JSON.parse(raw) as AuthUser;
-    } catch (_e) {
+    } catch {
         return null;
     }
 }
@@ -221,7 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
                 const j = JSON.parse(body);
                 msg = j.erro || j.error || j.message || msg;
-            } catch (_e) {
+            } catch {
                 console.warn(`[apiCall] Failed to parse error response from ${url}:`, body.substring(0, 200));
             }
             throw new Error(msg);
@@ -260,7 +263,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                     if (res.ok) {
                         const data = await res.json();
-                        const freshUser: AuthUser = data.user ?? storedUser;
+                        const serverUser: AuthUser = data.user ?? storedUser;
+                        // Preserve client-side profile fields that backend session might not return
+                        const freshUser: AuthUser = {
+                            ...storedUser,
+                            ...serverUser,
+                            avatar_url: serverUser.avatar_url || storedUser.avatar_url,
+                            display_name: serverUser.display_name || storedUser.display_name,
+                            bio: serverUser.bio || storedUser.bio,
+                        };
                         setUser(freshUser);
                         setAccessToken(tokens.access_token);
                         saveUser(freshUser);
@@ -283,7 +294,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                                 if (cancelled) return;
                                 if (retryRes.ok) {
                                     const data = await retryRes.json();
-                                    const freshUser: AuthUser = data.user ?? storedUser;
+                                    const serverUser: AuthUser = data.user ?? storedUser;
+                                    const freshUser: AuthUser = {
+                                        ...storedUser,
+                                        ...serverUser,
+                                        avatar_url: serverUser.avatar_url || storedUser.avatar_url,
+                                        display_name: serverUser.display_name || storedUser.display_name,
+                                        bio: serverUser.bio || storedUser.bio,
+                                    };
                                     setUser(freshUser);
                                     saveUser(freshUser);
                                     return;
@@ -336,7 +354,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 let data: Record<string, unknown> = {};
                 try {
                     data = JSON.parse(body);
-                } catch (_parseErr) {
+                } catch {
                     console.warn('[Auth] Failed to parse login response:', body.substring(0, 200));
                     setError('Resposta invalida do servidor');
                     setIsLoading(false);
@@ -378,7 +396,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, [handleAuthSuccess]);
 
-    const register = useCallback(async (username: string, password: string): Promise<boolean> => {
+    const register = useCallback(async (username: string, password: string): Promise<{ success: boolean; recoveryKey?: string }> => {
         setIsLoading(true);
         setError(null);
         try {
@@ -399,18 +417,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 let data: Record<string, unknown> = {};
                 try {
                     data = JSON.parse(body);
-                } catch (_parseErr) {
+                } catch {
                     console.warn('[Auth] Failed to parse register response:', body.substring(0, 200));
                     setError('Resposta invalida do servidor');
                     setIsLoading(false);
-                    return false;
+                    return { success: false };
                 }
 
                 if (!res.ok) {
                     const msg = (data.erro || data.error || 'Erro ao criar conta') as string;
                     setError(msg);
                     setIsLoading(false);
-                    return false;
+                    return { success: false };
                 }
 
                 if (data.access_token && data.user) {
@@ -422,7 +440,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
 
                 setIsLoading(false);
-                return true;
+                return { success: true, recoveryKey: data.recovery_key as string | undefined };
             } finally {
                 clearTimeout(timeoutId);
             }
@@ -434,9 +452,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setError('Erro de conexao. Tente novamente.');
             }
             setIsLoading(false);
-            return false;
+            return { success: false };
         }
     }, [handleAuthSuccess]);
+
+    const resetPassword = useCallback(async (username: string, recovery_key: string, new_password: string): Promise<boolean> => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+            try {
+                const res = await fetch(`${AUTH_API}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, recovery_key, new_password }),
+                    signal: controller.signal,
+                });
+                clearTimeout(timeoutId);
+
+                const body = await res.text();
+                let data: Record<string, unknown> = {};
+                try {
+                    data = JSON.parse(body);
+                } catch {
+                    setError('Resposta invalida do servidor');
+                    setIsLoading(false);
+                    return false;
+                }
+
+                if (!res.ok) {
+                    const msg = (data.erro || data.error || 'Erro ao redefinir a senha') as string;
+                    setError(msg);
+                    setIsLoading(false);
+                    return false;
+                }
+
+                setIsLoading(false);
+                return true;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        } catch (e: unknown) {
+            if (e instanceof Error && e.name === 'AbortError') {
+                setError('Conexao expirou. Tente novamente.');
+            } else {
+                console.warn('[Auth] Reset password error:', e);
+                setError('Erro de conexao. Tente novamente.');
+            }
+            setIsLoading(false);
+            return false;
+        }
+    }, []);
 
     const logout = useCallback(async () => {
         const refresh = refreshTokenRef.current;
@@ -454,7 +523,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     credentials: 'include',
                     body: JSON.stringify({ refresh_token: refresh }),
                 });
-            } catch (_e) { /* best effort */ }
+            } catch { /* best effort */ }
         }
     }, [resetAuth]);
 
@@ -468,6 +537,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             error,
             login,
             register,
+            resetPassword,
             logout,
             clearError,
             apiCall,

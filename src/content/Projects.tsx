@@ -44,10 +44,10 @@ export default function ProjectsContent() {
 
             <h2>Eventos Anuais</h2>
             <ul>
-                <li><strong>Semana da Computação</strong> - Palestras, workshops e minicursos</li>
-                <li><strong>Hackathon UFERSA</strong> - Maratona de desenvolvimento</li>
+                <li><strong>WTCC</strong> - Palestras, workshops e minicursos (Primeiro semestre do ano)</li>
+                <li><strong>CAPCOM</strong> - Workshops, minicursos, gamejam (Segundo semestre do ano)</li>
+                <li><strong>SPC</strong> - Maratona de Computação Competitiva</li>
                 <li><strong>Recepção de Calouros</strong> - Integração dos novos alunos</li>
-                <li><strong>SECOMP</strong> - Semana Acadêmica de Computação</li>
             </ul>
 
             <h2>Como Participar</h2>

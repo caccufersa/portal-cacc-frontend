@@ -36,7 +36,7 @@ export default function BootScreen() {
             </div>
 
             <p className={styles.copyright}>
-                © 2025 CACC UFERSA - Todos os direitos reservados
+                © 2026 CACC UFERSA - Todos os direitos reservados
             </p>
         </div>
     );

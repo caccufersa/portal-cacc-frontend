@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertDialog } from '@/components/Dialog/Dialog';
 import { useAuth } from '@/context/AuthContext';
 import { useWindows } from '@/context/WindowsContext';
@@ -45,9 +45,7 @@ const TRIPS: Trip[] = [
 ];
 
 import { useBusService } from './bus/useBusService';
-import { BusSeat, MyReservation } from './bus/types';
 
-// Keep LAYOUTS and TRIPS for now as they are not served by backend yet
 const getInitialLayoutSeats = (layout: BusLayout): Seat[] => {
     const seats: Seat[] = [];
     let seatNum = 1;
@@ -69,7 +67,7 @@ const getInitialLayoutSeats = (layout: BusLayout): Seat[] => {
 export default function BusContent() {
     const { user } = useAuth();
     const { openWindow } = useWindows();
-    const { getSeats, reserveSeat, getMyReservations, cancelReservation } = useBusService();
+    const { getSeats, reserveSeat, getMyReservations, cancelReservation, getContact, saveContact } = useBusService();
 
     const [view, setView] = useState<'hub' | 'seatmap'>('hub');
     const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
@@ -80,8 +78,19 @@ export default function BusContent() {
     const [confirmModal, setConfirmModal] = useState<{ open: boolean; seat?: Seat }>({ open: false });
     const [removeModal, setRemoveModal] = useState<{ open: boolean; seat?: Seat }>({ open: false });
     const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
+    const [phoneModal, setPhoneModal] = useState<{ open: boolean; seat?: Seat }>({ open: false });
+    const [phoneInput, setPhoneInput] = useState('');
+    const [alreadyReservedModal, setAlreadyReservedModal] = useState(false);
+    const [myReservations, setMyReservations] = useState<import('./bus/types').MyReservation[]>([]);
 
     const [hoveredSeat, setHoveredSeat] = useState<string | null>(null);
+
+    // Load saved contact on mount
+    useEffect(() => {
+        if (user) {
+            getContact().then(p => { if (p) setPhoneInput(p); }).catch(() => { });
+        }
+    }, [user, getContact]);
 
     const refreshSeats = async (tripId: string, layout: BusLayout) => {
         setLoading(true);
@@ -108,10 +117,10 @@ export default function BusContent() {
                 };
             });
             setSeats(mergedSeats);
+            setMyReservations(myReservations);
 
         } catch (error) {
             console.error(error);
-            // Fallback for demo if API fails
             setSeats(getInitialLayoutSeats(layout));
         } finally {
             setLoading(false);
@@ -128,17 +137,44 @@ export default function BusContent() {
         }
     };
 
-    const handleSeatClick = (seat: Seat) => {
+    const handleSeatClick = async (seat: Seat) => {
         if (seat.isOccupied) {
-            // Check if user can remove (e.g., it's their reservation)
-            // Here we check `seat.canRemove` which is mocked, or match `seat.occupiedBy === user.username`
-            // For demo, let's use the mocked `canRemove` flag OR simulate matching user
             const canRemove = seat.canRemove || (user && seat.occupiedBy === user.username);
-
             if (canRemove) {
                 setRemoveModal({ open: true, seat });
             }
             return;
+        }
+
+        // Fast local check first — if no cached reservation, proceed immediately
+        const cachedHasReservation = selectedTrip
+            ? myReservations.some(mr => mr.trip_id === selectedTrip.id)
+            : false;
+
+        if (cachedHasReservation) {
+            // Live-check backend: user might have cancelled and wants to rebook
+            try {
+                setLoading(true);
+                const freshReservations = await getMyReservations();
+                setMyReservations(freshReservations);
+
+                const stillHasReservation = selectedTrip
+                    ? freshReservations.some(mr => mr.trip_id === selectedTrip.id)
+                    : false;
+
+                if (stillHasReservation) {
+                    // Confirmed: user still has an active reservation on this trip
+                    setAlreadyReservedModal(true);
+                    return;
+                }
+                // Otherwise: reservation was cancelled — fall through to allow rebook
+            } catch {
+                // If request fails, fall back to cached data to avoid bad UX
+                setAlreadyReservedModal(true);
+                return;
+            } finally {
+                setLoading(false);
+            }
         }
 
         // Toggle selection
@@ -152,8 +188,20 @@ export default function BusContent() {
     const handleConfirmReservation = () => {
         const seat = seats.find(s => s.id === selectedSeat);
         if (seat) {
-            setConfirmModal({ open: true, seat });
+            // First ask for phone contact, then confirm reservation
+            setPhoneModal({ open: true, seat });
         }
+    };
+
+    const handlePhoneSubmit = async () => {
+        if (!phoneModal.seat) return;
+        const digits = phoneInput.replace(/\D/g, '');
+        if (digits.length < 8) return; // minimum validation
+        try {
+            await saveContact(phoneInput);
+        } catch { /* best effort, non-fatal */ }
+        setPhoneModal({ open: false });
+        setConfirmModal({ open: true, seat: phoneModal.seat });
     };
 
     const finalizeReservation = async () => {
@@ -272,6 +320,110 @@ export default function BusContent() {
 
     return (
         <div className={styles.container}>
+            {phoneModal.open && phoneModal.seat && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
+                }}>
+                    <div style={{
+                        background: '#d4d0c8', border: '2px outset #fff', padding: 0,
+                        minWidth: 320, maxWidth: 380, fontFamily: 'var(--font-main)', fontSize: 13,
+                        boxShadow: '4px 4px 8px rgba(0,0,0,0.5)'
+                    }}>
+                        {/* Title Bar */}
+                        <div style={{
+                            background: 'linear-gradient(90deg,#000080,#1084d0)',
+                            color: '#fff', padding: '4px 8px', fontWeight: 'bold', fontSize: 12,
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}>
+                            <span>📞 Contato de Viagem – Assento {phoneModal.seat.label}</span>
+                            <button onClick={() => setPhoneModal({ open: false })} style={{ background: 'none', border: '1px outset #999', color: '#fff', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}>✕</button>
+                        </div>
+
+                        {/* Passenger identity card */}
+                        <div style={{
+                            margin: '12px 16px 0',
+                            background: '#fff',
+                            border: '1px inset #808080',
+                            padding: '8px 12px',
+                            display: 'flex', alignItems: 'center', gap: 12,
+                        }}>
+                            <div style={{
+                                width: 48, height: 48, borderRadius: '50%',
+                                border: '2px solid #000080',
+                                overflow: 'hidden', flexShrink: 0,
+                                background: '#000080',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 22, color: '#fff', fontWeight: 'bold',
+                            }}>
+                                {user?.avatar_url ? (
+                                    <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                    user?.username?.[0]?.toUpperCase() ?? '?'
+                                )}
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 'bold', fontSize: 13, color: '#000080' }}>
+                                    {user?.display_name || user?.username}
+                                </div>
+                                <div style={{ fontSize: 11, color: '#666' }}>@{user?.username}</div>
+                                <div style={{ fontSize: 11, marginTop: 2, color: '#444' }}>
+                                    🚌 {selectedTrip?.destination?.split('|')[0]?.trim()} · Assento <strong>{phoneModal.seat.label}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ padding: '12px 16px 10px' }}>
+                            <p style={{ margin: '0 0 8px', fontSize: 12, color: '#444' }}>
+                                Informe seu número de contato (WhatsApp) para facilitar a organização da viagem.
+                            </p>
+                            <input
+                                id="bus-phone-input"
+                                type="tel"
+                                value={phoneInput}
+                                onChange={e => setPhoneInput(e.target.value.replace(/[^\d\s()+-]/g, ''))}
+                                placeholder="(84) 99999-9999"
+                                maxLength={20}
+                                autoFocus
+                                onKeyDown={e => { if (e.key === 'Enter') handlePhoneSubmit(); }}
+                                style={{
+                                    width: '100%', boxSizing: 'border-box',
+                                    padding: '4px 8px', fontSize: 14, fontFamily: 'monospace',
+                                    border: 'none', boxShadow: 'inset 1px 1px 0 #808080, inset -1px -1px 0 #fff',
+                                    background: '#fff', outline: 'none',
+                                }}
+                            />
+                            {phoneInput.replace(/\D/g, '').length > 0 && phoneInput.replace(/\D/g, '').length < 8 && (
+                                <div style={{ fontSize: 11, color: '#c00', marginTop: 4 }}>Mínimo 8 dígitos</div>
+                            )}
+                            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
+                                <button
+                                    onClick={handlePhoneSubmit}
+                                    disabled={phoneInput.replace(/\D/g, '').length < 8}
+                                    style={{
+                                        background: '#d4d0c8', border: '2px outset #fff', padding: '4px 16px',
+                                        fontFamily: 'var(--font-main)', fontSize: 12, cursor: 'pointer',
+                                        fontWeight: 'bold'
+                                    }}
+                                >
+                                    Confirmar
+                                </button>
+                                <button
+                                    onClick={() => setPhoneModal({ open: false })}
+                                    style={{
+                                        background: '#d4d0c8', border: '2px outset #fff', padding: '4px 16px',
+                                        fontFamily: 'var(--font-main)', fontSize: 12, cursor: 'pointer'
+                                    }}
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
             {confirmModal.open && (
                 <AlertDialog
                     title="Confirmar Reserva"
@@ -298,6 +450,15 @@ export default function BusContent() {
                     message={successModal.message}
                     type="info"
                     onOk={() => setSuccessModal({ open: false, message: '' })}
+                />
+            )}
+
+            {alreadyReservedModal && (
+                <AlertDialog
+                    title="Reserva Duplicada"
+                    message="Você já possui um assento reservado nesta viagem. Cada usuário pode reservar apenas 1 assento por viagem."
+                    type="warning"
+                    onOk={() => setAlreadyReservedModal(false)}
                 />
             )}
 

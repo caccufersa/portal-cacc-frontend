@@ -2,7 +2,7 @@ import styles from './Content.module.css';
 
 const documents = [
     { icon: '/icons-95/notepad_file.ico', name: 'PPC - Projeto Pedagógico do Curso', description: 'Documento oficial com toda estrutura do curso' },
-    { icon: '/icons-95/calendar.ico', name: 'Calendário Acadêmico 2025', description: 'Datas importantes do ano letivo' },
+    { icon: '/icons-95/calendar.ico', name: 'Calendário Acadêmico 2026-1', description: 'Datas importantes do ano letivo' },
     { icon: '/icons-95/document.ico', name: 'Ementas das Disciplinas', description: 'Conteúdo programático de cada disciplina' },
     { icon: '/icons-95/certificate.ico', name: 'Regulamento de TCC', description: 'Normas para o Trabalho de Conclusão de Curso' },
     { icon: '/icons-95/write_file.ico', name: 'Modelo de Requerimento', description: 'Template para solicitações à coordenação' },

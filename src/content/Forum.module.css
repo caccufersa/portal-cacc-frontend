@@ -106,6 +106,7 @@
     font-weight: bold;
     flex-shrink: 0;
     border: 1px solid #404040;
+    overflow: hidden;
 }
 
 .addressBar {
@@ -186,6 +187,7 @@
     font-weight: bold;
     flex-shrink: 0;
     border: 1px solid #404040;
+    overflow: hidden;
 }
 
 .composeLabel {
@@ -295,6 +297,7 @@
     flex-shrink: 0;
     cursor: pointer;
     border: 1px solid #404040;
+    overflow: hidden;
 }
 
 .postAvatar:hover {
@@ -397,10 +400,13 @@
 .actionIcoLiked {
     composes: actionIco;
     filter: sepia(1) saturate(5) hue-rotate(320deg);
+    /* Pop animation fires automatically whenever this class is first applied */
+    animation: heartPopAnim 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28);
 }
 
+/* Keep .heartPop for any remaining manual usages */
 .heartPop {
-    animation: heartPopAnim 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    animation: heartPopAnim 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28);
 }
 
 .deleteBtn {
@@ -501,6 +507,7 @@
     flex-shrink: 0;
     cursor: pointer;
     border: 1px solid #404040;
+    overflow: hidden;
 }
 
 .replyBody {
@@ -820,6 +827,7 @@
     font-weight: bold;
     color: #fff;
     flex-shrink: 0;
+    overflow: hidden;
 }
 
 .profileInfo {

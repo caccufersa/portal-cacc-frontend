@@ -261,8 +261,11 @@
 }
 
 .profileBigIcon {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--win95-border-dark);
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .profileUsername {

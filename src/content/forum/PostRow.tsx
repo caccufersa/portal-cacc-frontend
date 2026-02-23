@@ -1,8 +1,9 @@
 'use client';
 
-import React, { memo, useCallback, useRef } from 'react';
+import { memo, useCallback } from 'react';
 import type { Post } from './types';
 import { timeAgo, avatarLetter } from './helpers';
+import LikeButton from './LikeButton';
 import s from '../Forum.module.css';
 
 interface PostRowProps {
@@ -10,6 +11,7 @@ interface PostRowProps {
     onOpenThread: (id: number) => void;
     onLike: (id: number) => void;
     onOpenProfile: (username: string) => void;
+    onRepost?: (id: number) => void;
     onDelete?: (id: number) => void;
     liked: boolean;
     isNew?: boolean;
@@ -23,39 +25,19 @@ const PostRow = memo(function PostRow({
     onOpenThread,
     onLike,
     onOpenProfile,
+    onRepost,
     onDelete,
     liked,
     isNew,
     isOwner,
 }: PostRowProps) {
-    const heartRef = useRef<HTMLButtonElement>(null);
     const isOptimistic = post.id < 0;
 
     const handleLike = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         if (isOptimistic) return;
-        // Animation is now handled by the state change from the parent which waits for server
-        // But we can trigger a pop if we want immediate feedback, however User requested "Wait for confirmation"
-        // So we should probably NOT animate until the prop 'liked' actually changes.
-        // But 'liked' prop changes when parent updates state.
-
-        // If we want the pop animation to happen ON confirmation:
-        // We can add a useEffect to watch 'liked' prop? 
-        // Or just keep the click animation but know the number won't change yet?
-        // User asked for "same logic as ThreadView, server confirmation".
-        // In ThreadView, we removed optimistic state updates.
-
         onLike(post.id);
     }, [onLike, post.id, isOptimistic]);
-
-    // Effect to trigger animation when liked state changes to true
-    React.useEffect(() => {
-        if (liked) {
-            heartRef.current?.classList.remove(s.heartPop);
-            void heartRef.current?.offsetWidth;
-            heartRef.current?.classList.add(s.heartPop);
-        }
-    }, [liked]);
 
     const handleProfile = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
@@ -71,18 +53,36 @@ const PostRow = memo(function PostRow({
         onDelete?.(post.id);
     }, [onDelete, post.id]);
 
+    const handleRepost = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (isOptimistic) return;
+        onRepost?.(post.id);
+    }, [onRepost, post.id, isOptimistic]);
+
+    const isRepost = !!post.repost_id;
+
     return (
         <div
             className={`${s.post} ${isNew ? s.postEnter : ''} ${isOptimistic ? s.postOptimistic : ''}`}
             onClick={handleThread}
         >
+            {isRepost && (
+                <div style={{ fontSize: 11, color: '#808080', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <img src="/icons-95/directory_open_refresh.ico" alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated' }} />
+                    <span>repostou</span>
+                </div>
+            )}
             <div className={s.postHeader}>
                 <div className={s.postAvatar} onClick={handleProfile}>
-                    {avatarLetter(post.author)}
+                    {post.avatar_url ? (
+                        <img src={post.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                        avatarLetter(post.author)
+                    )}
                 </div>
                 <div className={s.postMeta}>
                     <span className={s.postAuthor} onClick={handleProfile}>
-                        {post.author}
+                        {post.author_name || post.author} <span style={{ opacity: 0.6, fontSize: '0.9em' }}>@{post.author}</span>
                     </span>
                     <span className={s.postDate}>
                         {isOptimistic ? 'enviando...' : timeAgo(post.created_at)}
@@ -96,20 +96,12 @@ const PostRow = memo(function PostRow({
             </div>
             <div className={s.postBody}>{post.texto}</div>
             <div className={s.postActions}>
-                <button
-                    ref={heartRef}
-                    className={`${s.actionBtn} ${liked ? s.actionBtnLiked : ''}`}
-                    onClick={handleLike}
+                <LikeButton
+                    liked={liked}
+                    count={post.likes || 0}
                     disabled={isOptimistic}
-                    title={liked ? 'Descurtir' : 'Curtir'}
-                >
-                    <img
-                        src="/icons-95/world_star.ico"
-                        alt=""
-                        className={liked ? s.actionIcoLiked : s.actionIco}
-                    />
-                    <span>{post.likes || 0}</span>
-                </button>
+                    onClick={() => onLike(post.id)}
+                />
                 <button
                     className={s.actionBtn}
                     onClick={(e) => { e.stopPropagation(); handleThread(); }}
@@ -119,6 +111,17 @@ const PostRow = memo(function PostRow({
                     <img src="/icons-95/message_envelope_open.ico" alt="" className={s.actionIco} />
                     <span>{post.reply_count ?? post.replies?.length ?? 0}</span>
                 </button>
+                {!isRepost && onRepost && (
+                    <button
+                        className={s.actionBtn}
+                        onClick={handleRepost}
+                        disabled={isOptimistic}
+                        title="Repostar"
+                    >
+                        <img src="/icons-95/directory_open_refresh.ico" alt="" className={s.actionIco} />
+                        <span>Repost</span>
+                    </button>
+                )}
             </div>
         </div>
     );

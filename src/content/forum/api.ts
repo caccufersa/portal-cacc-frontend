@@ -1,107 +1,18 @@
 import type { Post, UserProfile, LikeResult, DeleteResult } from './types';
 import { setCache, invalidate, getStale, getCached } from './cache';
-import { WebSocketService } from '@/lib/websocket/WebSocketService';
+import { useAuth } from '@/context/AuthContext';
+import { useCallback } from 'react';
 
-function getWs(): WebSocketService | null {
-    const ws = WebSocketService.getInstance();
-    return ws.status === 'connected' ? ws : null;
-}
+const AUTH_API = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'https://backend-go-portal-u9o8.onrender.com';
 
-async function wsQuery<T>(
-    cacheKey: string,
-    action: string,
-    data: Record<string, unknown>,
-    ttl: number,
-): Promise<T | null> {
-    const cached = getCached<T>(cacheKey, ttl);
-    if (cached) return cached;
-
-    const ws = getWs();
-    if (!ws) return getStale<T>(cacheKey);
-
-    try {
-        const result = await ws.sendAction<T>(action, data, 12_000);
-        if (result != null) setCache(cacheKey, result);
-        return result;
-    } catch {
-        return getStale<T>(cacheKey);
+function getCacheEntries(): [string, unknown][] {
+    const stale: [string, unknown][] = [];
+    const keys = ['feed:30:0', 'feed:50:0'];
+    for (const k of keys) {
+        const d = getStale<unknown>(k);
+        if (d) stale.push([k, d]);
     }
-}
-
-async function wsMutate<T>(
-    action: string,
-    data: Record<string, unknown>,
-    timeoutMs = 8_000,
-): Promise<T | null> {
-    const ws = getWs();
-    if (!ws) return null;
-
-    try {
-        return await ws.sendAction<T>(action, data, timeoutMs);
-    } catch {
-        return null;
-    }
-}
-
-export async function fetchPosts(limit = 30, offset = 0): Promise<Post[]> {
-    const key = `feed:${limit}:${offset}`;
-    const data = await wsQuery<Post[]>(key, 'social.feed', { limit, offset }, 15_000);
-    return Array.isArray(data) ? data : [];
-}
-
-export async function fetchThread(postId: number): Promise<Post | null> {
-    return wsQuery<Post>(`thread:${postId}`, 'social.thread', { id: postId }, 30_000);
-}
-
-export async function fetchProfile(username: string): Promise<UserProfile | null> {
-    const ws = getWs();
-    if (!ws) return null;
-    try {
-        return await ws.sendAction<UserProfile>('social.profile', { username }, 12_000);
-    } catch {
-        return null;
-    }
-}
-
-export async function fetchOwnProfile(): Promise<UserProfile | null> {
-    const ws = getWs();
-    if (!ws) return null;
-    try {
-        return await ws.sendAction<UserProfile>('social.profile', {}, 12_000);
-    } catch {
-        return null;
-    }
-}
-
-export async function createPost(texto: string): Promise<Post | null> {
-    const post = await wsMutate<Post>('social.post.create', { texto });
-    invalidate('feed:*');
-    return post;
-}
-
-export async function createComment(postId: number, texto: string): Promise<Post | null> {
-    const comment = await wsMutate<Post>('social.post.comment', {
-        parent_id: postId,
-        texto,
-    });
-    invalidate(`thread:${postId}`);
-    invalidate('feed:*');
-    return comment;
-}
-
-export async function likePost(postId: number): Promise<LikeResult | null> {
-    return wsMutate<LikeResult>('social.post.like', { id: postId }, 6_000);
-}
-
-export async function unlikePost(postId: number): Promise<LikeResult | null> {
-    return wsMutate<LikeResult>('social.post.unlike', { id: postId }, 6_000);
-}
-
-export async function deletePost(postId: number): Promise<DeleteResult | null> {
-    const result = await wsMutate<DeleteResult>('social.post.delete', { id: postId });
-    invalidate('feed:*');
-    invalidate(`thread:${postId}`);
-    return result;
+    return stale;
 }
 
 export function patchPostLikes(postId: number, delta: number): void {
@@ -116,12 +27,150 @@ export function patchPostLikes(postId: number, delta: number): void {
     }
 }
 
-function getCacheEntries(): [string, unknown][] {
-    const stale: [string, unknown][] = [];
-    const keys = ['feed:30:0', 'feed:50:0'];
-    for (const k of keys) {
-        const d = getStale<unknown>(k);
-        if (d) stale.push([k, d]);
-    }
-    return stale;
+export function useForumApi() {
+    const { apiCall } = useAuth();
+
+    const fetchPosts = useCallback(async (limit = 30, offset = 0): Promise<Post[]> => {
+        const key = `feed:${limit}:${offset}`;
+        const cached = getCached<Post[]>(key, 15_000);
+        if (cached) return cached;
+
+        try {
+            const data = await apiCall<Post[]>(`${AUTH_API}/social/feed?limit=${limit}&offset=${offset}`);
+            const result = Array.isArray(data) ? data : [];
+            setCache(key, result);
+            return result;
+        } catch {
+            const stale = getStale<Post[]>(key);
+            return stale || [];
+        }
+    }, [apiCall]);
+
+    const fetchThread = useCallback(async (postId: number): Promise<Post | null> => {
+        const key = `thread:${postId}`;
+        const cached = getCached<Post>(key, 30_000);
+        if (cached) return cached;
+
+        try {
+            const data = await apiCall<Post>(`${AUTH_API}/social/feed/${postId}`);
+            setCache(key, data);
+            return data;
+        } catch {
+            return getStale<Post>(key) || null;
+        }
+    }, [apiCall]);
+
+    const fetchProfile = useCallback(async (username: string): Promise<UserProfile | null> => {
+        try {
+            return await apiCall<UserProfile>(`${AUTH_API}/social/profile/${username}`);
+        } catch {
+            return null;
+        }
+    }, [apiCall]);
+
+    const fetchOwnProfile = useCallback(async (): Promise<UserProfile | null> => {
+        try {
+            return await apiCall<UserProfile>(`${AUTH_API}/social/profile`);
+        } catch {
+            return null;
+        }
+    }, [apiCall]);
+
+    const createPost = useCallback(async (texto: string): Promise<Post | null> => {
+        try {
+            const post = await apiCall<Post>(`${AUTH_API}/social/feed`, {
+                method: 'POST',
+                body: JSON.stringify({ texto }),
+            });
+            invalidate('feed:*');
+            return post;
+        } catch {
+            return null;
+        }
+    }, [apiCall]);
+
+    const createComment = useCallback(async (postId: number, texto: string): Promise<Post | null> => {
+        try {
+            const comment = await apiCall<Post>(`${AUTH_API}/social/feed/${postId}/reply`, {
+                method: 'POST',
+                body: JSON.stringify({ texto }),
+            });
+            invalidate(`thread:${postId}`);
+            invalidate('feed:*');
+            return comment;
+        } catch {
+            return null;
+        }
+    }, [apiCall]);
+
+    const likePost = useCallback(async (postId: number): Promise<LikeResult | null> => {
+        try {
+            return await apiCall<LikeResult>(`${AUTH_API}/social/feed/${postId}/like`, {
+                method: 'PUT',
+            });
+        } catch {
+            return null;
+        }
+    }, [apiCall]);
+
+    const unlikePost = useCallback(async (postId: number): Promise<LikeResult | null> => {
+        try {
+            return await apiCall<LikeResult>(`${AUTH_API}/social/feed/${postId}/like`, {
+                method: 'DELETE',
+            });
+        } catch {
+            return null;
+        }
+    }, [apiCall]);
+
+    const deletePost = useCallback(async (postId: number): Promise<DeleteResult | null> => {
+        try {
+            const result = await apiCall<DeleteResult>(`${AUTH_API}/social/feed/${postId}`, {
+                method: 'DELETE',
+            });
+            invalidate('feed:*');
+            invalidate(`thread:${postId}`);
+            return result;
+        } catch {
+            return null;
+        }
+    }, [apiCall]);
+
+    const createRepost = useCallback(async (postId: number): Promise<Post | null> => {
+        try {
+            const post = await apiCall<Post>(`${AUTH_API}/social/feed/${postId}/repost`, {
+                method: 'POST',
+            });
+            invalidate('feed:*');
+            return post;
+        } catch {
+            return null;
+        }
+    }, [apiCall]);
+
+    const updateProfile = useCallback(async (data: { display_name: string; bio: string; avatar_url: string }): Promise<boolean> => {
+        try {
+            await apiCall(`${AUTH_API}/social/profile`, {
+                method: 'PUT',
+                body: JSON.stringify(data),
+            });
+            return true;
+        } catch {
+            return false;
+        }
+    }, [apiCall]);
+
+    return {
+        fetchPosts,
+        fetchThread,
+        fetchProfile,
+        fetchOwnProfile,
+        createPost,
+        createComment,
+        likePost,
+        unlikePost,
+        deletePost,
+        createRepost,
+        updateProfile,
+    };
 }

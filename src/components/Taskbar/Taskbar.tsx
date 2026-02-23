@@ -55,23 +55,31 @@ export default function Taskbar() {
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    // Escuta eventos globais do Broadcast do WebSocket (Pessoas online)
-    const { subscribe } = useWebSocketContext();
+    const { subscribe, lastMessage } = useWebSocketContext();
     useEffect(() => {
         if (wsStatus === 'connected') {
             const unsubscribe = subscribe('userCount', (msg) => {
-                // Safely extract payload count
                 const count = (msg.data as { count?: number })?.count;
                 if (typeof count === 'number') {
                     setOnlineUsers(count);
                 }
             });
-
             return () => unsubscribe();
         } else {
             setOnlineUsers(0);
         }
     }, [subscribe, wsStatus]);
+
+    // O fallback usando lastMessage garante que nao percamos o evento inicial
+    // caso o componente se inscreva tarde demais
+    useEffect(() => {
+        if (lastMessage?.action === 'userCount') {
+            const count = (lastMessage.data as { count?: number })?.count;
+            if (typeof count === 'number') {
+                setOnlineUsers(count);
+            }
+        }
+    }, [lastMessage]);
 
     const openWindows = windows.filter(w => w.isOpen);
 
@@ -94,11 +102,6 @@ export default function Taskbar() {
         offline: 'Offline',
     };
 
-    const wsIcon: Record<string, string> = {
-        connected: '🟢',
-        connecting: '🟡',
-        offline: '🔴',
-    };
 
     const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -109,29 +112,53 @@ export default function Taskbar() {
             const formData = new FormData();
             formData.append('file', file);
 
-            // Upload directly to Next.js Cloudinary Route
+            // Upload to Cloudinary via Next.js route
             const res = await fetch('/api/avatar/upload', {
                 method: 'POST',
                 body: formData
             });
 
-            if (!res.ok) throw new Error('Cloudinary Upload Failed');
+            // Always parse JSON — even on error, we might have gotten a url
+            let data: { url?: string; error?: string } = {};
+            try {
+                data = await res.json();
+            } catch {
+                console.error('[Avatar] Could not parse upload response');
+            }
 
-            const data = await res.json();
+            console.log('[Avatar] Upload response:', res.status, data);
+
             const newUrl = data.url;
+            if (!newUrl) {
+                console.error('[Avatar] No URL returned:', data.error);
+                alert(`Erro no upload: ${data.error ?? 'sem URL retornada'}`);
+                return;
+            }
 
-            // Instant UI App Update
-            const { updateAuthUser, apiCall } = await import('@/context/AuthContext').then(m => ({ updateAuthUser: m.useAuth().updateAuthUser, apiCall: m.useAuth().apiCall })).catch(() => ({ updateAuthUser: () => { }, apiCall: async () => { } }));
+            // 1. Update UI immediately
+            updateAuthUser({ avatar_url: newUrl });
 
-            // Since we are inside the component, we can just use the destructucted updateAuthUser from useAuth() at the top. Let's fix that.
+            // 2. Persist to backend (independently — don't let this block or revert the UI)
+            try {
+                const AUTH_API = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'https://backend-go-portal-u9o8.onrender.com';
+                await apiCall(`${AUTH_API}/social/profile`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ avatar_url: newUrl }),
+                });
+                console.log('[Avatar] Persisted to backend:', newUrl);
+            } catch (backendErr) {
+                console.error('[Avatar] Backend persist failed (UI already updated):', backendErr);
+                // Don't alert — the local state is already updated, it will persist on next profile edit
+            }
         } catch (error) {
-            console.error(error);
-            alert("Erro ao enviar foto de perfil.");
+            console.error('[Avatar] Upload error:', error);
+            alert('Erro ao enviar foto de perfil. Verifique o console para detalhes.');
         } finally {
             setIsUploadingAvatar(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
+
 
     return (
         <>
@@ -179,9 +206,18 @@ export default function Taskbar() {
                             }}
                             title="Mapa UFERSA"
                         >
-                            <img src="/icons-95/globe_map.ico" alt="" style={{ width: '16px', height: '16px', imageRendering: 'pixelated' }} />
+                            <img src="/icons-95/gps.ico" alt="" style={{ width: '16px', height: '16px', imageRendering: 'pixelated' }} />
                             <span className={styles.profileName}>Mapa UFERSA</span>
                         </button>
+                    </div>
+
+                    <div className={styles.separator} />
+
+                    <div className={styles.trayItem} title="Pessoas Online no Portal" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#000', padding: '0px 6px', border: '1px inset #fff', cursor: 'pointer', height: '22px' }} onClick={() => setShowNetwork(true)}>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: 13, color: '#0f0', minWidth: 16, textAlign: 'center' }}>
+                            {wsStatus === 'connected' ? 'ON: ' : 'OFF'}
+                            {wsStatus === 'connected' ? Math.max(1, onlineUsers) : ''}
+                        </span>
                     </div>
 
                     <div className={styles.separator} />
@@ -222,12 +258,16 @@ export default function Taskbar() {
                                             <img src="/icons-95/users.ico" alt="" style={{ width: 16, height: 16 }} />
                                             Pessoas Online no Portal
                                         </span>
-                                        <span style={{ background: '#000', color: '#0f0', padding: '0px 6px', fontFamily: 'monospace', fontWeight: 'bold', border: '1px inset #fff' }}>
-                                            {wsStatus === 'connected' ? onlineUsers : 0}
+                                        <span style={{
+                                            background: '#000', color: '#0f0', padding: '2px 8px',
+                                            fontFamily: 'monospace', fontWeight: 'bold', fontSize: 15, border: '1px inset #fff',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 26
+                                        }}>
+                                            {wsStatus === 'connected' ? Math.max(1, onlineUsers) : '-'}
                                         </span>
                                     </div>
-                                    <div style={{ marginTop: '8px', fontSize: '10px', color: '#666', textAlign: 'right' }}>
-                                        Ping via {process.env.NEXT_PUBLIC_WS_URL ? 'WSS Seguro' : 'Local'}
+                                    <div style={{ marginTop: '12px', fontSize: '10px', color: '#666', textAlign: 'center', borderTop: '1px dotted #ccc', paddingTop: '8px' }}>
+                                        Servidor em {process.env.NEXT_PUBLIC_WS_URL ? 'WSS Seguro' : 'Conexão Local'}
                                     </div>
                                 </div>
                             </div>
@@ -267,11 +307,22 @@ export default function Taskbar() {
                             }}
                             title={user ? user.username : 'Entrar'}
                         >
-                            <img
-                                src={user ? (user.avatar_url || '/icons-95/user_computer.ico') : '/icons-95/key_padlock.ico'}
-                                alt=""
-                                style={{ width: '16px', height: '16px', objectFit: 'cover', borderRadius: user?.avatar_url ? '50%' : '0' }}
-                            />
+                            <div style={{
+                                width: 18, height: 18, borderRadius: '50%',
+                                background: user?.avatar_url ? 'transparent' : '#000080',
+                                border: '1px solid #404040',
+                                overflow: 'hidden',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                flexShrink: 0, fontSize: 10, color: '#fff', fontWeight: 'bold',
+                            }}>
+                                {user?.avatar_url ? (
+                                    <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : user ? (
+                                    user.username[0].toUpperCase()
+                                ) : (
+                                    <img src="/icons-95/key_world.ico" alt="" style={{ width: '14px', height: '14px' }} />
+                                )}
+                            </div>
                             <span className={styles.profileName}>
                                 {user ? user.username : 'Entrar'}
                             </span>
@@ -291,13 +342,43 @@ export default function Taskbar() {
                                             title="Clique para alterar a foto do perfil"
                                         >
                                             <img
-                                                src={user.avatar_url || "/icons-95/users.ico"}
+                                                src={user.avatar_url || "/icons-95/user_computer.ico"}
                                                 alt="Avatar"
                                                 className={styles.profileBigIcon}
-                                                style={{ objectFit: 'cover', borderRadius: user.avatar_url ? '4px' : '0', opacity: isUploadingAvatar ? 0.5 : 1 }}
+                                                style={{ objectFit: 'cover', borderRadius: user.avatar_url ? '2px' : '0', opacity: isUploadingAvatar ? 0.3 : 1 }}
                                             />
-                                            <div style={{ position: 'absolute', bottom: -5, right: -5, background: '#d4d0c8', border: '1px solid #fff', borderBottomColor: '#404040', borderRightColor: '#404040', padding: '2px', display: 'flex' }}>
-                                                <img src="/icons-95/camera.ico" style={{ width: 12, height: 12 }} alt="Edit" />
+                                            {isUploadingAvatar && (
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: 0, left: 0, right: 0, bottom: 0,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    color: '#fff', fontSize: '11px', fontWeight: 'bold', textShadow: '1px 1px 2px #000',
+                                                    fontFamily: 'monospace'
+                                                }}>
+                                                    Wait...
+                                                </div>
+                                            )}
+                                            <div style={{
+                                                position: 'absolute',
+                                                bottom: 0,
+                                                right: 0,
+                                                background: '#d4d0c8',
+                                                borderTop: '1px solid #fff',
+                                                borderLeft: '1px solid #fff',
+                                                borderBottom: '1px outset #000',
+                                                borderRight: '1px outset #000',
+                                                width: 14,
+                                                height: 14,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '12px',
+                                                fontWeight: 'bold',
+                                                fontFamily: 'monospace',
+                                                color: '#008000',
+                                                lineHeight: 1
+                                            }} title="Alterar Foto">
+                                                +
                                             </div>
                                         </div>
                                         <input
@@ -308,7 +389,7 @@ export default function Taskbar() {
                                             onChange={handleAvatarUpload}
                                         />
                                         <div>
-                                            <div className={styles.profileUsername}>{user.username}</div>
+                                            <div className={styles.profileUsername}>@{user.username}</div>
                                             <div className={styles.profileStatus} style={{ fontSize: '10px' }}>
                                                 Membro Registrado
                                             </div>
@@ -322,7 +403,7 @@ export default function Taskbar() {
                                             logout();
                                         }}
                                     >
-                                        <img src="/icons-95/key_padlock.ico" alt="" style={{ width: '16px', height: '16px' }} />
+                                        <img src="/icons-95/key_world.ico" alt="" style={{ width: '16px', height: '16px' }} />
                                         Sair
                                     </button>
                                 </div>

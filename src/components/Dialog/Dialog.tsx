@@ -2,7 +2,6 @@
 
 import { ReactNode } from 'react';
 import styles from './Dialog.module.css';
-import Image from 'next/image';
 
 interface DialogButton {
     label: string;
@@ -77,7 +76,7 @@ export function AlertDialog({ title, message, type = 'info', onOk, onCancel, Ima
     return (
         <Dialog title={title} icon={typeIcons[type]} buttons={buttons} onClose={onCancel || onOk}>
             <div style={{ paddingRight: '50px', justifyContent: 'center', display: 'flex', }}>
-            {Image && <Image src={`/icons-95/${type}.ico`} alt={type} height={16} width={16}  />}
+                {Image && <Image src={`/icons-95/${type}.ico`} alt={type} height={16} width={16} />}
             </div>
             <p>{message}</p>
         </Dialog>

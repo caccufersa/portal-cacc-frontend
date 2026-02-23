@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   keywords: 'CACC, Centro Acadêmico, Ciência da Computação, UFERSA, Mossoró, RN, Universidade, Curso, Programação',
   authors: [{ name: 'CACC UFERSA' }],
   icons: {
-    icon: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+    icon: 'favicon.svg',
   },
   openGraph: {
     title: 'CACC - Centro Acadêmico de Ciência da Computação',

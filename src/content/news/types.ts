@@ -31,13 +31,13 @@ export type NewsView =
     | { type: 'detail'; id: number };
 
 export const CATEGORIAS: Record<string, { label: string; icon: string }> = {
-    geral: { label: 'Geral', icon: '/icons-95/msg_information.ico' },
+    geral: { label: 'Geral', icon: '/icons-95/newspaper.ico' },
     evento: { label: 'Evento', icon: '/icons-95/calendar.ico' },
     academico: { label: 'Academico', icon: '/icons-95/directory_open_file_mydocs.ico' },
-    
+
 };
 
 export function getCategoria(cat: string) {
     const key = cat.toLowerCase();
-    return { key, ...( CATEGORIAS[key] || CATEGORIAS.geral ) };
+    return { key, ...(CATEGORIAS[key] || CATEGORIAS.geral) };
 }

@@ -49,9 +49,9 @@ export default function HelpContent() {
         });
     };
 
-    const handleTouchStart = (e: React.TouchEvent, index: number) => {
+    const handleTouchStart = (e: React.TouchEvent) => {
         const touch = e.touches[0];
-        setTouchStart({ x: touch.clientX, y: touch.clientY, time: Date.now() });
+        setTouchStart({ x: touch.clientX, y: touch.clientY, time: e.timeStamp });
     };
 
     const handleTouchMove = (e: React.TouchEvent, index: number) => {
@@ -73,7 +73,7 @@ export default function HelpContent() {
         const touch = e.changedTouches[0];
         const deltaX = touch.clientX - touchStart.x;
         const deltaY = touch.clientY - touchStart.y;
-        const currentTime = Date.now();
+        const currentTime = e.timeStamp;
         const deltaTime = currentTime - touchStart.time;
 
         const isQuickSwipe = deltaTime < 300 && Math.abs(deltaX) > 30;
@@ -96,16 +96,16 @@ export default function HelpContent() {
                 Encontre aqui respostas para as perguntas mais frequentes dos estudantes.
             </p>
 
-            
+
             {faqs.map((faq, index) => {
                 const isOpen = openFaqs.has(index);
                 const offset = swipeOffset?.index === index ? swipeOffset.offset : 0;
-                
+
                 return (
-                    <div 
-                        key={index} 
+                    <div
+                        key={index}
                         className={styles.faqItem}
-                        onTouchStart={(e) => handleTouchStart(e, index)}
+                        onTouchStart={(e) => handleTouchStart(e)}
                         onTouchMove={(e) => handleTouchMove(e, index)}
                         onTouchEnd={(e) => handleTouchEnd(e, index)}
                         style={{
@@ -113,7 +113,7 @@ export default function HelpContent() {
                             transition: offset ? 'none' : 'transform 0.2s ease',
                         }}
                     >
-                        <button 
+                        <button
                             className={`${styles.faqButton} ${isOpen ? styles.faqButtonOpen : ''}`}
                             onClick={() => toggleFaq(index)}
                         >

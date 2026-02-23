@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, memo } from 'react';
 import type { Post, UserProfile } from './types';
-import { fetchProfile, likePost, unlikePost } from './api';
+import { useAuth } from '@/context/AuthContext';
+import { useForumApi } from './api';
 import { avatarLetter } from './helpers';
 import PostRow from './PostRow';
 import { FeedSkeleton } from './Skeletons';
@@ -22,6 +23,13 @@ const ProfileView = memo(function ProfileView({
     const [tab, setTab] = useState<'posts' | 'likes'>('posts');
     const [entering, setEntering] = useState(true);
     const [likingId, setLikingId] = useState<number | null>(null);
+    const { user, updateAuthUser } = useAuth();
+    const { fetchProfile, fetchOwnProfile, likePost, unlikePost, updateProfile } = useForumApi();
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [editDisplayName, setEditDisplayName] = useState('');
+    const [editBio, setEditBio] = useState('');
+    const [savingProfile, setSavingProfile] = useState(false);
 
     useEffect(() => {
         requestAnimationFrame(() => setEntering(false));
@@ -29,14 +37,18 @@ const ProfileView = memo(function ProfileView({
 
     useEffect(() => {
         let cancelled = false;
-        fetchProfile(username).then(data => {
+        const isOwnProfile = user?.username === username;
+        // Use the authenticated endpoint for own profile — it returns all posts
+        // including ones that /profile/:username might hide
+        const fetcher = isOwnProfile ? fetchOwnProfile() : fetchProfile(username);
+        fetcher.then(data => {
             if (!cancelled) {
                 setProfile(data);
                 setLoading(false);
             }
         });
         return () => { cancelled = true; };
-    }, [username]);
+    }, [username, user?.username, fetchProfile, fetchOwnProfile]);
 
     const handleLike = React.useCallback(async (postId: number) => {
         if (!profile || likingId === postId) return;
@@ -60,9 +72,6 @@ const ProfileView = memo(function ProfileView({
                         // Only update on success
                         newPosts[idx] = { ...newPosts[idx], likes: result.likes, liked: !isLiked };
                     }
-                    // Update total likes? Ideally server returns this or we recalculate, but simple toggle is okay
-                    // However result only gives post likes. 
-                    // Let's assume total_likes change matches delta for now until full profile refresh
                     const delta = isLiked ? -1 : 1;
                     return { ...prev, posts: newPosts, total_likes: prev.total_likes + delta };
                 });
@@ -72,7 +81,26 @@ const ProfileView = memo(function ProfileView({
         } finally {
             setLikingId(null);
         }
-    }, [profile, likingId]);
+    }, [profile, likingId, likePost, unlikePost]);
+
+    const handleEditSave = async () => {
+        if (!profile) return;
+        setSavingProfile(true);
+        const updates = {
+            display_name: editDisplayName.trim(),
+            bio: editBio.trim(),
+            avatar_url: profile.avatar_url || '',
+        };
+        const ok = await updateProfile(updates);
+        if (ok) {
+            setProfile({ ...profile, ...updates });
+            updateAuthUser(updates);
+            setIsEditing(false);
+        } else {
+            alert("Erro ao salvar perfil.");
+        }
+        setSavingProfile(false);
+    };
 
     if (loading) {
         return (
@@ -117,19 +145,74 @@ const ProfileView = memo(function ProfileView({
             </button>
 
             <div className={s.profileHeader}>
-                <div className={s.profileAvatarLg}>{avatarLetter(profile.username)}</div>
-                <div className={s.profileInfo}>
-                    <div className={s.profileName}>{profile.username}</div>
-                    <div className={s.profileStats}>
-                        <div className={s.profileStat}>
-                            <span className={s.profileStatVal}>{profile.total_posts}</span>
-                            <span className={s.profileStatLabel}>posts</span>
-                        </div>
-                        <div className={s.profileStat}>
-                            <span className={s.profileStatVal}>{profile.total_likes}</span>
-                            <span className={s.profileStatLabel}>curtidas</span>
-                        </div>
-                    </div>
+                <div className={s.profileAvatarLg}>
+                    {profile.avatar_url ? (
+                        <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                        avatarLetter(profile.username)
+                    )}
+                </div>
+                <div className={s.profileInfo} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {isEditing ? (
+                        <>
+                            <input
+                                className={s.searchInput}
+                                style={{ fontSize: 20, fontWeight: 'bold', width: '100%', padding: 4 }}
+                                value={editDisplayName}
+                                onChange={e => setEditDisplayName(e.target.value.slice(0, 50))}
+                                placeholder="Nome de Exibiçao"
+                                disabled={savingProfile}
+                            />
+                            <textarea
+                                className={s.composeTextarea}
+                                style={{ width: '100%', fontSize: 13, marginTop: 4 }}
+                                rows={3}
+                                value={editBio}
+                                onChange={e => setEditBio(e.target.value.slice(0, 500))}
+                                placeholder="Sua bio..."
+                                disabled={savingProfile}
+                            />
+                            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                <button className={s.toolbarBtn} onClick={handleEditSave} disabled={savingProfile}>
+                                    Salvar
+                                </button>
+                                <button className={s.toolbarBtn} onClick={() => setIsEditing(false)} disabled={savingProfile}>
+                                    Cancelar
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div className={s.profileName}>{profile.display_name || profile.username}</div>
+                                {user?.username === profile.username && (
+                                    <button
+                                        className={s.toolbarBtnSmall}
+                                        onClick={() => {
+                                            setEditDisplayName(profile.display_name || '');
+                                            setEditBio(profile.bio || '');
+                                            setIsEditing(true);
+                                        }}
+                                        title="Editar Perfil"
+                                    >
+                                        <img src="/icons-95/accessibility_toggle.ico" alt="" style={{ width: 14, height: 14 }} />
+                                    </button>
+                                )}
+                            </div>
+                            <div className={s.profileUsername} style={{ opacity: 0.7, marginBottom: 8 }}>@{profile.username}</div>
+                            {profile.bio && <div className={s.profileBio} style={{ fontSize: 13, marginBottom: 12 }}>{profile.bio}</div>}
+                            <div className={s.profileStats}>
+                                <div className={s.profileStat}>
+                                    <span className={s.profileStatVal}>{profile.total_posts}</span>
+                                    <span className={s.profileStatLabel}>posts</span>
+                                </div>
+                                <div className={s.profileStat}>
+                                    <span className={s.profileStatVal}>{profile.total_likes}</span>
+                                    <span className={s.profileStatLabel}>curtidas</span>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 

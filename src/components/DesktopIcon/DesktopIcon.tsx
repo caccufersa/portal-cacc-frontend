@@ -7,6 +7,7 @@ interface DesktopIconProps {
     id: string;
     icon: string;
     label: string;
+    iconSize?: number;
     initialPosition: { x: number; y: number };
     isSelected: boolean;
     onSelect: (id: string) => void;
@@ -14,7 +15,7 @@ interface DesktopIconProps {
     onPositionChange: (position: { x: number; y: number }) => void;
 }
 
-export default function DesktopIcon({ id, icon, label, initialPosition, isSelected, onSelect, onDoubleClick, onPositionChange }: DesktopIconProps) {
+export default function DesktopIcon({ id, icon, label, iconSize, initialPosition, isSelected, onSelect, onDoubleClick, onPositionChange }: DesktopIconProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [position, setPosition] = useState(initialPosition);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -84,7 +85,7 @@ export default function DesktopIcon({ id, icon, label, initialPosition, isSelect
             tabIndex={0}
         >
             <div className={styles.iconImage}>
-                <img src={icon} alt={label} style={{ width: '32px', height: '32px' }} />
+                <img src={icon} alt={label} style={{ width: iconSize ? `${iconSize}px` : '32px', height: iconSize ? `${iconSize}px` : '32px' }} />
             </div>
             <span className={styles.label}>{label}</span>
         </div>

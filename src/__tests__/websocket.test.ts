@@ -1,14 +1,12 @@
-/* ------------------------------------------------------------------ */
-/*  WebSocketService – testes unitários                                */
-/* ------------------------------------------------------------------ */
+
+//  WebSocketService – testes unitários
+
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WebSocketService } from '@/lib/websocket/WebSocketService';
 import type { WSMessage } from '@/lib/websocket/types';
 
-/* ------------------------------------------------------------------ */
-/*  Mock do WebSocket nativo                                           */
-/* ------------------------------------------------------------------ */
+//  Mock do WebSocket nativo  
 
 type WSListener = (ev: unknown) => void;
 
@@ -290,9 +288,8 @@ describe('WebSocketService – reconexão', () => {
     });
 });
 
-/* ------------------------------------------------------------------ */
-/*  5. Token expirado / erro de auth                                   */
-/* ------------------------------------------------------------------ */
+//  5. Token expirado / erro de auth
+
 
 describe('WebSocketService – token expirado', () => {
     it('chama onAuthError e NÃO reconecta no code 4001', () => {
@@ -341,9 +338,7 @@ describe('WebSocketService – token expirado', () => {
     });
 });
 
-/* ------------------------------------------------------------------ */
-/*  6. Heartbeat                                                       */
-/* ------------------------------------------------------------------ */
+// Heartbeat
 
 describe('WebSocketService – heartbeat', () => {
     it('envia ping no intervalo configurado', () => {
@@ -380,9 +375,7 @@ describe('WebSocketService – heartbeat', () => {
     });
 });
 
-/* ------------------------------------------------------------------ */
-/*  7. Singleton                                                       */
-/* ------------------------------------------------------------------ */
+// Singleton
 
 describe('WebSocketService – singleton', () => {
     it('retorna a mesma instância', () => {

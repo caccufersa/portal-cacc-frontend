@@ -15,7 +15,7 @@ interface Image {
     description: string;
 }
 
-const PREDEFINED_ALBUMS = ['Geral', 'WTCC 2026', 'Interclasse 2025', 'Outros'];
+const PREDEFINED_ALBUMS = ['Geral', 'WTCC 2026', 'Outros'];
 
 const SkeletonItem = ({ height }: { height: number }) => (
     <div
@@ -338,7 +338,12 @@ export default function GaleriaContent() {
                                             />
                                         </div>
                                         <div style={{ marginTop: '8px', fontSize: '11px', color: '#404040' }}>
-                                            {image.description ? image.description : <i>Sem descrição</i>}
+                                            <div style={{ marginBottom: '4px' }}>
+                                                {image.description ? image.description : <i>Sem descrição</i>}
+                                            </div>
+                                            <div style={{ color: '#000080' }}>
+                                                Enviado por <b>{image.user !== 'Anônimo' ? `@${image.user}` : image.user}</b>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -382,7 +387,7 @@ export default function GaleriaContent() {
                             <p style={{ margin: '4px 0 0', fontSize: '13px' }}>{selectedImage.description}</p>
                         )}
                         <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#ddd' }}>
-                            Enviado por <b>{selectedImage.user}</b> em {new Date(selectedImage.createdAt).toLocaleDateString('pt-BR')}
+                            Enviado por <b>{selectedImage.user !== 'Anônimo' ? `@${selectedImage.user}` : selectedImage.user}</b> em {new Date(selectedImage.createdAt).toLocaleDateString('pt-BR')}
                         </p>
                     </div>
                 </div>

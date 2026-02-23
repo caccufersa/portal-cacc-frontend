@@ -10,6 +10,7 @@ export default function TutorialPopup() {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
         const isDismissed = localStorage.getItem('cacc-tutorial-login-dismissed');
         if (isDismissed) {
