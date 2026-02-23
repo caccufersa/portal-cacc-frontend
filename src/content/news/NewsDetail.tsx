@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, JSX, createElement } from 'react';
-import type { Noticia, EditorJSData } from './types';
+import type { Noticia, EditorJSData, EditorJSBlock } from './types';
 import { getCategoria } from './types';
 import { fetchNoticia } from './api';
 import { ListSkeleton } from './Skeletons';
@@ -15,190 +15,195 @@ function formatFull(dateStr: string): string {
     });
 }
 
-function renderEditorJS(data: EditorJSData): JSX.Element[] {
-    return data.blocks.map((block, idx) => {
-        switch (block.type) {
-            case 'header': {
-                const data = block.data as { level?: number; text: string };
-                const level = Math.min(Math.max(data.level || 2, 1), 6);
-                return createElement(
-                    `h${level}`,
-                    { key: idx, className: s.detailHeading },
-                    data.text
-                );
-            }
+// Typed accessors — avoids `block.data` being `unknown` at usage sites
+function blockData<T>(block: EditorJSBlock): T {
+    return block.data as T;
+}
 
-            case 'paragraph': {
-                const data = block.data as { text: string };
-                return <p key={idx} className={s.detailParagraph} dangerouslySetInnerHTML={{ __html: data.text }} />;
-            }
-
-            case 'list': {
-                const data = block.data as { style: string; items: string[] };
-                const ListTag = data.style === 'ordered' ? 'ol' : 'ul';
-                return (
-                    <ListTag key={idx} className={s.detailList}>
-                        {data.items.map((item: string, i: number) => (
-                            <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
-                        ))}
-                    </ListTag>
-                );
-            }
-
-            case 'checklist': {
-                const data = block.data as { items: { text: string; checked: boolean }[] };
-                return (
-                    <ul key={idx} className={s.detailChecklist}>
-                        {(data.items || []).map((item: { text: string; checked: boolean }, i: number) => (
-                            <li key={i} className={item.checked ? s.detailChecklistChecked : ''}>
-                                <span>{item.checked ? '☑' : '☐'}</span>
-                                <span dangerouslySetInnerHTML={{ __html: item.text }} />
-                            </li>
-                        ))}
-                    </ul>
-                );
-            }
-
-            case 'quote': {
-                const data = block.data as { text: string; caption: string };
-                return (
-                    <blockquote key={idx} className={s.detailQuote}>
-                        <p dangerouslySetInnerHTML={{ __html: data.text }} />
-                        {data.caption && (
-                            <cite className={s.detailQuoteCaption}>{data.caption}</cite>
-                        )}
-                    </blockquote>
-                );
-            }
-
-            case 'image': {
-                const data = block.data as { file?: { url: string }; url?: string; caption: string };
-                return (
-                    <figure key={idx} className={s.detailFigure}>
-                        <img src={data.file?.url || data.url} alt="" className={s.detailContentImage} />
-                        {data.caption && (
-                            <figcaption className={s.detailFigcaption}>{data.caption}</figcaption>
-                        )}
-                    </figure>
-                );
-            }
-
-            case 'code': {
-                const data = block.data as { code: string };
-                return (
-                    <pre key={idx} className={s.detailCode}>
-                        <code>{data.code}</code>
-                    </pre>
-                );
-            }
-
-            case 'raw': {
-                const data = block.data as { html: string };
-                return (
-                    <div
-                        key={idx}
-                        className={s.detailRawHtml}
-                        dangerouslySetInnerHTML={{ __html: data.html || '' }}
-                    />
-                );
-            }
-
-            case 'embed': {
-                const data = block.data as { embed: string; width: number; height: number; caption: string };
-                return (
-                    <figure key={idx} className={s.detailFigure}>
-                        <iframe
-                            src={data.embed}
-                            width={data.width || '100%'}
-                            height={data.height || 320}
-                            className={s.detailEmbed}
-                            title={data.caption || 'Embed'}
-                            allowFullScreen
-                        />
-                        {data.caption && (
-                            <figcaption className={s.detailFigcaption}>{data.caption}</figcaption>
-                        )}
-                    </figure>
-                );
-            }
-
-            case 'table': {
-                const data = block.data as { content: string[][]; withHeadings: boolean };
-                const rows: string[][] = data.content || [];
-                return (
-                    <div key={idx} className={s.detailTableWrap}>
-                        <table className={s.detailTable}>
-                            {data.withHeadings && rows.length > 0 && (
-                                <thead>
-                                    <tr>
-                                        {rows[0].map((cell: string, ci: number) => (
-                                            <th key={ci} dangerouslySetInnerHTML={{ __html: cell }} />
-                                        ))}
-                                    </tr>
-                                </thead>
-                            )}
-                            <tbody>
-                                {(data.withHeadings ? rows.slice(1) : rows).map((row: string[], ri: number) => (
-                                    <tr key={ri}>
-                                        {row.map((cell: string, ci: number) => (
-                                            <td key={ci} dangerouslySetInnerHTML={{ __html: cell }} />
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                );
-            }
-
-            case 'warning': {
-                const data = block.data as { title: string; message: string };
-                return (
-                    <div key={idx} className={s.detailWarning}>
-                        <div className={s.detailWarningTitle}>
-                            <img src="/icons-95/msg_warning.ico" alt="" style={{ width: 16, height: 16 }} />
-                            {data.title}
-                        </div>
-                        <p dangerouslySetInnerHTML={{ __html: data.message }} />
-                    </div>
-                );
-            }
-
-            case 'linkTool': {
-                const data = block.data as { link: string; meta: { title: string; description: string } };
-                return (
-                    <a
-                        key={idx}
-                        href={data.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={s.detailLink}
-                    >
-                        <span className={s.detailLinkTitle}>{data.meta?.title || data.link}</span>
-                        {data.meta?.description && (
-                            <span className={s.detailLinkDesc}>{data.meta.description}</span>
-                        )}
-                    </a>
-                );
-            }
-
-            case 'delimiter':
-                return <hr key={idx} className={s.detailDelimiter} />;
-
-            default: {
-                // Fallback: se tem text ou html, renderiza; senão ignora
-                const data = block.data as { text?: string; html?: string };
-                if (data.text) {
-                    return <p key={idx} className={s.detailParagraph} dangerouslySetInnerHTML={{ __html: data.text }} />;
-                }
-                if (data.html) {
-                    return <div key={idx} className={s.detailRawHtml} dangerouslySetInnerHTML={{ __html: data.html }} />;
-                }
-                // Bloco vazio ou desconhecido — não mostrar JSON
-                return <div key={idx} />;
-            }
+function renderBlock(block: EditorJSBlock, idx: number): JSX.Element {
+    switch (block.type) {
+        case 'header': {
+            const d = blockData<{ level?: number; text: string }>(block);
+            const level = Math.min(Math.max(d.level || 2, 1), 6);
+            return createElement(
+                `h${level}`,
+                { key: idx, className: s.detailHeading },
+                d.text
+            );
         }
-    });
+
+        case 'paragraph': {
+            const d = blockData<{ text: string }>(block);
+            return <p key={idx} className={s.detailParagraph} dangerouslySetInnerHTML={{ __html: d.text }} />;
+        }
+
+        case 'list': {
+            const d = blockData<{ style: string; items: string[] }>(block);
+            const ListTag = d.style === 'ordered' ? 'ol' : 'ul';
+            return (
+                <ListTag key={idx} className={s.detailList}>
+                    {d.items.map((item, i) => (
+                        <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
+                    ))}
+                </ListTag>
+            );
+        }
+
+        case 'checklist': {
+            const d = blockData<{ items: { text: string; checked: boolean }[] }>(block);
+            return (
+                <ul key={idx} className={s.detailChecklist}>
+                    {(d.items || []).map((item, i) => (
+                        <li key={i} className={item.checked ? s.detailChecklistChecked : ''}>
+                            <span>{item.checked ? '☑' : '☐'}</span>
+                            <span dangerouslySetInnerHTML={{ __html: item.text }} />
+                        </li>
+                    ))}
+                </ul>
+            );
+        }
+
+        case 'quote': {
+            const d = blockData<{ text: string; caption: string }>(block);
+            return (
+                <blockquote key={idx} className={s.detailQuote}>
+                    <p dangerouslySetInnerHTML={{ __html: d.text }} />
+                    {d.caption && (
+                        <cite className={s.detailQuoteCaption}>{d.caption}</cite>
+                    )}
+                </blockquote>
+            );
+        }
+
+        case 'image': {
+            const d = blockData<{ file?: { url: string }; url?: string; caption?: string }>(block);
+            return (
+                <figure key={idx} className={s.detailFigure}>
+                    <img src={d.file?.url || d.url} alt="" className={s.detailContentImage} />
+                    {d.caption && (
+                        <figcaption className={s.detailFigcaption}>{d.caption}</figcaption>
+                    )}
+                </figure>
+            );
+        }
+
+        case 'code': {
+            const d = blockData<{ code: string }>(block);
+            return (
+                <pre key={idx} className={s.detailCode}>
+                    <code>{d.code}</code>
+                </pre>
+            );
+        }
+
+        case 'raw': {
+            const d = blockData<{ html: string }>(block);
+            return (
+                <div
+                    key={idx}
+                    className={s.detailRawHtml}
+                    dangerouslySetInnerHTML={{ __html: d.html || '' }}
+                />
+            );
+        }
+
+        case 'embed': {
+            const d = blockData<{ embed: string; width?: number; height?: number; caption?: string }>(block);
+            return (
+                <figure key={idx} className={s.detailFigure}>
+                    <iframe
+                        src={d.embed}
+                        width={d.width || '100%'}
+                        height={d.height || 320}
+                        className={s.detailEmbed}
+                        title={d.caption || 'Embed'}
+                        allowFullScreen
+                    />
+                    {d.caption && (
+                        <figcaption className={s.detailFigcaption}>{d.caption}</figcaption>
+                    )}
+                </figure>
+            );
+        }
+
+        case 'table': {
+            const d = blockData<{ content: string[][]; withHeadings: boolean }>(block);
+            const rows: string[][] = d.content || [];
+            return (
+                <div key={idx} className={s.detailTableWrap}>
+                    <table className={s.detailTable}>
+                        {d.withHeadings && rows.length > 0 && (
+                            <thead>
+                                <tr>
+                                    {rows[0].map((cell, ci) => (
+                                        <th key={ci} dangerouslySetInnerHTML={{ __html: cell }} />
+                                    ))}
+                                </tr>
+                            </thead>
+                        )}
+                        <tbody>
+                            {(d.withHeadings ? rows.slice(1) : rows).map((row, ri) => (
+                                <tr key={ri}>
+                                    {row.map((cell, ci) => (
+                                        <td key={ci} dangerouslySetInnerHTML={{ __html: cell }} />
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        case 'warning': {
+            const d = blockData<{ title: string; message: string }>(block);
+            return (
+                <div key={idx} className={s.detailWarning}>
+                    <div className={s.detailWarningTitle}>
+                        <img src="/icons-95/msg_warning.ico" alt="" style={{ width: 16, height: 16 }} />
+                        {d.title}
+                    </div>
+                    <p dangerouslySetInnerHTML={{ __html: d.message }} />
+                </div>
+            );
+        }
+
+        case 'linkTool': {
+            const d = blockData<{ link: string; meta?: { title?: string; description?: string } }>(block);
+            return (
+                <a
+                    key={idx}
+                    href={d.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={s.detailLink}
+                >
+                    <span className={s.detailLinkTitle}>{d.meta?.title || d.link}</span>
+                    {d.meta?.description && (
+                        <span className={s.detailLinkDesc}>{d.meta.description}</span>
+                    )}
+                </a>
+            );
+        }
+
+        case 'delimiter':
+            return <hr key={idx} className={s.detailDelimiter} />;
+
+        default: {
+            const d = blockData<{ text?: string; html?: string }>(block);
+            if (d.text) {
+                return <p key={idx} className={s.detailParagraph} dangerouslySetInnerHTML={{ __html: d.text }} />;
+            }
+            if (d.html) {
+                return <div key={idx} className={s.detailRawHtml} dangerouslySetInnerHTML={{ __html: d.html }} />;
+            }
+            return <div key={idx} />;
+        }
+    }
+}
+
+function renderEditorJS(data: EditorJSData): JSX.Element[] {
+    return data.blocks.map((block, idx) => renderBlock(block, idx));
 }
 
 export default function NewsDetail({
@@ -219,7 +224,7 @@ export default function NewsDetail({
                 try {
                     data.conteudo_obj = JSON.parse(data.conteudo);
                 } catch {
-                    // Se não for JSON válido, mantém como texto simples
+                    // Not valid JSON — will render as plain text
                 }
             }
             setNoticia(data);

@@ -40,8 +40,8 @@ interface Trip {
 }
 
 const TRIPS: Trip[] = [
-    { id: 't1', destination: 'Natal - RN | Dataprev + Cloud++ VISITA TÉCNICA', date: '15/07/2026 - 06:00', price: 'R$ 40,00', layoutId: 'executive' },
-    { id: 't2', destination: 'Fortaleza - CE | Serpro | VISITA TÉCNICA', date: '22/08/2026 - 05:30', price: 'R$ 50,00', layoutId: 'standard' },
+    { id: 't1', destination: 'Natal - RN | Dataprev + Cloud++ VISITA TÉCNICA', date: '15/07/2026 - 06:00', price: '', layoutId: 'executive' },
+    { id: 't2', destination: 'Fortaleza - CE | Serpro | VISITA TÉCNICA', date: '22/08/2026 - 05:30', price: '', layoutId: 'standard' },
 ];
 
 import { useBusService } from './bus/useBusService';
