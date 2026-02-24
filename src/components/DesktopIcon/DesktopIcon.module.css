@@ -52,7 +52,8 @@
     pointer-events: none;
 }
 
-@media (max-width: 768px) {
+/* Ativa layout em grid (sem position:absolute) a partir de telas médias */
+@media (max-width: 900px) {
     .icon {
         position: static !important;
         width: 100%;
@@ -67,14 +68,30 @@
     }
 
     .iconImage {
-        width: 40px;
-        height: 40px;
-        font-size: 28px;
+        width: 44px;
+        height: 44px;
+        font-size: 30px;
     }
 
     .label {
         font-size: 11px;
         padding: 2px 2px;
         line-height: 1.2;
+    }
+}
+
+@media (max-width: 500px) {
+    .icon {
+        padding: 6px 2px;
+    }
+
+    .iconImage {
+        width: 36px;
+        height: 36px;
+        font-size: 26px;
+    }
+
+    .label {
+        font-size: 10px;
     }
 }

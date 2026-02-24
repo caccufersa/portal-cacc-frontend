@@ -34,20 +34,24 @@
     z-index: 100;
 }
 
-@media (max-width: 768px) {
+/* Telas médias: 500px–900px — faixa que estava descoberta e causava o problema */
+@media (max-width: 900px) {
     .desktop {
         bottom: 44px;
         background-color: #008080;
     }
 
     .iconsContainer {
-        padding: 12px 8px;
+        padding: 10px 8px;
         overflow-y: auto;
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 4px;
         align-content: start;
         -webkit-overflow-scrolling: touch;
+        /* Garante que o container tenha altura real para os filhos appearam */
+        height: 100%;
+        box-sizing: border-box;
     }
 
     .selectionBox {
@@ -55,8 +59,26 @@
     }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 768px) {
+    .iconsContainer {
+        padding: 12px 8px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+    }
+}
+
+@media (max-width: 500px) {
     .iconsContainer {
         grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+        padding: 8px 4px;
+    }
+}
+
+@media (max-width: 360px) {
+    .iconsContainer {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+        padding: 6px 2px;
     }
 }

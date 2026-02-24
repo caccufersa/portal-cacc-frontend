@@ -1,21 +1,23 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './Content.module.css';
 import { useAuth } from '@/context/AuthContext';
 
-interface Image {
-    id: string;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'https://backend-go-portal-u9o8.onrender.com';
+
+// Alinhado com o schema do backend Go (pkg/models/galeria.go)
+interface GaleriaItem {
+    id: number;
+    public_id: string;
     url: string;
-    createdAt: string;
+    caption: string;
+    uploaded_by: number;
+    uploaded_by_username: string;
+    created_at: string;
     width: number;
     height: number;
-    user: string;
-    album: string;
-    description: string;
 }
-
-const PREDEFINED_ALBUMS = ['Geral', 'WTCC 2026', 'Outros'];
 
 const SkeletonItem = ({ height }: { height: number }) => (
     <div
@@ -32,12 +34,8 @@ const SkeletonItem = ({ height }: { height: number }) => (
     >
         <style>{`
             @keyframes shimmer {
-                0% {
-                    background-position: -1000px 0;
-                }
-                100% {
-                    background-position: 1000px 0;
-                }
+                0% { background-position: -1000px 0; }
+                100% { background-position: 1000px 0; }
             }
             @keyframes pulse {
                 0% { opacity: 0.85; }
@@ -57,47 +55,53 @@ const SkeletonItem = ({ height }: { height: number }) => (
 );
 
 export default function GaleriaContent() {
-    const { user } = useAuth();
-    const [images, setImages] = useState<Image[]>([]);
+    const { user, accessToken } = useAuth();
+    const [images, setImages] = useState<GaleriaItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
-    const [selectedImage, setSelectedImage] = useState<Image | null>(null);
-    const [albumName, setAlbumName] = useState('Geral');
-    const [description, setDescription] = useState('');
-    const [isCustomAlbum, setIsCustomAlbum] = useState(false);
-
-    const groupedImages = useMemo(() => {
-        const groups: Record<string, Image[]> = {};
-        // Initialize predefined albums ensuring they exist in order
-        PREDEFINED_ALBUMS.forEach(alb => groups[alb] = []);
-
-        images.forEach(img => {
-            const album = img.album || 'Geral';
-            if (!groups[album]) groups[album] = [];
-            groups[album].push(img);
-        });
-
-        // Remove empty predefined albums if no images? 
-        // User didn't specify, but usually good to keep them if they are "fixed".
-        // Let's keep them even if empty to encourage posting.
-        return groups;
-    }, [images]);
+    const [selectedImage, setSelectedImage] = useState<GaleriaItem | null>(null);
+    const [caption, setCaption] = useState('');
+    const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
     useEffect(() => {
         fetchImages();
     }, []);
 
     const fetchImages = async (showSkeleton = false) => {
-        if (showSkeleton) {
-            setRefreshing(true);
-        }
+        if (showSkeleton) setRefreshing(true);
         try {
-            const response = await fetch('/api/galeria/list');
+            const response = await fetch(`${BACKEND_URL}/galeria/list`, {
+                cache: 'no-store',
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
-            setImages(data.images || []);
+
+            // Log de diagnóstico — remova após confirmar os campos do backend
+            const rawList = Array.isArray(data) ? data : (data.images ?? data.data ?? []);
+            if (rawList.length > 0) {
+                console.log('[Galeria] Campos do backend (item[0]):', JSON.stringify(rawList[0], null, 2));
+            }
+
+            // Normaliza campos — cobre variações de nome que o backend Go pode retornar
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const list: GaleriaItem[] = rawList.map((item: any) => ({
+                id: item.id ?? item.ID ?? 0,
+                public_id: item.public_id ?? item.publicId ?? item.cloudinary_id ?? '',
+                // URL: tenta vários nomes possíveis
+                url: item.url ?? item.image_url ?? item.secure_url ?? item.photo_url ?? '',
+                caption: item.caption ?? item.description ?? item.legenda ?? '',
+                uploaded_by: item.uploaded_by ?? item.user_id ?? item.uploader_id ?? 0,
+                // Username: tenta vários nomes possíveis
+                uploaded_by_username: item.uploaded_by_username ?? item.username ?? item.uploader ?? item.user ?? '',
+                created_at: item.created_at ?? item.createdAt ?? item.created ?? new Date().toISOString(),
+                width: item.width ?? 0,
+                height: item.height ?? 0,
+            }));
+
+            setImages(list);
         } catch (error) {
-            console.error('Erro ao carregar imagens:', error);
+            console.error('[Galeria] Erro ao carregar imagens:', error);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -108,30 +112,57 @@ export default function GaleriaContent() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        if (!accessToken) {
+            alert('Você precisa estar logado para enviar fotos.');
+            return;
+        }
+
         setUploading(true);
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('user', user?.username || 'Anônimo');
-        formData.append('album', isCustomAlbum ? albumName : albumName);
-        formData.append('description', description);
+        formData.append('caption', caption);
 
         try {
-            const response = await fetch('/api/galeria/upload', {
+            const response = await fetch(`${BACKEND_URL}/galeria/upload`, {
                 method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
                 body: formData,
             });
 
             if (response.ok) {
                 await fetchImages();
                 e.target.value = '';
+                setCaption('');
             } else {
-                alert('Erro ao fazer upload da imagem');
+                const err = await response.json().catch(() => ({}));
+                alert(err.error || 'Erro ao fazer upload da imagem');
             }
         } catch (error) {
-            console.error('Erro ao fazer upload:', error);
+            console.error('[Galeria] Erro ao fazer upload:', error);
             alert('Erro ao fazer upload da imagem');
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handleDelete = async (imageId: number) => {
+        if (!accessToken) return;
+        try {
+            const response = await fetch(`${BACKEND_URL}/galeria/${imageId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            if (response.ok || response.status === 204) {
+                setImages(prev => prev.filter(img => img.id !== imageId));
+                setSelectedImage(null);
+                setDeleteConfirm(null);
+            } else {
+                alert('Erro ao remover a imagem.');
+            }
+        } catch {
+            alert('Erro ao remover a imagem.');
         }
     };
 
@@ -145,7 +176,6 @@ export default function GaleriaContent() {
                     </h1>
                     <p>Fotos dos eventos e atividades do CACC</p>
                 </div>
-
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
@@ -160,16 +190,6 @@ export default function GaleriaContent() {
         );
     }
 
-    if (!user) {
-        return (
-            <div className={styles.content} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
-                <img src="/icons-95/key_padlock.ico" alt="" style={{ width: 64, height: 64, marginBottom: 12, imageRendering: 'pixelated', opacity: 0.8 }} />
-                <h2 style={{ color: '#000080', fontSize: '16px', margin: '0 0 8px 0' }}>Faça login para acessar a Galeria</h2>
-                <p style={{ color: '#606060', fontSize: '13px', margin: 0 }}>Clique no ícone de perfil na barra de tarefas para entrar.</p>
-            </div>
-        );
-    }
-
     return (
         <div className={styles.content}>
             <div style={{ marginBottom: '20px' }}>
@@ -180,86 +200,79 @@ export default function GaleriaContent() {
                 <p>Fotos dos eventos e atividades do CACC</p>
             </div>
 
-            <div style={{ marginBottom: '20px', padding: '10px', background: '#c0c0c0', border: '2px solid #000', display: 'flex', gap: '10px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontWeight: 'bold' }}>Álbum:</label>
-                    <select
-                        value={isCustomAlbum ? 'custom' : albumName}
-                        onChange={(e) => {
-                            if (e.target.value === 'custom') {
-                                setIsCustomAlbum(true);
-                                setAlbumName('');
-                            } else {
-                                setIsCustomAlbum(false);
-                                setAlbumName(e.target.value);
-                            }
-                        }}
-                        style={{ padding: '2px', border: '2px inset #fff', minWidth: '150px' }}
-                    >
-                        {PREDEFINED_ALBUMS.map(alb => (
-                            <option key={alb} value={alb}>{alb}</option>
-                        ))}
-                        <option value="custom">Outro (Novo)...</option>
-                    </select>
-                    {isCustomAlbum && (
+            {user && accessToken ? (
+                <div style={{ marginBottom: '20px', padding: '10px', background: '#c0c0c0', border: '2px solid #000', display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '180px' }}>
+                        <label style={{ fontWeight: 'bold' }}>Legenda (opcional):</label>
                         <input
                             type="text"
-                            placeholder="Nome do álbum..."
-                            value={albumName}
-                            onChange={(e) => setAlbumName(e.target.value)}
-                            style={{ padding: '2px 4px', border: '2px inset #fff', marginTop: '2px' }}
+                            value={caption}
+                            onChange={(e) => setCaption(e.target.value)}
+                            placeholder="Ex: Final do campeonato..."
+                            style={{ padding: '2px 4px', border: '2px inset #fff' }}
                         />
-                    )}
-                </div>
+                    </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontWeight: 'bold' }}>Descrição (opcional):</label>
-                    <input
-                        type="text"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Ex: Final do campeonato..."
-                        style={{ padding: '2px 4px', border: '2px inset #fff', width: '200px' }}
-                    />
-                </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label htmlFor="fileUpload" style={{ fontWeight: 'bold' }}>
+                            Adicionar nova foto:
+                        </label>
+                        <input
+                            id="fileUpload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            disabled={uploading}
+                        />
+                        {uploading && <p style={{ marginTop: '4px', color: '#000080' }}>Enviando...</p>}
+                    </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label htmlFor="fileUpload" style={{ fontWeight: 'bold' }}>
-                        Adicionar nova foto:
-                    </label>
-                    <input
-                        id="fileUpload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        disabled={uploading}
-                    />
-                    {uploading && <p style={{ marginTop: '8px', color: '#000080' }}>Enviando...</p>}
+                    <button
+                        onClick={() => fetchImages(true)}
+                        disabled={uploading || refreshing}
+                        style={{
+                            padding: '4px 12px',
+                            background: '#c0c0c0',
+                            borderTop: refreshing ? '2px solid #808080' : '2px solid #ffffff',
+                            borderLeft: refreshing ? '2px solid #808080' : '2px solid #ffffff',
+                            borderBottom: refreshing ? '2px solid #ffffff' : '2px solid #808080',
+                            borderRight: refreshing ? '2px solid #ffffff' : '2px solid #808080',
+                            fontWeight: 'bold',
+                            cursor: uploading || refreshing ? 'not-allowed' : 'pointer',
+                            fontFamily: 'MS Sans Serif, Arial, sans-serif',
+                            fontSize: '11px',
+                            opacity: uploading || refreshing ? 0.7 : 1,
+                        }}
+                    >
+                        {refreshing ? 'Carregando...' : 'Atualizar'}
+                    </button>
                 </div>
-                <button
-                    onClick={() => fetchImages(true)}
-                    disabled={uploading || refreshing}
-                    style={{
-                        padding: '4px 12px',
-                        background: '#c0c0c0',
-                        border: refreshing ? '2px inset #dfdfdf' : '2px outset #dfdfdf',
-                        borderTop: refreshing ? '2px solid #808080' : '2px solid #ffffff',
-                        borderLeft: refreshing ? '2px solid #808080' : '2px solid #ffffff',
-                        borderBottom: refreshing ? '2px solid #ffffff' : '2px solid #808080',
-                        borderRight: refreshing ? '2px solid #ffffff' : '2px solid #808080',
-                        fontWeight: 'bold',
-                        cursor: uploading || refreshing ? 'not-allowed' : 'pointer',
-                        fontFamily: 'MS Sans Serif, Arial, sans-serif',
-                        fontSize: '11px',
-                        opacity: uploading || refreshing ? 0.7 : 1,
-                        marginLeft: 'auto',
-                        alignSelf: 'flex-end',
-                        marginBottom: '2px'
-                    }}
-                >
-                    {refreshing ? 'Carregando...' : 'Atualizar Galeria'}
-                </button>
-            </div>
+            ) : (
+                <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                    <p style={{ margin: 0, color: '#606060', fontSize: '12px' }}>
+                        💡 Faça login para enviar fotos para a galeria.
+                    </p>
+                    <button
+                        onClick={() => fetchImages(true)}
+                        disabled={refreshing}
+                        style={{
+                            padding: '4px 12px',
+                            background: '#c0c0c0',
+                            borderTop: '2px solid #ffffff',
+                            borderLeft: '2px solid #ffffff',
+                            borderBottom: '2px solid #808080',
+                            borderRight: '2px solid #808080',
+                            fontWeight: 'bold',
+                            cursor: refreshing ? 'not-allowed' : 'pointer',
+                            fontFamily: 'MS Sans Serif, Arial, sans-serif',
+                            fontSize: '11px',
+                            opacity: refreshing ? 0.7 : 1,
+                        }}
+                    >
+                        {refreshing ? 'Carregando...' : 'Atualizar Galeria'}
+                    </button>
+                </div>
+            )}
 
             {images.length === 0 && !refreshing ? (
                 <div style={{
@@ -273,95 +286,65 @@ export default function GaleriaContent() {
                     <img
                         src="/images/cat.jpg"
                         alt="Sem fotos"
-                        style={{
-                            maxWidth: '200px',
-                            marginBottom: '20px',
-                            imageRendering: 'pixelated'
-                        }}
+                        style={{ maxWidth: '200px', marginBottom: '20px', imageRendering: 'pixelated' }}
                     />
                     <p>Nenhuma foto na galeria ainda. Seja o primeiro a adicionar!</p>
                 </div>
             ) : (
-                Object.entries(groupedImages).map(([album, albumImages]) => (
-                    <div key={album} style={{ marginBottom: '24px' }}>
-                        <h2 style={{
-                            fontSize: '14px',
-                            borderBottom: '2px solid #808080',
-                            paddingBottom: '4px',
-                            marginBottom: '12px',
-                            color: '#000080'
-                        }}>
-                            📁 {album}
-                        </h2>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                            gap: '12px',
-                            padding: '4px'
-                        }}>
-                            {refreshing
-                                ? [150, 170, 160].map((h, i) => (
-                                    <SkeletonItem key={`refresh-${album}-${i}`} height={h} />
-                                ))
-                                : albumImages.map((image) => (
-                                    <div
-                                        key={image.id}
-                                        onClick={() => setSelectedImage(image)}
-                                        style={{
-                                            cursor: 'pointer',
-                                            padding: '8px 8px 18px',
-                                            background: '#fdfdfd',
-                                            border: '2px outset #dfdfdf',
-                                            borderTop: '2px solid #eeeeee',
-                                            borderLeft: '2px solid #dbdbdb',
-                                            borderBottom: '2px solid #808080',
-                                            borderRight: '2px solid #808080',
-                                            boxShadow: '3px 3px 0 rgba(0,0,0,0.35)',
-                                            transition: 'transform 0.1s',
-                                        }}>
-                                        <div
-                                            style={{
-                                                border: '2px solid #000',
-                                                background: '#fff',
-                                                padding: '2px'
-                                            }}
-                                        >
-                                            <img
-                                                src={image.url}
-                                                alt="Foto da galeria"
-                                                style={{
-                                                    width: '100%',
-                                                    height: '150px',
-                                                    objectFit: 'cover',
-                                                    display: 'block'
-                                                }}
-                                            />
-                                        </div>
-                                        <div style={{ marginTop: '8px', fontSize: '11px', color: '#404040' }}>
-                                            <div style={{ marginBottom: '4px' }}>
-                                                {image.description ? image.description : <i>Sem descrição</i>}
-                                            </div>
-                                            <div style={{ color: '#000080' }}>
-                                                Enviado por <b>{image.user !== 'Anônimo' ? `@${image.user}` : image.user}</b>
-                                            </div>
-                                        </div>
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                    gap: '12px',
+                    padding: '4px'
+                }}>
+                    {refreshing
+                        ? [150, 170, 160, 180, 165, 175].map((h, i) => (
+                            <SkeletonItem key={`refresh-${i}`} height={h} />
+                        ))
+                        : images.map((image) => (
+                            <div
+                                key={image.id}
+                                onClick={() => setSelectedImage(image)}
+                                style={{
+                                    cursor: 'pointer',
+                                    padding: '8px 8px 18px',
+                                    background: '#fdfdfd',
+                                    borderTop: '2px solid #eeeeee',
+                                    borderLeft: '2px solid #dbdbdb',
+                                    borderBottom: '2px solid #808080',
+                                    borderRight: '2px solid #808080',
+                                    boxShadow: '3px 3px 0 rgba(0,0,0,0.35)',
+                                    transition: 'transform 0.1s',
+                                }}
+                            >
+                                <div style={{ border: '2px solid #000', background: '#fff', padding: '2px' }}>
+                                    <img
+                                        src={image.url}
+                                        alt={image.caption || 'Foto da galeria'}
+                                        style={{ width: '100%', height: '150px', objectFit: 'cover', display: 'block' }}
+                                    />
+                                </div>
+                                <div style={{ marginTop: '8px', fontSize: '11px', color: '#404040' }}>
+                                    <div style={{ marginBottom: '4px' }}>
+                                        {image.caption ? image.caption : <i>Sem legenda</i>}
                                     </div>
-                                ))}
-                        </div>
-                    </div>
-                ))
+                                    <div style={{ color: '#000080' }}>
+                                        por <b>@{image.uploaded_by_username || 'anônimo'}</b>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
             )}
 
             {selectedImage && (
                 <div
-                    onClick={() => setSelectedImage(null)}
+                    onClick={() => { setSelectedImage(null); setDeleteConfirm(null); }}
                     style={{
                         position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0, 0, 0, 0.8)',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0, 0, 0, 0.85)',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
@@ -372,23 +355,56 @@ export default function GaleriaContent() {
                 >
                     <img
                         src={selectedImage.url}
-                        alt="Foto ampliada"
+                        alt={selectedImage.caption || 'Foto ampliada'}
                         style={{
                             maxWidth: '90%',
-                            maxHeight: '80%',
+                            maxHeight: '75%',
                             border: '4px solid #fff',
                             boxShadow: '0 0 20px rgba(0,0,0,0.5)',
                             marginBottom: '10px'
                         }}
                     />
-                    <div style={{ color: '#fff', textAlign: 'center', background: 'rgba(0,0,0,0.6)', padding: '10px', borderRadius: '4px' }}>
-                        <p style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>Álbum: {selectedImage.album}</p>
-                        {selectedImage.description && (
-                            <p style={{ margin: '4px 0 0', fontSize: '13px' }}>{selectedImage.description}</p>
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ color: '#fff', textAlign: 'center', background: 'rgba(0,0,0,0.65)', padding: '10px 16px', borderRadius: '4px', minWidth: '250px' }}
+                    >
+                        {selectedImage.caption && (
+                            <p style={{ margin: '0 0 4px', fontSize: '13px' }}>{selectedImage.caption}</p>
                         )}
                         <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#ddd' }}>
-                            Enviado por <b>{selectedImage.user !== 'Anônimo' ? `@${selectedImage.user}` : selectedImage.user}</b> em {new Date(selectedImage.createdAt).toLocaleDateString('pt-BR')}
+                            Enviado por <b>@{selectedImage.uploaded_by_username || 'anônimo'}</b>
+                            {' '}em {new Date(selectedImage.created_at).toLocaleDateString('pt-BR')}
                         </p>
+
+                        {/* Pode excluir: upload próprio OU upload sem dono identificado (anônimo) */
+                        }
+                        {user && (user.id === selectedImage.uploaded_by || !selectedImage.uploaded_by_username) && (
+                            <div style={{ marginTop: '10px' }}>
+                                {deleteConfirm === selectedImage.id ? (
+                                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                        <button
+                                            onClick={() => handleDelete(selectedImage.id)}
+                                            style={{ padding: '3px 10px', background: '#cc0000', color: '#fff', border: '2px outset #ff4444', cursor: 'pointer', fontWeight: 'bold', fontSize: '11px' }}
+                                        >
+                                            Confirmar exclusão
+                                        </button>
+                                        <button
+                                            onClick={() => setDeleteConfirm(null)}
+                                            style={{ padding: '3px 10px', background: '#c0c0c0', border: '2px outset #dfdfdf', cursor: 'pointer', fontSize: '11px' }}
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => setDeleteConfirm(selectedImage.id)}
+                                        style={{ padding: '3px 10px', background: '#c0c0c0', border: '2px outset #dfdfdf', cursor: 'pointer', fontSize: '11px' }}
+                                    >
+                                        🗑 Excluir foto
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

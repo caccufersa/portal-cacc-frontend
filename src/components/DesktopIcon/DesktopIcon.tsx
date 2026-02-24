@@ -23,7 +23,7 @@ export default function DesktopIcon({ id, icon, label, iconSize, initialPosition
     const iconRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+        const checkMobile = () => setIsMobile(window.innerWidth <= 900);
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);

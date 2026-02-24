@@ -213,7 +213,7 @@ export default function Taskbar() {
 
                     <div className={styles.separator} />
 
-                    <div className={styles.trayItem} title="Pessoas Online no Portal" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#000', padding: '0px 6px', border: '1px inset #fff', cursor: 'pointer', height: '22px' }} onClick={() => setShowNetwork(true)}>
+                    <div className={`${styles.trayItem} ${styles.trayConnStatus}`} title="Pessoas Online no Portal" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#000', padding: '0px 6px', border: '1px inset #fff', cursor: 'pointer', height: '22px' }} onClick={() => setShowNetwork(true)}>
                         <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: 13, color: '#0f0', minWidth: 16, textAlign: 'center' }}>
                             {wsStatus === 'connected' ? 'ON: ' : 'OFF'}
                             {wsStatus === 'connected' ? Math.max(1, onlineUsers) : ''}
