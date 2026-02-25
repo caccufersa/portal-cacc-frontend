@@ -38,7 +38,7 @@ interface AuthContextType {
     clearError: () => void;
     apiCall: <T = unknown>(url: string, options?: RequestInit) => Promise<T>;
     updateAuthUser: (updates: Partial<AuthUser>) => void;
-    setTokensDirectly: (token: string) => void;
+    forceLoginSession: (token: string, user: AuthUser) => void;
     AUTH_API: string;
 }
 
@@ -596,18 +596,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             clearError,
             apiCall,
             updateAuthUser,
-            setTokensDirectly: (token: string) => {
-                // Ao logar com Google, a API retorna token no Fragment. A API já enviou refresh no cookie.
-                setTokens({ access_token: token, refresh_token: '' }); // refresh_token is handled via HTTP cookie by the backend magic.
-                // Wait, frontend loadTokens assumes refresh_token exists or else fails. Let's just mock it up or let it be handled.
-                // Actually the backend Google callback sets `refresh_token` cookie. The loadTokens reads from localStorage.
-                // If it's HttpOnly cookie, we can't read it. The loadTokens logic here might need to just check access_token if refresh is cookie based?
-                // The instructions say: "Refresh Token num Cookie HttpOnly".
-                // If refresh_token is HttpOnly, we CANNOT read it. The existing implementation uses localStorage.setItem(STORAGE_REFRESH, tokens.refresh_token).
-                // Did the instructions say Backend set it via Cookie HttpOnly? Yes! "Refresh Token já terá sido setado magicamente via Cookie HttpOnly".
-                // Our frontend currently reads/writes refresh_token to localStorage. We might need to gracefully handle empty refresh_token in storage if it's HttpOnly. 
-                // For now, save an empty string so `loadTokens` doesn't fail.
-                setTokens({ access_token: token, refresh_token: localStorage.getItem(STORAGE_REFRESH) || 'cookie_handled' });
+            forceLoginSession: (token: string, newUser: AuthUser) => {
+                // Ao logar com Google, recebemos o token no hash e o backend cuidou do refresh cookie
+                const newTokens = { access_token: token, refresh_token: localStorage.getItem(STORAGE_REFRESH) || 'cookie_handled' };
+                setTokens(newTokens);
+                setUser(newUser);
+                saveUser(newUser);
             },
             AUTH_API,
         }}>

@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function AuthCallbackClient() {
     const router = useRouter();
-    const { setTokensDirectly, apiCall, updateAuthUser } = useAuth();
+    const { forceLoginSession } = useAuth();
     const [status, setStatus] = useState('Processando login com Google...');
     const hasProcessed = useRef(false);
 
@@ -34,25 +34,32 @@ export default function AuthCallbackClient() {
                     return;
                 }
 
-                // 2. Salvar o accessToken e limpar o hash da URL
+                // 2. Limpar o hash da URL e setar validando
                 window.history.replaceState(null, document.title, window.location.pathname);
-                setTokensDirectly(accessToken);
                 setStatus('Validando sessão...');
 
-                // 3. Buscar dados do usuário via /auth/session
-                const data = await apiCall<{ user: unknown }>('/auth/session', {
-                    method: 'GET'
+                // 3. Buscar os dados reaiis do User via /auth/session passando o token explicitamente
+                const AUTH_API = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'https://backend-go-portal-u9o8.onrender.com';
+                const res = await fetch(`${AUTH_API}/auth/session`, {
+                    method: 'GET',
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    credentials: 'include'
                 });
 
-                if (data && data.user) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    updateAuthUser(data.user as any);
-                    setStatus('Login efetuado! Redirecionando...');
-                    router.push('/');
-                } else {
-                    setStatus('Falha ao obter perfil. Redirecionando...');
-                    setTimeout(() => router.push('/'), 2000);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.user) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        forceLoginSession(accessToken, data.user as any);
+                        setStatus('Login efetuado! Redirecionando...');
+                        router.push('/');
+                        return;
+                    }
                 }
+
+                setStatus('Falha ao obter perfil. Redirecionando...');
+                setTimeout(() => router.push('/'), 2000);
+
             } catch (err: unknown) {
                 console.error('Callback error:', err);
                 const msg = err instanceof Error ? err.message : 'Erro desconhecido';
@@ -62,7 +69,7 @@ export default function AuthCallbackClient() {
         };
 
         processCallback();
-    }, [router, setTokensDirectly, apiCall, updateAuthUser]);
+    }, [router, forceLoginSession]);
 
     return (
         <div style={{
