@@ -8,12 +8,14 @@ export default function AuthScreen() {
     const { login, register, error, clearError, isLoading } = useAuth();
     const [mode, setMode] = useState<'login' | 'register'>('login');
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPw, setConfirmPw] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
 
     const resetFields = () => {
         setUsername('');
+        setEmail('');
         setPassword('');
         setConfirmPw('');
         clearError();
@@ -33,8 +35,9 @@ export default function AuthScreen() {
         if (mode === 'register') {
             if (password !== confirmPw) return;
             if (password.length < 4) return;
-            const ok = await register(username.trim(), password);
-            if (ok) {
+            if (!email.trim()) return;
+            const result = await register(username.trim(), email.trim(), password);
+            if (result?.success) {
                 setSuccessMsg('Conta criada! Faca login.');
                 setTimeout(() => switchMode('login'), 1200);
             }
@@ -90,6 +93,20 @@ export default function AuthScreen() {
                         />
                     </div>
 
+                    {isReg && (
+                        <div>
+                            <div className={s.loginLabel}>E-mail:</div>
+                            <input
+                                className={s.loginInput}
+                                type="email"
+                                value={email}
+                                onChange={e => { setEmail(e.target.value); clearError(); }}
+                                placeholder="seu@email.com"
+                                disabled={isLoading}
+                            />
+                        </div>
+                    )}
+
                     <div>
                         <div className={s.loginLabel}>Senha:</div>
                         <input
@@ -137,7 +154,7 @@ export default function AuthScreen() {
                         <button
                             type="submit"
                             className={s.toolbarBtn}
-                            disabled={isLoading || !username.trim() || !password || (isReg && (pwMismatch || !confirmPw))}
+                            disabled={isLoading || !username.trim() || !password || (isReg && (pwMismatch || !confirmPw || !email.trim()))}
                         >
                             {isLoading ? 'Aguarde...' : isReg ? 'Criar Conta' : 'OK'}
                         </button>
