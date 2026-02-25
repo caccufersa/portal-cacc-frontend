@@ -34,19 +34,22 @@
     z-index: 100;
 }
 
-/* Telas médias: 500px–900px — faixa que estava descoberta e causava o problema */
-@media (max-width: 900px) {
+/* Telas médias: 500px–1024px — responsividade flexível sem positions absolutas */
+@media (max-width: 1024px) {
     .desktop {
         bottom: 44px;
         background-color: #008080;
     }
 
     .iconsContainer {
-        padding: 10px 8px;
+        padding: 16px 8px;
         overflow-y: auto;
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 4px;
+        grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+        grid-auto-rows: min-content;
+        justify-items: center;
+        row-gap: 16px;
+        column-gap: 4px;
         align-content: start;
         -webkit-overflow-scrolling: touch;
         /* Garante que o container tenha altura real para os filhos appearam */
@@ -56,29 +59,5 @@
 
     .selectionBox {
         display: none;
-    }
-}
-
-@media (max-width: 768px) {
-    .iconsContainer {
-        padding: 12px 8px;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 4px;
-    }
-}
-
-@media (max-width: 500px) {
-    .iconsContainer {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 2px;
-        padding: 8px 4px;
-    }
-}
-
-@media (max-width: 360px) {
-    .iconsContainer {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 2px;
-        padding: 6px 2px;
     }
 }

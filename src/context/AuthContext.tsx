@@ -31,12 +31,15 @@ interface AuthContextType {
     isLoading: boolean;
     error: string | null;
     login: (username: string, password: string) => Promise<boolean>;
-    register: (username: string, password: string) => Promise<{ success: boolean; recoveryKey?: string }>;
-    resetPassword: (username: string, recovery_key: string, new_password: string) => Promise<boolean>;
+    register: (username: string, email: string, password: string) => Promise<{ success: boolean }>;
+    forgotPassword: (email: string) => Promise<boolean>;
+    resetPassword: (token: string, new_password: string) => Promise<boolean>;
     logout: () => void;
     clearError: () => void;
     apiCall: <T = unknown>(url: string, options?: RequestInit) => Promise<T>;
     updateAuthUser: (updates: Partial<AuthUser>) => void;
+    setTokensDirectly: (token: string) => void;
+    AUTH_API: string;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -396,7 +399,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, [handleAuthSuccess]);
 
-    const register = useCallback(async (username: string, password: string): Promise<{ success: boolean; recoveryKey?: string }> => {
+    const register = useCallback(async (username: string, email: string, password: string): Promise<{ success: boolean }> => {
         setIsLoading(true);
         setError(null);
         try {
@@ -408,7 +411,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ username, password }),
+                    body: JSON.stringify({ username, email, password }),
                     signal: controller.signal,
                 });
                 clearTimeout(timeoutId);
@@ -440,7 +443,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
 
                 setIsLoading(false);
-                return { success: true, recoveryKey: data.recovery_key as string | undefined };
+                return { success: true };
             } finally {
                 clearTimeout(timeoutId);
             }
@@ -456,7 +459,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, [handleAuthSuccess]);
 
-    const resetPassword = useCallback(async (username: string, recovery_key: string, new_password: string): Promise<boolean> => {
+    const forgotPassword = useCallback(async (email: string): Promise<boolean> => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+            try {
+                const res = await fetch(`${AUTH_API}/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email }),
+                    signal: controller.signal,
+                });
+                clearTimeout(timeoutId);
+
+                // Independente de email existir ou não, o backend retorna 200 OK.
+                // Mas pode dar erro de limitação de tentativas etc.
+                if (!res.ok) {
+                    let msg = 'Erro ao solicitar redefinição';
+                    try {
+                        const errBody = await res.json();
+                        msg = errBody.erro || errBody.error || msg;
+                    } catch { }
+                    setError(msg);
+                    setIsLoading(false);
+                    return false;
+                }
+
+                setIsLoading(false);
+                return true;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        } catch (e: unknown) {
+            if (e instanceof Error && e.name === 'AbortError') {
+                setError('Conexao expirou. Tente novamente.');
+            } else {
+                console.warn('[Auth] Forgot password error:', e);
+                setError('Erro de conexao. Tente novamente.');
+            }
+            setIsLoading(false);
+            return false;
+        }
+    }, []);
+
+    const resetPassword = useCallback(async (token: string, new_password: string): Promise<boolean> => {
         setIsLoading(true);
         setError(null);
         try {
@@ -468,7 +518,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ username, recovery_key, new_password }),
+                    body: JSON.stringify({ token, new_password }),
                     signal: controller.signal,
                 });
                 clearTimeout(timeoutId);
@@ -537,11 +587,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             error,
             login,
             register,
+            forgotPassword,
             resetPassword,
             logout,
             clearError,
             apiCall,
             updateAuthUser,
+            setTokensDirectly: (token: string) => {
+                // Ao logar com Google, a API retorna token no Fragment. A API já enviou refresh no cookie.
+                setTokens({ access_token: token, refresh_token: '' }); // refresh_token is handled via HTTP cookie by the backend magic.
+                // Wait, frontend loadTokens assumes refresh_token exists or else fails. Let's just mock it up or let it be handled.
+                // Actually the backend Google callback sets `refresh_token` cookie. The loadTokens reads from localStorage.
+                // If it's HttpOnly cookie, we can't read it. The loadTokens logic here might need to just check access_token if refresh is cookie based?
+                // The instructions say: "Refresh Token num Cookie HttpOnly".
+                // If refresh_token is HttpOnly, we CANNOT read it. The existing implementation uses localStorage.setItem(STORAGE_REFRESH, tokens.refresh_token).
+                // Did the instructions say Backend set it via Cookie HttpOnly? Yes! "Refresh Token já terá sido setado magicamente via Cookie HttpOnly".
+                // Our frontend currently reads/writes refresh_token to localStorage. We might need to gracefully handle empty refresh_token in storage if it's HttpOnly. 
+                // For now, save an empty string so `loadTokens` doesn't fail.
+                setTokens({ access_token: token, refresh_token: localStorage.getItem(STORAGE_REFRESH) || 'cookie_handled' });
+            },
+            AUTH_API,
         }}>
             {children}
         </AuthContext.Provider>

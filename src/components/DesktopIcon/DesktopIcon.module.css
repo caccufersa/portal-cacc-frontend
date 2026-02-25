@@ -52,8 +52,8 @@
     pointer-events: none;
 }
 
-/* Ativa layout em grid (sem position:absolute) a partir de telas médias */
-@media (max-width: 900px) {
+/* Ativa layout em grid (sem position:absolute) a partir de telas médias/tablets */
+@media (max-width: 1024px) {
     .icon {
         position: static !important;
         width: 100%;

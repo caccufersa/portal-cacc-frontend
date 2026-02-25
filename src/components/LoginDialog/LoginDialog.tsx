@@ -9,30 +9,30 @@ interface LoginDialogProps {
 }
 
 const USERNAME_RE = /^[a-zA-Z0-9_-]{3,30}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginDialog({ onClose }: LoginDialogProps) {
-    const { login, register, resetPassword, error, clearError, isLoading } = useAuth();
-    const [mode, setMode] = useState<'login' | 'register' | 'reset'>('login');
+    const { login, register, forgotPassword, AUTH_API, error, clearError, isLoading } = useAuth();
+    const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPw, setConfirmPw] = useState('');
-    const [recoveryKey, setRecoveryKey] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [shownRecoveryKey, setShownRecoveryKey] = useState<string | null>(null);
+    const [forgotSent, setForgotSent] = useState('');
+
     const dialogRef = useRef<HTMLDivElement>(null);
     const usernameRef = useRef<HTMLInputElement>(null);
 
     const resetFields = () => {
         setUsername('');
+        setEmail('');
         setPassword('');
         setConfirmPw('');
-        setRecoveryKey('');
-        setNewPassword('');
-        setShownRecoveryKey(null);
+        setForgotSent('');
         clearError();
     };
 
-    const switchMode = (m: 'login' | 'register' | 'reset') => {
+    const switchMode = (m: 'login' | 'register' | 'forgot') => {
         resetFields();
         setMode(m);
         setTimeout(() => usernameRef.current?.focus(), 50);
@@ -40,27 +40,22 @@ export default function LoginDialog({ onClose }: LoginDialogProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!username.trim()) return;
 
         if (mode === 'register') {
-            if (!password || password !== confirmPw || password.length < 8) return;
-            if (!USERNAME_RE.test(username.trim())) return;
-            const result = await register(username.trim(), password);
+            if (!username.trim() || !email.trim() || !password || password !== confirmPw || password.length < 8) return;
+            if (!USERNAME_RE.test(username.trim()) || !EMAIL_RE.test(email.trim())) return;
+            const result = await register(username.trim(), email.trim(), password);
             if (result.success) {
-                if (result.recoveryKey) {
-                    setShownRecoveryKey(result.recoveryKey);
-                } else {
-                    onClose();
-                }
+                onClose();
             }
-        } else if (mode === 'reset') {
-            if (!recoveryKey.trim() || !newPassword || newPassword.length < 8) return;
-            const ok = await resetPassword(username.trim(), recoveryKey.trim(), newPassword);
+        } else if (mode === 'forgot') {
+            if (!email.trim() || !EMAIL_RE.test(email.trim())) return;
+            const ok = await forgotPassword(email.trim());
             if (ok) {
-                switchMode('login');
+                setForgotSent('Se uma conta com esse e-mail existir, você receberá um link de redefinição em breve.');
             }
         } else {
-            if (!password) return;
+            if (!username.trim() || !password) return;
             const ok = await login(username.trim(), password);
             if (ok) onClose();
         }
@@ -84,76 +79,48 @@ export default function LoginDialog({ onClose }: LoginDialogProps) {
     }, [onClose]);
 
     const isReg = mode === 'register';
-    const isReset = mode === 'reset';
+    const isForgot = mode === 'forgot';
     const pwMismatch = isReg && confirmPw.length > 0 && password !== confirmPw;
     const pwTooShort = isReg && password.length > 0 && password.length < 8;
     const usernameInvalid = isReg && username.length > 0 && !USERNAME_RE.test(username);
-    const newPwTooShort = isReset && newPassword.length > 0 && newPassword.length < 8;
+    const emailInvalid = (isReg || isForgot) && email.length > 0 && !EMAIL_RE.test(email);
 
     const canSubmit =
         !isLoading &&
-        username.trim().length > 0 &&
-        (isReset
-            ? recoveryKey.trim().length > 0 && newPassword.length >= 8
-            : password.length > 0 &&
-            (!isReg || (confirmPw.length > 0 && !pwMismatch && !pwTooShort && !usernameInvalid))
+        (isForgot
+            ? email.trim().length > 0 && !emailInvalid
+            : username.trim().length > 0 && password.length > 0 &&
+            (!isReg || (email.trim().length > 0 && !emailInvalid && confirmPw.length > 0 && !pwMismatch && !pwTooShort && !usernameInvalid))
         );
 
-    const titleText = isReg ? 'Criar Conta – Rede CACC' : isReset ? 'Recuperar Acesso – CACC' : 'Entrar na Rede CACC';
-    const bannerIcon = isReg ? '/icons-95/msagent_file.ico' : isReset ? '/icons-95/key_padlock.ico' : '/icons-95/msagent.ico';
-    const bannerTitle = isReg ? 'Nova conta de usuario' : isReset ? 'Recuperação de Senha' : 'Bem-vindo de volta';
+    const titleText = isReg ? 'Criar Conta – Rede CACC' : isForgot ? 'Recuperar Acesso – CACC' : 'Entrar na Rede CACC';
+    const bannerIcon = isReg ? '/icons-95/users_key.ico' : isForgot ? '/icons-95/key_padlock_help.ico' : '/icons-95/key_win.ico';
+    const bannerTitle = isReg ? 'Nova conta de usuario' : isForgot ? 'Recuperação de Senha' : 'Bem-vindo de volta';
     const bannerSubtitle = isReg
-        ? 'Preencha os dados para se registrar na rede.'
-        : isReset
-            ? 'Use sua Chave de Recuperação para definir uma nova senha.'
-            : 'Digite seu usuario e senha para continuar.';
+        ? 'Preencha os dados (incluindo e-mail obrigatório) para criar conta.'
+        : isForgot
+            ? 'Informe seu e-mail para receber um link de redefinição temporário.'
+            : 'Digite seu usuário e senha para continuar ou acesse com o Google.';
 
-    // --- Recovery key reveal screen after registration ---
-    if (shownRecoveryKey) {
+    if (forgotSent) {
         return (
             <div className={styles.overlay}>
                 <div className={styles.dialog} ref={dialogRef}>
                     <div className={styles.titleBar}>
-                        <span className={styles.titleText}>Conta Criada com Sucesso!</span>
+                        <span className={styles.titleText}>E-mail Enviado</span>
                         <button className={styles.closeBtn} onClick={onClose} title="Fechar">✕</button>
                     </div>
                     <div className={styles.banner}>
-                        <img src="/icons-95/key_padlock.ico" alt="" className={styles.bannerIcon} />
+                        <img src="/icons-95/msg_info.ico" alt="" className={styles.bannerIcon} />
                         <div className={styles.bannerText}>
-                            <div className={styles.bannerTitle}>Guarde sua Chave de Recuperação!</div>
-                            <div className={styles.bannerSubtitle}>Ela é a única forma de recuperar sua conta se você esquecer a senha.</div>
+                            <div className={styles.bannerTitle}>Verifique sua caixa de entrada</div>
+                            <div className={styles.bannerSubtitle}>{forgotSent}</div>
                         </div>
                     </div>
                     <div className={styles.body}>
-                        <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
-                            <div style={{ fontSize: 11, marginBottom: 8, color: '#666' }}>Sua chave de recuperação:</div>
-                            <div style={{
-                                fontSize: 20,
-                                fontWeight: 'bold',
-                                fontFamily: 'monospace',
-                                background: '#000080',
-                                color: '#fff',
-                                padding: '10px 20px',
-                                letterSpacing: 4,
-                                userSelect: 'all',
-                                border: '2px inset #404040',
-                                display: 'inline-block',
-                            }}>
-                                {shownRecoveryKey}
-                            </div>
-                            <div style={{ marginTop: 12, fontSize: 11, color: '#c00', fontWeight: 'bold' }}>
-                                ⚠ Anote em um lugar seguro. Ela não será exibida novamente!
-                            </div>
-                        </div>
                         <div className={styles.separator} />
                         <div className={styles.footer}>
-                            <button
-                                type="button"
-                                className={`${styles.btn} ${styles.btnPrimary}`}
-                                onClick={onClose}
-                            >
-                                Entendi, vou guardar
-                            </button>
+                            <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={onClose}>OK</button>
                         </div>
                     </div>
                 </div>
@@ -184,6 +151,7 @@ export default function LoginDialog({ onClose }: LoginDialogProps) {
                         onClick={() => switchMode('login')}
                         disabled={isLoading}
                     >
+                        <img src="/icons-95/keys.ico" alt="" style={{ width: 16, height: 16 }} />
                         Entrar
                     </button>
                     <button
@@ -192,39 +160,63 @@ export default function LoginDialog({ onClose }: LoginDialogProps) {
                         onClick={() => switchMode('register')}
                         disabled={isLoading}
                     >
+                        <img src="/icons-95/users_green.ico" alt="" style={{ width: 16, height: 16 }} />
                         Criar Conta
                     </button>
                     <button
                         type="button"
-                        className={`${styles.tab} ${isReset ? styles.tabActive : ''}`}
-                        onClick={() => switchMode('reset')}
+                        className={`${styles.tab} ${isForgot ? styles.tabActive : ''}`}
+                        onClick={() => switchMode('forgot')}
                         disabled={isLoading}
                     >
+                        <img src="/icons-95/key_world.ico" alt="" style={{ width: 16, height: 16 }} />
                         Esqueci a Senha
                     </button>
                 </div>
 
                 <form className={styles.body} onSubmit={handleSubmit}>
-                    <div className={styles.fieldGroup}>
-                        <label className={styles.fieldRow}>
-                            <span className={styles.label}>Usuario:</span>
-                            <input
-                                ref={usernameRef}
-                                className={`${styles.input} ${usernameInvalid ? styles.inputError : ''}`}
-                                value={username}
-                                onChange={e => { setUsername(e.target.value); clearError(); }}
-                                placeholder="seu_usuario"
-                                autoFocus
-                                disabled={isLoading}
-                                maxLength={30}
-                            />
-                        </label>
-                        {usernameInvalid && (
-                            <div className={styles.hint}>3-30 caracteres: letras, numeros, _ ou -</div>
-                        )}
-                    </div>
+                    {!isForgot && (
+                        <div className={styles.fieldGroup}>
+                            <label className={styles.fieldRow}>
+                                <span className={styles.label}>Usuario:</span>
+                                <input
+                                    ref={usernameRef}
+                                    className={`${styles.input} ${usernameInvalid ? styles.inputError : ''}`}
+                                    value={username}
+                                    onChange={e => { setUsername(e.target.value); clearError(); }}
+                                    placeholder="seu_usuario"
+                                    autoFocus
+                                    disabled={isLoading}
+                                    maxLength={30}
+                                />
+                            </label>
+                            {usernameInvalid && (
+                                <div className={styles.hint}>3-30 caracteres: letras, numeros, _ ou -</div>
+                            )}
+                        </div>
+                    )}
 
-                    {!isReset && (
+                    {(isReg || isForgot) && (
+                        <div className={styles.fieldGroup}>
+                            <label className={styles.fieldRow}>
+                                <span className={styles.label}>E-mail:</span>
+                                <input
+                                    ref={isForgot ? usernameRef : undefined}
+                                    className={`${styles.input} ${emailInvalid ? styles.inputError : ''}`}
+                                    type="email"
+                                    value={email}
+                                    onChange={e => { setEmail(e.target.value); clearError(); }}
+                                    placeholder="seu_email@exemplo.com"
+                                    disabled={isLoading}
+                                />
+                            </label>
+                            {emailInvalid && (
+                                <div className={styles.hint}>E-mail invalido</div>
+                            )}
+                        </div>
+                    )}
+
+                    {!isForgot && (
                         <div className={styles.fieldGroup}>
                             <label className={styles.fieldRow}>
                                 <span className={styles.label}>Senha:</span>
@@ -262,46 +254,39 @@ export default function LoginDialog({ onClose }: LoginDialogProps) {
                         </div>
                     )}
 
-                    {isReset && (
-                        <>
-                            <div className={styles.fieldGroup}>
-                                <label className={styles.fieldRow}>
-                                    <span className={styles.label}>Chave:</span>
-                                    <input
-                                        className={styles.input}
-                                        value={recoveryKey}
-                                        onChange={e => { setRecoveryKey(e.target.value.toUpperCase()); clearError(); }}
-                                        placeholder="CACC-1A2B3C4D"
-                                        disabled={isLoading}
-                                        maxLength={14}
-                                        style={{ fontFamily: 'monospace', letterSpacing: 2 }}
-                                    />
-                                </label>
-                            </div>
-                            <div className={styles.fieldGroup}>
-                                <label className={styles.fieldRow}>
-                                    <span className={styles.label}>Nova Senha:</span>
-                                    <input
-                                        className={`${styles.input} ${newPwTooShort ? styles.inputError : ''}`}
-                                        type="password"
-                                        value={newPassword}
-                                        onChange={e => { setNewPassword(e.target.value); clearError(); }}
-                                        placeholder="••••••••"
-                                        disabled={isLoading}
-                                    />
-                                </label>
-                                {newPwTooShort && (
-                                    <div className={styles.hint}>Minimo 8 caracteres</div>
-                                )}
-                            </div>
-                        </>
-                    )}
-
                     {error && (
                         <div className={styles.errorBox}>
                             <img src="/icons-95/msg_error.ico" alt="" className={styles.errorIcon} />
                             <span>{error}</span>
                         </div>
+                    )}
+
+                    {!isReg && !isForgot && (
+                        <>
+                            <div className={styles.dividerLine}>Ou continue com</div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <button
+                                    type="button"
+                                    className={`${styles.btn}`}
+                                    style={{ width: '100%', padding: '6px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold' }}
+                                    disabled={isLoading}
+                                    onClick={() => {
+                                        window.location.href = `${AUTH_API}/auth/google`;
+                                    }}
+                                >
+                                    <img src="/icons-95/google.svg" alt="G" style={{ width: 22, height: 22 }} />
+                                    <span>
+                                        Entrar com{' '}
+                                        <span style={{ color: '#4285F4' }}>G</span>
+                                        <span style={{ color: '#EA4335' }}>o</span>
+                                        <span style={{ color: '#FBBC05' }}>o</span>
+                                        <span style={{ color: '#4285F4' }}>g</span>
+                                        <span style={{ color: '#34A853' }}>l</span>
+                                        <span style={{ color: '#EA4335' }}>e</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </>
                     )}
 
                     <div className={styles.separator} />
@@ -316,8 +301,8 @@ export default function LoginDialog({ onClose }: LoginDialogProps) {
                                 ? 'Aguarde...'
                                 : isReg
                                     ? 'Registrar'
-                                    : isReset
-                                        ? 'Redefinir Senha'
+                                    : isForgot
+                                        ? 'Enviar Link'
                                         : 'OK'}
                         </button>
                         <button

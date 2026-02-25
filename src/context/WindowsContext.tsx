@@ -57,38 +57,10 @@ const initialWindows: WindowState[] = [
 ];
 
 const getInitialIconPositions = (): IconPosition[] => {
-  if (typeof window === 'undefined') {
-    return [
-      { id: 'about', position: { x: 20, y: 20 } },
-      { id: 'courses', position: { x: 20, y: 110 } },
-      { id: 'galeria', position: { x: 20, y: 200 } },
-      { id: 'contact', position: { x: 20, y: 290 } },
-      { id: 'forum', position: { x: 20, y: 380 } },
-      { id: 'news', position: { x: 20, y: 470 } },
-      { id: 'help', position: { x: 20, y: 560 } },
-      { id: 'documents', position: { x: 20, y: 650 } },
-      { id: 'balance', position: { x: 20, y: 740 } },
-      { id: 'sugest', position: { x: 20, y: 830 } },
-      { id: 'bus', position: { x: 20, y: 920 } },
-      { id: 'map', position: { x: 20, y: 1010 } },
-      { id: 'lojinha', position: { x: 20, y: 1100 } },
-      { id: 'calouroGuide', position: { x: 400, y: 300 } },
-    ];
-  }
-
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
-
   const leftColumn = 20;
   const iconSpacing = 90;
 
-  // Calcula posição centralizada para o Guia do Calouro
-  const centerX = Math.max(20, (screenWidth / 2) - 50);
-  const centerY = Math.max(20, (screenHeight / 2) - 150);
-
-  if (screenWidth >= 1024 && screenHeight >= 768) {
-    const rightColumn = screenWidth - 120;
-
+  if (typeof window === 'undefined') {
     return [
       { id: 'about', position: { x: leftColumn, y: 20 } },
       { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
@@ -97,17 +69,46 @@ const getInitialIconPositions = (): IconPosition[] => {
       { id: 'forum', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
       { id: 'news', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
       { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
-      { id: 'documents', position: { x: rightColumn, y: 20 } },
-      { id: 'balance', position: { x: rightColumn, y: 20 + iconSpacing } },
-      { id: 'sugest', position: { x: rightColumn, y: 20 + iconSpacing * 2 } },
-      { id: 'bus', position: { x: rightColumn, y: 20 + iconSpacing * 3 } },
-      { id: 'map', position: { x: rightColumn, y: 20 + iconSpacing * 4 } },
-      { id: 'lojinha', position: { x: rightColumn, y: 20 + iconSpacing * 5 } },
-      { id: 'calouroGuide', position: { x: centerX, y: centerY } },
+      { id: 'documents', position: { x: leftColumn + 100, y: 20 } },
+      { id: 'balance', position: { x: leftColumn + 100, y: 20 + iconSpacing } },
+      { id: 'sugest', position: { x: leftColumn + 100, y: 20 + iconSpacing * 2 } },
+      { id: 'bus', position: { x: leftColumn + 100, y: 20 + iconSpacing * 3 } },
+      { id: 'map', position: { x: leftColumn + 100, y: 20 + iconSpacing * 4 } },
+      { id: 'lojinha', position: { x: leftColumn + 100, y: 20 + iconSpacing * 5 } },
+      { id: 'calouroGuide', position: { x: 400, y: 300 } },
     ];
   }
 
-  // Para telas menores
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  const centerX = Math.max(20, (screenWidth / 2) - 50);
+  const centerY = Math.max(20, (screenHeight / 2) - 150);
+
+  // Em larguras menores que o trigger do Grid (<= 1024), a posição absoluta JS não é ativamente usada,
+  // mas fornecemos valores garantidos para caso alguém desabilite JS.
+  if (screenWidth <= 1024) {
+    return [
+      { id: 'about', position: { x: leftColumn, y: 20 } },
+      { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
+      { id: 'galeria', position: { x: leftColumn, y: 20 + iconSpacing * 2 } },
+      { id: 'contact', position: { x: leftColumn, y: 20 + iconSpacing * 3 } },
+      { id: 'forum', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
+      { id: 'news', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
+      { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
+      { id: 'documents', position: { x: leftColumn, y: 20 + iconSpacing * 7 } },
+      { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 8 } },
+      { id: 'sugest', position: { x: leftColumn, y: 20 + iconSpacing * 9 } },
+      { id: 'bus', position: { x: leftColumn, y: 20 + iconSpacing * 10 } },
+      { id: 'map', position: { x: leftColumn, y: 20 + iconSpacing * 11 } },
+      { id: 'lojinha', position: { x: leftColumn, y: 20 + iconSpacing * 12 } },
+      { id: 'calouroGuide', position: { x: centerX, y: centerY } }
+    ];
+  }
+
+  // Layout clássico: Direita da tela fixa para os apps de back-office / adicionais
+  const rightColumn = screenWidth - 100;
+
   return [
     { id: 'about', position: { x: leftColumn, y: 20 } },
     { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
@@ -116,12 +117,14 @@ const getInitialIconPositions = (): IconPosition[] => {
     { id: 'forum', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
     { id: 'news', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
     { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
-    { id: 'documents', position: { x: leftColumn, y: 20 + iconSpacing * 7 } },
-    { id: 'balance', position: { x: leftColumn, y: 20 + iconSpacing * 8 } },
-    { id: 'sugest', position: { x: leftColumn, y: 20 + iconSpacing * 9 } },
-    { id: 'bus', position: { x: leftColumn, y: 20 + iconSpacing * 10 } },
-    { id: 'map', position: { x: leftColumn, y: 20 + iconSpacing * 11 } },
-    { id: 'lojinha', position: { x: leftColumn, y: 20 + iconSpacing * 12 } },
+
+    { id: 'documents', position: { x: rightColumn, y: 20 } },
+    { id: 'sugest', position: { x: rightColumn, y: 20 + iconSpacing } },
+    { id: 'bus', position: { x: rightColumn, y: 20 + iconSpacing * 2 } },
+    { id: 'map', position: { x: rightColumn, y: 20 + iconSpacing * 3 } },
+    { id: 'lojinha', position: { x: rightColumn, y: 20 + iconSpacing * 4 } },
+    { id: 'balance', position: { x: rightColumn, y: 20 + iconSpacing * 5 } },
+
     { id: 'calouroGuide', position: { x: centerX, y: centerY } },
   ];
 };
