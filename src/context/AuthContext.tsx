@@ -193,6 +193,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const token = accessTokenRef.current;
         if (!token) throw new Error('Not authenticated');
 
+        // Auto-prefixa URLs relativas com o domínio do backend
+        const fullUrl = url.startsWith('/') ? `${AUTH_API}${url}` : url;
+
         const createSignal = () => {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -201,7 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const doFetch = (t: string) => {
             const { controller, timeoutId } = createSignal();
-            return fetch(url, {
+            return fetch(fullUrl, {
                 ...options,
                 credentials: 'include',
                 signal: controller.signal,
@@ -228,7 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const j = JSON.parse(body);
                 msg = j.erro || j.error || j.message || msg;
             } catch {
-                console.warn(`[apiCall] Failed to parse error response from ${url}:`, body.substring(0, 200));
+                console.warn(`[apiCall] Failed to parse error response from ${fullUrl}:`, body.substring(0, 200));
             }
             throw new Error(msg);
         }
