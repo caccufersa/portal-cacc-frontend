@@ -305,7 +305,7 @@ export default function Taskbar() {
                                 if (user) setShowProfile(prev => !prev);
                                 else setShowLogin(true);
                             }}
-                            title={user ? user.username : 'Entrar'}
+                            title={user ? (user.display_name || user.username) : 'Entrar'}
                         >
                             <div style={{
                                 width: 18, height: 18, borderRadius: '50%',
@@ -318,13 +318,13 @@ export default function Taskbar() {
                                 {user?.avatar_url ? (
                                     <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 ) : user ? (
-                                    user.username[0].toUpperCase()
+                                    (user.display_name || user.username)[0].toUpperCase()
                                 ) : (
                                     <img src="/icons-95/key_world.ico" alt="" style={{ width: '14px', height: '14px' }} />
                                 )}
                             </div>
                             <span className={styles.profileName}>
-                                {user ? user.username : 'Entrar'}
+                                {user ? (user.display_name || user.username) : 'Entrar'}
                             </span>
                         </button>
 
@@ -389,8 +389,9 @@ export default function Taskbar() {
                                             onChange={handleAvatarUpload}
                                         />
                                         <div>
-                                            <div className={styles.profileUsername}>@{user.username}</div>
-                                            <div className={styles.profileStatus} style={{ fontSize: '10px' }}>
+                                            <div className={styles.profileUsername} style={{ fontWeight: 'bold' }}>{user.display_name || user.username}</div>
+                                            <div className={styles.profileUsername} style={{ fontSize: '10px', marginTop: '2px', color: '#666' }}>@{user.username}</div>
+                                            <div className={styles.profileStatus} style={{ fontSize: '10px', marginTop: '4px' }}>
                                                 Membro Registrado
                                             </div>
                                         </div>
