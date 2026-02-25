@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import FirebaseAnalytics from '../components/FirebaseAnalytics/FirebaseAnalytics';
+import Providers from './providers';
 
 export const metadata: Metadata = {
   title: {
@@ -36,8 +37,11 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body>
         <FirebaseAnalytics />
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
 }
+
