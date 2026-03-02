@@ -3,6 +3,9 @@ export interface BusSeat {
     is_reserved: boolean;
     user_id?: number;
     reserved_at?: string;
+    avatar_url?: string;
+    display_name?: string;
+    username?: string;
 }
 
 export interface MyReservation {

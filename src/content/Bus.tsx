@@ -11,6 +11,7 @@ interface Seat {
     label: string;
     isOccupied: boolean;
     occupiedBy?: string;
+    avatarUrl?: string;
     canRemove?: boolean;
     row: number;
     col: number;
@@ -112,7 +113,8 @@ export default function BusContent() {
                 return {
                     ...s,
                     isOccupied: apiSeat ? apiSeat.is_reserved : false,
-                    occupiedBy: isMine ? user?.username : (apiSeat?.is_reserved && apiSeat?.user_id ? `User #${apiSeat.user_id}` : undefined),
+                    occupiedBy: isMine ? (user?.display_name || user?.username) : (apiSeat?.display_name || apiSeat?.username || (apiSeat?.is_reserved && apiSeat?.user_id ? `User #${apiSeat.user_id}` : undefined)),
+                    avatarUrl: isMine ? user?.avatar_url : apiSeat?.avatar_url,
                     canRemove: isMine
                 };
             });
@@ -278,7 +280,7 @@ export default function BusContent() {
                             key={seat.id}
                             className={`
                                     ${styles.seat} 
-                                    ${seat.isOccupied ? (seat.occupiedBy === user?.username ? styles.seatUserReserved : styles.seatOccupied) : ''} 
+                                    ${seat.isOccupied ? (seat.occupiedBy === (user?.display_name || user?.username) ? styles.seatUserReserved : styles.seatOccupied) : ''} 
                                     ${isSelected ? styles.seatSelected : ''}
                                 `}
                             onClick={() => handleSeatClick(seat)}
@@ -286,7 +288,20 @@ export default function BusContent() {
                             onMouseLeave={() => setHoveredSeat(null)}
                             style={{ cursor: seat.isOccupied ? (seat.canRemove ? 'pointer' : 'not-allowed') : 'pointer' }}
                         >
-                            <span className={styles.seatNumber}>{seat.label}</span>
+                            {seat.isOccupied && seat.avatarUrl && (
+                                <img src={seat.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, borderRadius: 'inherit', zIndex: 2, opacity: 0.9 }} />
+                            )}
+                            <span
+                                className={styles.seatNumber}
+                                style={{
+                                    zIndex: 3,
+                                    position: 'relative',
+                                    textShadow: (seat.isOccupied && seat.avatarUrl) ? '1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000' : 'none',
+                                    color: (seat.isOccupied && seat.avatarUrl) ? '#fff' : undefined
+                                }}
+                            >
+                                {seat.label}
+                            </span>
                             {canHover && hoveredSeat === seat.id && (
                                 <div className={styles.tooltip}>
                                     {seat.occupiedBy}
