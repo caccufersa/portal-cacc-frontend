@@ -1,13 +1,18 @@
 import { useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import type { BusSeat, MyReservation, ReserveResponse } from './types';
+import type { BusSeat, MyReservation, ReserveResponse, Trip } from './types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'https://backend-go-portal-u9o8.onrender.com';
 
 export function useBusService() {
     const { apiCall } = useAuth();
 
-    // 1. List Seats for a specific trip
+    // 1. List all available Trips
+    const getTrips = useCallback(async (): Promise<Trip[]> => {
+        return apiCall<Trip[]>(`${BASE_URL}/bus`);
+    }, [apiCall]);
+
+    // 2. List Seats for a specific trip
     const getSeats = useCallback(async (tripId: string): Promise<BusSeat[]> => {
         return apiCall<BusSeat[]>(`${BASE_URL}/bus/${tripId}/seats`);
     }, [apiCall]);
@@ -33,21 +38,22 @@ export function useBusService() {
         });
     }, [apiCall]);
 
-    // 5. Get user contact phone
-    const getContact = useCallback(async (): Promise<string> => {
-        const res = await apiCall<{ phone: string }>(`${BASE_URL}/bus/contact`);
-        return res.phone ?? '';
+    // 5. Get user contact (phone + matricula)
+    const getContact = useCallback(async (): Promise<{ phone: string; matricula: string }> => {
+        const res = await apiCall<{ phone: string; matricula: string }>(`${BASE_URL}/bus/contact`);
+        return { phone: res.phone ?? '', matricula: res.matricula ?? '' };
     }, [apiCall]);
 
-    // 6. Save user contact phone (backend strips non-digits)
-    const saveContact = useCallback(async (phone: string): Promise<void> => {
+    // 6. Save user contact (phone + matricula — backend strips non-digits from phone)
+    const saveContact = useCallback(async (phone: string, matricula: string): Promise<void> => {
         await apiCall(`${BASE_URL}/bus/contact`, {
             method: 'PUT',
-            body: JSON.stringify({ phone }),
+            body: JSON.stringify({ phone, matricula }),
         });
     }, [apiCall]);
 
     return {
+        getTrips,
         getSeats,
         reserveSeat,
         getMyReservations,

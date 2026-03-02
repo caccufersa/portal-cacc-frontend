@@ -127,11 +127,11 @@ describe('WebSocketService – dispatch de eventos', () => {
         svc.connect('jwt');
         MockWebSocket.last()!.simulateOpen();
 
-        const msg: WSMessage = { type: 'new_post', data: { id: 1, text: 'Olá' } };
+        const msg: WSMessage = { action: 'new_post', data: { id: 1, text: 'Olá' } };
         MockWebSocket.last()!.simulateMessage(msg);
 
         expect(received).toHaveLength(1);
-        expect(received[0].type).toBe('new_post');
+        expect(received[0].action).toBe('new_post');
         expect((received[0].data as Record<string, unknown>).id).toBe(1);
     });
 
@@ -143,7 +143,7 @@ describe('WebSocketService – dispatch de eventos', () => {
         svc.connect('jwt');
         MockWebSocket.last()!.simulateOpen();
 
-        MockWebSocket.last()!.simulateMessage({ type: 'new_post', data: {} });
+        MockWebSocket.last()!.simulateMessage({ action: 'new_post', data: {} });
         expect(received).toHaveLength(0);
     });
 
@@ -155,8 +155,8 @@ describe('WebSocketService – dispatch de eventos', () => {
         svc.connect('jwt');
         MockWebSocket.last()!.simulateOpen();
 
-        MockWebSocket.last()!.simulateMessage({ type: 'new_post', data: {} });
-        MockWebSocket.last()!.simulateMessage({ type: 'user_login', data: {} });
+        MockWebSocket.last()!.simulateMessage({ action: 'new_post', data: {} });
+        MockWebSocket.last()!.simulateMessage({ action: 'user_login', data: {} });
         expect(received).toHaveLength(2);
     });
 
@@ -168,12 +168,12 @@ describe('WebSocketService – dispatch de eventos', () => {
         svc.connect('jwt');
         MockWebSocket.last()!.simulateOpen();
 
-        MockWebSocket.last()!.simulateMessage({ type: 'new_post', data: { n: 1 } });
+        MockWebSocket.last()!.simulateMessage({ action: 'new_post', data: { n: 1 } });
         expect(received).toHaveLength(1);
 
         unsub();
 
-        MockWebSocket.last()!.simulateMessage({ type: 'new_post', data: { n: 2 } });
+        MockWebSocket.last()!.simulateMessage({ action: 'new_post', data: { n: 2 } });
         expect(received).toHaveLength(1); // não cresceu
     });
 
@@ -199,14 +199,14 @@ describe('WebSocketService – send', () => {
         const ws = MockWebSocket.last()!;
         ws.simulateOpen();
 
-        svc.send({ type: 'ping' });
+        svc.send({ action: 'ping', data: {} });
         expect(ws.sent).toHaveLength(1);
-        expect(JSON.parse(ws.sent[0])).toEqual({ type: 'ping' });
+        expect(JSON.parse(ws.sent[0])).toEqual({ action: 'ping', data: {} });
     });
 
     it('descarta send() quando offline', () => {
         const svc = WebSocketService.getInstance({ url: 'ws://test/ws' });
-        svc.send({ type: 'ping' }); // sem conexão
+        svc.send({ action: 'ping', data: {} }); // sem conexão
         // não deve lançar erro
         expect(MockWebSocket.instances).toHaveLength(0);
     });
@@ -354,7 +354,7 @@ describe('WebSocketService – heartbeat', () => {
 
         vi.advanceTimersByTime(500);
         expect(ws.sent).toHaveLength(1);
-        expect(JSON.parse(ws.sent[0])).toEqual({ type: 'ping' });
+        expect(JSON.parse(ws.sent[0])).toEqual({ action: 'ping', data: {} });
 
         vi.advanceTimersByTime(500);
         expect(ws.sent).toHaveLength(2);

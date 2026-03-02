@@ -41,7 +41,7 @@ const WindowsContext = createContext<WindowsContextType | null>(null);
 
 const initialWindows: WindowState[] = [
   { id: 'about', title: 'Sobre o CACC', icon: 'icons-95/directory_closed.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 50, y: 50 }, size: { width: 500, height: 400 } },
-  { id: 'courses', title: 'Grade Curricular', icon: 'icons-95/calendar.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 100, y: 80 }, size: { width: 600, height: 450 } },
+  { id: 'courses', title: 'Grade Curricular', icon: 'icons-95/calendar.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 80, y: 30 }, size: { width: 750, height: 550 } },
   { id: 'galeria', title: 'Galeria', icon: 'icons-95/pictures.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 150, y: 60 }, size: { width: 550, height: 420 } },
   { id: 'contact', title: 'Contato', icon: 'icons-95/phone_desk.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 200, y: 100 }, size: { width: 450, height: 400 } },
   { id: 'forum', title: 'Fórum CACC', icon: 'icons-95/connected_world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 180, y: 80 }, size: { width: 620, height: 500 } },
@@ -51,7 +51,7 @@ const initialWindows: WindowState[] = [
   { id: 'balance', title: 'Transparência', icon: 'icons-95/calculator.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 400, y: 120 }, size: { width: 600, height: 450 } },
   { id: 'sugest', title: 'Sugestões', icon: 'icons-95/msg_information.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 300, y: 150 }, size: { width: 550, height: 500 } },
   { id: 'bus', title: 'Reserva de Passagens', icon: 'images/bus.svg', iconSize: 54, isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 350, y: 180 }, size: { width: 800, height: 600 } },
-  { id: 'calouroGuide', title: 'Guia do Calouro', icon: 'icons-95/user_world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 600, y: 250 }, size: { width: 700, height: 500 } },
+  { id: 'calouroGuide', title: 'Guia do Calouro', icon: 'icons-95/user_world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 120, y: 40 }, size: { width: 800, height: 600 } },
   { id: 'map', title: 'Mapa UFERSA', icon: 'icons-95/gps.ico', iconSize: 48, isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 250, y: 150 }, size: { width: 750, height: 550 } },
   { id: 'lojinha', title: 'Lojinha', icon: 'icons-95/pifedit.ico', iconSize: 32, isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 300, y: 180 }, size: { width: 500, height: 400 } },
 ];

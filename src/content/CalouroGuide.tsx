@@ -2,21 +2,32 @@ import styles from './Content.module.css';
 
 export default function CalouroGuide() {
     return (
-        <div className={styles.content}>
+        <div className={styles.content} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <div className={styles.header}>
-                <img src="icons-95/world.ico" alt="Calouro Guide" className={styles.contentIcon} />
+                <img src="icons-95/user_world.ico" alt="Guia do Calouro" className={styles.contentIcon} />
                 <div>
-                    <h1 className={styles.title}>CACC</h1>
-                    <p className={styles.subtitle}>Centro Acadêmico de Ciência da Computação</p>
+                    <h1 className={styles.title} style={{ margin: 0 }}>Guia do Calouro</h1>
+                    <p className={styles.subtitle} style={{ margin: 0 }}>Manual do Fera — UFERSA</p>
                 </div>
             </div>
-            <h2>Guia do Calouro</h2>
-            <p>
-                Seja bem-vindo ao curso de Ciência da Computação da UFERSA! Este guia foi
-                criado para ajudar você a se orientar nos primeiros dias e aproveitar ao
-                máximo sua experiência acadêmica.
-            </p>
-            
+
+            <div style={{
+                flex: 1,
+                minHeight: 0,
+                border: '2px inset var(--win95-border-dark)',
+                background: '#525659',
+            }}>
+                <iframe
+                    src="/Manual-do-Fera.pdf"
+                    title="Manual do Fera - Guia do Calouro UFERSA"
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                        display: 'block',
+                    }}
+                />
+            </div>
         </div>
     );
 }

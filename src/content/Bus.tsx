@@ -40,10 +40,7 @@ interface Trip {
     layoutId: string;
 }
 
-const TRIPS: Trip[] = [
-    { id: 't1', destination: 'Natal - RN | Dataprev + Cloud++ VISITA TÉCNICA', date: '15/07/2026 - 06:00', price: '', layoutId: 'executive' },
-    { id: 't2', destination: 'Fortaleza - CE | Serpro | VISITA TÉCNICA', date: '22/08/2026 - 05:30', price: '', layoutId: 'standard' },
-];
+
 
 import { useBusService } from './bus/useBusService';
 
@@ -68,9 +65,10 @@ const getInitialLayoutSeats = (layout: BusLayout): Seat[] => {
 export default function BusContent() {
     const { user } = useAuth();
     const { openWindow } = useWindows();
-    const { getSeats, reserveSeat, getMyReservations, cancelReservation, getContact, saveContact } = useBusService();
+    const { getTrips, getSeats, reserveSeat, getMyReservations, cancelReservation, getContact, saveContact } = useBusService();
 
     const [view, setView] = useState<'hub' | 'seatmap'>('hub');
+    const [trips, setTrips] = useState<Trip[]>([]);
     const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
     const [seats, setSeats] = useState<Seat[]>([]);
     const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
@@ -81,17 +79,22 @@ export default function BusContent() {
     const [successModal, setSuccessModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
     const [phoneModal, setPhoneModal] = useState<{ open: boolean; seat?: Seat }>({ open: false });
     const [phoneInput, setPhoneInput] = useState('');
+    const [matriculaInput, setMatriculaInput] = useState('');
     const [alreadyReservedModal, setAlreadyReservedModal] = useState(false);
     const [myReservations, setMyReservations] = useState<import('./bus/types').MyReservation[]>([]);
 
     const [hoveredSeat, setHoveredSeat] = useState<string | null>(null);
 
-    // Load saved contact on mount
+    // Load saved contact and trips on mount
     useEffect(() => {
+        getTrips().then(setTrips).catch(console.error);
         if (user) {
-            getContact().then(p => { if (p) setPhoneInput(p); }).catch(() => { });
+            getContact().then(c => {
+                if (c.phone) setPhoneInput(c.phone);
+                if (c.matricula) setMatriculaInput(c.matricula);
+            }).catch(() => { });
         }
-    }, [user, getContact]);
+    }, [user, getContact, getTrips]);
 
     const refreshSeats = async (tripId: string, layout: BusLayout) => {
         setLoading(true);
@@ -198,9 +201,10 @@ export default function BusContent() {
     const handlePhoneSubmit = async () => {
         if (!phoneModal.seat) return;
         const digits = phoneInput.replace(/\D/g, '');
-        if (digits.length < 8) return; // minimum validation
+        if (digits.length < 8) return;
+        if (!matriculaInput.trim()) return;
         try {
-            await saveContact(phoneInput);
+            await saveContact(phoneInput, matriculaInput.trim());
         } catch { /* best effort, non-fatal */ }
         setPhoneModal({ open: false });
         setConfirmModal({ open: true, seat: phoneModal.seat });
@@ -411,10 +415,30 @@ export default function BusContent() {
                             {phoneInput.replace(/\D/g, '').length > 0 && phoneInput.replace(/\D/g, '').length < 8 && (
                                 <div style={{ fontSize: 11, color: '#c00', marginTop: 4 }}>Mínimo 8 dígitos</div>
                             )}
+
+                            <label style={{ display: 'block', marginTop: 10, marginBottom: 4, fontSize: 12, color: '#444' }}>Matrícula:</label>
+                            <input
+                                id="bus-matricula-input"
+                                type="text"
+                                value={matriculaInput}
+                                onChange={e => setMatriculaInput(e.target.value)}
+                                placeholder="Ex: 2024010123"
+                                maxLength={20}
+                                onKeyDown={e => { if (e.key === 'Enter') handlePhoneSubmit(); }}
+                                style={{
+                                    width: '100%', boxSizing: 'border-box',
+                                    padding: '4px 8px', fontSize: 14, fontFamily: 'monospace',
+                                    border: 'none', boxShadow: 'inset 1px 1px 0 #808080, inset -1px -1px 0 #fff',
+                                    background: '#fff', outline: 'none',
+                                }}
+                            />
+                            {matriculaInput.trim().length === 0 && (
+                                <div style={{ fontSize: 11, color: '#c00', marginTop: 4 }}>Matrícula obrigatória</div>
+                            )}
                             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
                                 <button
                                     onClick={handlePhoneSubmit}
-                                    disabled={phoneInput.replace(/\D/g, '').length < 8}
+                                    disabled={phoneInput.replace(/\D/g, '').length < 8 || !matriculaInput.trim()}
                                     style={{
                                         background: '#d4d0c8', border: '2px outset #fff', padding: '4px 16px',
                                         fontFamily: 'var(--font-main)', fontSize: 12, cursor: 'pointer',
@@ -492,7 +516,8 @@ export default function BusContent() {
                 {view === 'hub' ? (
                     <div className={styles.hubContainer}>
                         <h2 style={{ color: '#444', marginBottom: 20 }}>Próximas Viagens Disponíveis (2026)</h2>
-                        {TRIPS.map(trip => (
+                        {trips.length === 0 && <p style={{ fontSize: 13, color: '#666' }}>Carregando viagens...</p>}
+                        {trips.map(trip => (
                             <div key={trip.id} className={styles.tripCard} onClick={() => handleSelectTrip(trip)}>
                                 <div className={styles.tripInfo}>
                                     <h3>{trip.destination}</h3>

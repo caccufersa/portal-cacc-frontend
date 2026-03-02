@@ -22,10 +22,20 @@ export default function Taskbar() {
     const [showLogin, setShowLogin] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
     const [showNetwork, setShowNetwork] = useState(false);
+    const [showOnlineUsers, setShowOnlineUsers] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState(0);
+
+    interface OnlineUser {
+        uuid: string;
+        username: string;
+        display_name?: string;
+        avatar_url?: string;
+    }
+    const [onlineUserList, setOnlineUserList] = useState<OnlineUser[]>([]);
 
     const profileRef = useRef<HTMLDivElement>(null);
     const networkRef = useRef<HTMLDivElement>(null);
+    const onlineRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [alertOpen, setAlertOpen] = useState(false);
@@ -50,36 +60,74 @@ export default function Taskbar() {
             if (networkRef.current && !networkRef.current.contains(e.target as Node)) {
                 setShowNetwork(false);
             }
+            if (onlineRef.current && !onlineRef.current.contains(e.target as Node)) {
+                setShowOnlineUsers(false);
+            }
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    const { subscribe, lastMessage } = useWebSocketContext();
+    const { subscribe, lastMessage, sendAction } = useWebSocketContext();
     useEffect(() => {
         if (wsStatus === 'connected') {
-            const unsubscribe = subscribe('userCount', (msg) => {
-                const count = (msg.data as { count?: number })?.count;
-                if (typeof count === 'number') {
-                    setOnlineUsers(count);
+            const unsubCount = subscribe('userCount', (msg) => {
+                const data = msg.data as { count?: number; users?: OnlineUser[] };
+                if (typeof data.count === 'number') {
+                    setOnlineUsers(data.count);
+                }
+                // If the backend sends the user list alongside the count, update it
+                if (Array.isArray(data.users)) {
+                    setOnlineUserList(data.users);
                 }
             });
-            return () => unsubscribe();
+
+            // Subscribe to dedicated userList events if backend sends them separately
+            const unsubList = subscribe('userList', (msg) => {
+                const data = msg.data as { users?: OnlineUser[] };
+                if (Array.isArray(data.users)) {
+                    setOnlineUserList(data.users);
+                }
+            });
+
+            return () => {
+                unsubCount();
+                unsubList();
+            };
         } else {
             setOnlineUsers(0);
+            setOnlineUserList([]);
         }
     }, [subscribe, wsStatus]);
 
     // O fallback usando lastMessage garante que nao percamos o evento inicial
-    // caso o componente se inscreva tarde demais
     useEffect(() => {
         if (lastMessage?.action === 'userCount') {
-            const count = (lastMessage.data as { count?: number })?.count;
-            if (typeof count === 'number') {
-                setOnlineUsers(count);
+            const data = lastMessage.data as { count?: number; users?: OnlineUser[] };
+            if (typeof data.count === 'number') {
+                setOnlineUsers(data.count);
+            }
+            if (Array.isArray(data.users)) {
+                setOnlineUserList(data.users);
+            }
+        }
+        if (lastMessage?.action === 'userList') {
+            const data = lastMessage.data as { users?: OnlineUser[] };
+            if (Array.isArray(data.users)) {
+                setOnlineUserList(data.users);
             }
         }
     }, [lastMessage]);
+
+    // Request the full user list when the online users popup opens
+    const handleOpenOnlineUsers = () => {
+        setShowOnlineUsers(prev => !prev);
+        if (!showOnlineUsers && wsStatus === 'connected') {
+            sendAction('getOnlineUsers').catch(() => {
+                // Backend may not support this action yet — ignore
+            });
+        }
+    };
 
     const openWindows = windows.filter(w => w.isOpen);
 
@@ -213,11 +261,62 @@ export default function Taskbar() {
 
                     <div className={styles.separator} />
 
-                    <div className={`${styles.trayItem} ${styles.trayConnStatus}`} title="Pessoas Online no Portal" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#000', padding: '0px 6px', border: '1px inset #fff', cursor: 'pointer', height: '22px' }} onClick={() => setShowNetwork(true)}>
-                        <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: 13, color: '#0f0', minWidth: 16, textAlign: 'center' }}>
-                            {wsStatus === 'connected' ? 'ON: ' : 'OFF'}
-                            {wsStatus === 'connected' ? Math.max(1, onlineUsers) : ''}
-                        </span>
+                    <div className={styles.trayItem} ref={onlineRef}>
+                        <div
+                            className={`${styles.onlineBadge} ${styles.trayConnStatus}`}
+                            title="Pessoas Online no Portal"
+                            onClick={handleOpenOnlineUsers}
+                        >
+                            <span className={`${styles.onlineBadgeDot} ${wsStatus !== 'connected' ? styles.onlineBadgeOff : ''}`} />
+                            <span className={styles.onlineBadgeText}>
+                                {wsStatus === 'connected' ? Math.max(1, onlineUsers) : '—'}
+                            </span>
+                        </div>
+
+                        {showOnlineUsers && (
+                            <div className={styles.onlinePopup}>
+                                <div className={styles.onlinePopupTitle}>
+                                    <img src="/icons-95/users.ico" alt="" style={{ width: '16px', height: '16px' }} />
+                                    Pessoas Online
+                                    <span className={styles.onlinePopupTitleCount}>
+                                        {wsStatus === 'connected' ? Math.max(1, onlineUsers) : 0}
+                                    </span>
+                                </div>
+                                <div className={styles.onlineUsersList}>
+                                    {wsStatus !== 'connected' ? (
+                                        <div className={styles.onlineEmptyMsg}>
+                                            <img src="/icons-95/modem.ico" alt="" style={{ width: 16, height: 16, marginBottom: 4 }} />
+                                            <br />
+                                            Desconectado do servidor
+                                        </div>
+                                    ) : onlineUserList.length > 0 ? (
+                                        onlineUserList.map((u) => (
+                                            <div key={u.uuid} className={styles.onlineUserItem}>
+                                                <div className={styles.onlineUserAvatar}>
+                                                    {u.avatar_url ? (
+                                                        <img src={u.avatar_url} alt="" />
+                                                    ) : (
+                                                        (u.display_name || u.username || '?')[0].toUpperCase()
+                                                    )}
+                                                </div>
+                                                <span className={styles.onlineUserName}>
+                                                    {u.display_name || u.username}
+                                                </span>
+                                                <span className={styles.onlineDot} />
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className={styles.onlineEmptyMsg}>
+                                            <img src="/icons-95/users.ico" alt="" style={{ width: 16, height: 16, opacity: 0.5, marginBottom: 4 }} />
+                                            <br />
+                                            {Math.max(1, onlineUsers)} pessoa{onlineUsers !== 1 ? 's' : ''} online
+                                            <br />
+                                            <span style={{ fontSize: '10px', color: '#999' }}>Lista de usuários em breve</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className={styles.separator} />
@@ -251,20 +350,6 @@ export default function Taskbar() {
                                             Sessão
                                         </span>
                                         <strong>{user ? 'Autenticado' : 'Desconectado'}</strong>
-                                    </div>
-                                    <div className={styles.popupDivider} />
-                                    <div className={styles.statusRow}>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#000080', fontWeight: 'bold' }}>
-                                            <img src="/icons-95/users.ico" alt="" style={{ width: 16, height: 16 }} />
-                                            Pessoas Online no Portal
-                                        </span>
-                                        <span style={{
-                                            background: '#000', color: '#0f0', padding: '2px 8px',
-                                            fontFamily: 'monospace', fontWeight: 'bold', fontSize: 15, border: '1px inset #fff',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 26
-                                        }}>
-                                            {wsStatus === 'connected' ? Math.max(1, onlineUsers) : '-'}
-                                        </span>
                                     </div>
                                     <div style={{ marginTop: '12px', fontSize: '10px', color: '#666', textAlign: 'center', borderTop: '1px dotted #ccc', paddingTop: '8px' }}>
                                         Servidor em {process.env.NEXT_PUBLIC_WS_URL ? 'WSS Seguro' : 'Conexão Local'}

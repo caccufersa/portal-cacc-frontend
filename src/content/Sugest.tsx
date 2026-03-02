@@ -25,6 +25,7 @@ const Sugest: React.FC = () => {
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [message, setMessage] = useState('');
     const [categoria, setCategoria] = useState<string>('Sugestão');
+    const [anonimo, setAnonimo] = useState(false);
     const [loading, setLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -259,27 +260,27 @@ const Sugest: React.FC = () => {
         e.preventDefault();
         setError(null);
 
-        if (!accessToken) {
-            setError('Você precisa estar logado para enviar uma sugestão.');
-            return;
-        }
-
         if (!message || !categoria) return;
         setLoading(true);
 
         try {
             const headers: Record<string, string> = { 'Content-Type': 'application/json' };
             if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+
+            const body: Record<string, unknown> = { texto: message, categoria };
+            if (accessToken && anonimo) body.anonimo = true;
+
             const res = await fetch(`${API}/sugestoes`, {
                 method: 'POST',
                 headers,
-                body: JSON.stringify({ texto: message, categoria }),
+                body: JSON.stringify(body),
             });
             if (!res.ok) throw new Error('create failed');
             const created: Suggestion = await res.json();
             setSuggestions(prev => [created, ...prev]);
             setMessage('');
             setCategoria('Sugestão');
+            setAnonimo(false);
         } catch {
             setError('Erro ao enviar dados. Por favor, tente novamente.');
         } finally {
@@ -288,20 +289,8 @@ const Sugest: React.FC = () => {
     };
 
     useEffect(() => {
-        if (accessToken) {
-            fetchSuggestions();
-        }
-    }, [fetchSuggestions, accessToken]);
-
-    if (!accessToken) {
-        return (
-            <div style={{ ...styles.container, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                <img src="/icons-95/key_padlock.ico" alt="" style={{ width: 64, height: 64, marginBottom: 12, imageRendering: 'pixelated', opacity: 0.8 }} />
-                <h2 style={{ color: '#000080', fontSize: '16px', margin: '0 0 8px 0', fontFamily: 'initial' }}>Faça login para acessar a Ouvidoria</h2>
-                <p style={{ color: '#606060', fontSize: '13px', margin: 0 }}>Clique no ícone de perfil na barra de tarefas para entrar.</p>
-            </div>
-        );
-    }
+        fetchSuggestions();
+    }, [fetchSuggestions]);
 
     return (
         <div style={styles.container}>
@@ -329,6 +318,24 @@ const Sugest: React.FC = () => {
                         placeholder="Digite sua mensagem..."
                         required
                     />
+
+                    {accessToken && (
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', cursor: 'pointer', fontSize: '11px' }}>
+                            <input
+                                type="checkbox"
+                                checked={anonimo}
+                                onChange={(e) => setAnonimo(e.target.checked)}
+                                style={{ cursor: 'pointer' }}
+                            />
+                            Enviar como Anônimo
+                        </label>
+                    )}
+
+                    {!accessToken && (
+                        <div style={{ fontSize: '10px', color: '#666', marginBottom: '8px', fontStyle: 'italic' }}>
+                            Você está enviando como Anônimo. Faça login para se identificar.
+                        </div>
+                    )}
 
                     {error && <div style={{ color: 'red', marginBottom: '8px', border: '1px dotted red', padding: '4px', fontSize: '11px' }}>{error}</div>}
 
