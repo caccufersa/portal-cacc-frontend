@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useRef, useCallback } from 'react';
 import type { Post, UserProfile } from './types';
 import { useAuth } from '@/context/AuthContext';
 import { useForumApi } from './api';
@@ -22,9 +22,30 @@ const ProfileView = memo(function ProfileView({
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState<'posts' | 'likes'>('posts');
     const [entering, setEntering] = useState(true);
-    const [likingId, setLikingId] = useState<number | null>(null);
+    const [likeError, setLikeError] = useState<string | null>(null);
     const { user, updateAuthUser } = useAuth();
     const { fetchProfile, fetchOwnProfile, likePost, unlikePost, updateProfile } = useForumApi();
+    const likeOpsRef = useRef<Map<number, number>>(new Map());
+    const likeErrorTimeoutRef = useRef<number | null>(null);
+
+    const showLikeError = useCallback((message: string) => {
+        setLikeError(message);
+        if (likeErrorTimeoutRef.current) {
+            window.clearTimeout(likeErrorTimeoutRef.current);
+        }
+        likeErrorTimeoutRef.current = window.setTimeout(() => {
+            setLikeError(null);
+            likeErrorTimeoutRef.current = null;
+        }, 3500);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (likeErrorTimeoutRef.current) {
+                window.clearTimeout(likeErrorTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const [isEditing, setIsEditing] = useState(false);
     const [editDisplayName, setEditDisplayName] = useState('');
@@ -50,38 +71,60 @@ const ProfileView = memo(function ProfileView({
         return () => { cancelled = true; };
     }, [username, user?.username, fetchProfile, fetchOwnProfile]);
 
-    const handleLike = React.useCallback(async (postId: number) => {
-        if (!profile || likingId === postId) return;
+    const handleLike = React.useCallback((postId: number) => {
+        if (!profile) return;
 
         const postIndex = profile.posts.findIndex(p => p.id === postId);
         if (postIndex === -1) return;
 
         const post = profile.posts[postIndex];
         const isLiked = post.liked;
+        const currentLikes = post.likes;
+        const delta = isLiked ? -1 : 1;
 
-        setLikingId(postId);
+        setProfile(prev => {
+            if (!prev) return prev;
+            const newPosts = prev.posts.map((p) =>
+                p.id === postId
+                    ? { ...p, likes: Math.max(0, currentLikes + delta), liked: !isLiked }
+                    : p,
+            );
+            return { ...prev, posts: newPosts, total_likes: prev.total_likes + delta };
+        });
 
-        try {
+        const currentOp = (likeOpsRef.current.get(postId) ?? 0) + 1;
+        likeOpsRef.current.set(postId, currentOp);
+
+        void (async () => {
             const result = isLiked ? await unlikePost(postId) : await likePost(postId);
+            if ((likeOpsRef.current.get(postId) ?? 0) !== currentOp) return;
+
             if (result) {
                 setProfile(prev => {
                     if (!prev) return prev;
-                    const newPosts = [...prev.posts];
-                    const idx = newPosts.findIndex(p => p.id === postId);
-                    if (idx !== -1) {
-                        // Only update on success
-                        newPosts[idx] = { ...newPosts[idx], likes: result.likes, liked: !isLiked };
-                    }
-                    const delta = isLiked ? -1 : 1;
-                    return { ...prev, posts: newPosts, total_likes: prev.total_likes + delta };
+                    return {
+                        ...prev,
+                        posts: prev.posts.map((p) =>
+                            p.id === postId ? { ...p, likes: result.likes } : p,
+                        ),
+                    };
                 });
+                return;
             }
-        } catch (err) {
-            console.error("Like failed", err);
-        } finally {
-            setLikingId(null);
-        }
-    }, [profile, likingId, likePost, unlikePost]);
+
+            setProfile(prev => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    posts: prev.posts.map((p) =>
+                        p.id === postId ? { ...p, likes: currentLikes, liked: isLiked } : p,
+                    ),
+                    total_likes: prev.total_likes - delta,
+                };
+            });
+            showLikeError('Falha ao curtir post. Tente novamente.');
+        })();
+    }, [profile, likePost, unlikePost, showLikeError]);
 
     const handleEditSave = async () => {
         if (!profile) return;
@@ -230,6 +273,13 @@ const ProfileView = memo(function ProfileView({
                     Curtidas
                 </button>
             </div>
+
+            {likeError && (
+                <div className={s.loginError} style={{ margin: '0 12px 8px' }}>
+                    <img src="/icons-95/msg_warning.ico" alt="" style={{ width: 14, height: 14 }} />
+                    {likeError}
+                </div>
+            )}
 
             <div className={s.profilePosts}>
                 {tab === 'posts' && (

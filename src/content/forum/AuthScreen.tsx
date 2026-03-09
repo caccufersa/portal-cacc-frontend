@@ -87,7 +87,7 @@ export default function AuthScreen() {
                             className={s.loginInput}
                             value={username}
                             onChange={e => { setUsername(e.target.value); clearError(); setSuccessMsg(''); }}
-                            placeholder="seu_usuario"
+                            placeholder="alan_turing123"
                             autoFocus
                             disabled={isLoading}
                         />
@@ -101,7 +101,7 @@ export default function AuthScreen() {
                                 type="email"
                                 value={email}
                                 onChange={e => { setEmail(e.target.value); clearError(); }}
-                                placeholder="seu@email.com"
+                                placeholder="juninho123456milgrau@gmail.com"
                                 disabled={isLoading}
                             />
                         </div>

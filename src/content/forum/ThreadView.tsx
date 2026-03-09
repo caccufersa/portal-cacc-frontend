@@ -31,8 +31,29 @@ export default function ThreadView({
     const [sending, setSending] = useState(false);
     const repliesEndRef = useRef<HTMLDivElement>(null);
     const [entering, setEntering] = useState(true);
-    const [likingId, setLikingId] = useState<number | null>(null);
+    const [likeError, setLikeError] = useState<string | null>(null);
     const { fetchThread: apiFetchThread, createComment, likePost, unlikePost } = useForumApi();
+    const likeOpsRef = useRef<Map<number, number>>(new Map());
+    const likeErrorTimeoutRef = useRef<number | null>(null);
+
+    const showLikeError = useCallback((message: string) => {
+        setLikeError(message);
+        if (likeErrorTimeoutRef.current) {
+            window.clearTimeout(likeErrorTimeoutRef.current);
+        }
+        likeErrorTimeoutRef.current = window.setTimeout(() => {
+            setLikeError(null);
+            likeErrorTimeoutRef.current = null;
+        }, 3500);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (likeErrorTimeoutRef.current) {
+                window.clearTimeout(likeErrorTimeoutRef.current);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         requestAnimationFrame(() => setEntering(false));
@@ -139,8 +160,8 @@ export default function ThreadView({
         setSending(false);
     }, [replyText, sending, postId, username, currentUserAvatar, createComment]);
 
-    const handleLike = useCallback(async (targetId: number) => {
-        if (!thread || likingId === targetId) return;
+    const handleLike = useCallback((targetId: number) => {
+        if (!thread) return;
 
         let isLiked = false;
         let currentLikes = 0;
@@ -171,10 +192,13 @@ export default function ThreadView({
             };
         });
 
-        setLikingId(targetId);
+        const currentOp = (likeOpsRef.current.get(targetId) ?? 0) + 1;
+        likeOpsRef.current.set(targetId, currentOp);
 
-        try {
+        void (async () => {
             const result = isLiked ? await unlikePost(targetId) : await likePost(targetId);
+            if ((likeOpsRef.current.get(targetId) ?? 0) !== currentOp) return;
+
             if (result) {
                 setThread(prev => {
                     if (!prev) return prev;
@@ -186,39 +210,24 @@ export default function ThreadView({
                         replies: (prev.replies || []).map(r => r.id === targetId ? { ...r, likes: result.likes } : r)
                     };
                 });
-            } else {
-                // Revert
-                setThread(prev => {
-                    if (!prev) return prev;
-                    if (prev.id === targetId) {
-                        return { ...prev, likes: Math.max(0, currentLikes), liked: isLiked };
-                    }
-                    return {
-                        ...prev,
-                        replies: (prev.replies || []).map(r =>
-                            r.id === targetId ? { ...r, likes: Math.max(0, currentLikes), liked: isLiked } : r
-                        )
-                    };
-                });
+                return;
             }
-        } catch {
-            // Revert
+
             setThread(prev => {
                 if (!prev) return prev;
                 if (prev.id === targetId) {
-                    return { ...prev, likes: Math.max(0, currentLikes), liked: isLiked };
+                    return { ...prev, likes: currentLikes, liked: isLiked };
                 }
                 return {
                     ...prev,
                     replies: (prev.replies || []).map(r =>
-                        r.id === targetId ? { ...r, likes: Math.max(0, currentLikes), liked: isLiked } : r
+                        r.id === targetId ? { ...r, likes: currentLikes, liked: isLiked } : r
                     )
                 };
             });
-        } finally {
-            setLikingId(null);
-        }
-    }, [thread, likingId, likePost, unlikePost]);
+            showLikeError('Falha ao curtir resposta/post. Tente novamente.');
+        })();
+    }, [thread, likePost, unlikePost, showLikeError]);
 
     if (loading) {
         return (
@@ -262,6 +271,13 @@ export default function ThreadView({
                 Voltar ao Feed
             </button>
 
+            {likeError && (
+                <div className={s.loginError} style={{ margin: '0 12px 8px' }}>
+                    <img src="/icons-95/msg_warning.ico" alt="" style={{ width: 14, height: 14 }} />
+                    {likeError}
+                </div>
+            )}
+
             <div className={s.threadPost}>
                 <div className={s.postHeader}>
                     <div className={s.postAvatar} onClick={() => onOpenProfile(thread.author)}>
@@ -285,7 +301,6 @@ export default function ThreadView({
                     <LikeButton
                         liked={thread.liked}
                         count={thread.likes || 0}
-                        disabled={likingId === thread.id}
                         onClick={() => handleLike(thread.id)}
                     />
                     <span className={s.actionBtn}>
@@ -334,7 +349,7 @@ export default function ThreadView({
                                     <LikeButton
                                         liked={r.liked}
                                         count={r.likes || 0}
-                                        disabled={isOptimistic || likingId === r.id}
+                                        disabled={isOptimistic}
                                         onClick={() => handleLike(r.id)}
                                     />
                                 </div>

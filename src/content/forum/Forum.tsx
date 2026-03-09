@@ -26,7 +26,7 @@ const Forum: React.FC = () => {
     const [posting, setPosting] = useState(false);
     const [view, setView] = useState<View>({ type: 'feed' });
     const [newPostIds, setNewPostIds] = useState<Set<number>>(new Set());
-    const [likingId, setLikingId] = useState<number | null>(null);
+    const [likeError, setLikeError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [confirmModal, setConfirmModal] = useState<{
         isOpen: boolean;
@@ -35,6 +35,27 @@ const Forum: React.FC = () => {
         onConfirm: () => void;
     }>({ isOpen: false, title: '', message: '', onConfirm: () => { } });
     const feedRef = useRef<HTMLDivElement>(null);
+    const likeOpsRef = useRef<Map<number, number>>(new Map());
+    const likeErrorTimeoutRef = useRef<number | null>(null);
+
+    const showLikeError = useCallback((message: string) => {
+        setLikeError(message);
+        if (likeErrorTimeoutRef.current) {
+            window.clearTimeout(likeErrorTimeoutRef.current);
+        }
+        likeErrorTimeoutRef.current = window.setTimeout(() => {
+            setLikeError(null);
+            likeErrorTimeoutRef.current = null;
+        }, 3500);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (likeErrorTimeoutRef.current) {
+                window.clearTimeout(likeErrorTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const onWsNewPost = useCallback((post: Post) => {
         setPosts(prev => {
@@ -193,9 +214,7 @@ const Forum: React.FC = () => {
         setPosting(false);
     }, [composeText, posting, user, createPost]);
 
-    const handleLike = useCallback(async (targetId: number) => {
-        if (likingId === targetId) return;
-
+    const handleLike = useCallback((targetId: number) => {
         const post = posts.find(p => p.id === targetId);
         if (!post) return;
 
@@ -212,26 +231,20 @@ const Forum: React.FC = () => {
             )
         );
 
-        setLikingId(targetId);
+        const currentOp = (likeOpsRef.current.get(targetId) ?? 0) + 1;
+        likeOpsRef.current.set(targetId, currentOp);
 
-        try {
+        void (async () => {
             const result = isLiked ? await unlikePost(targetId) : await likePost(targetId);
+            if ((likeOpsRef.current.get(targetId) ?? 0) !== currentOp) return;
+
             if (result) {
                 setPosts(prev =>
                     prev.map(p => p.id === targetId ? { ...p, likes: result.likes } : p)
                 );
-            } else {
-                // Revert
-                setPosts(prev =>
-                    prev.map(p =>
-                        p.id === targetId
-                            ? { ...p, likes: currentLikes, liked: isLiked }
-                            : p
-                    )
-                );
+                return;
             }
-        } catch {
-            // Revert
+
             setPosts(prev =>
                 prev.map(p =>
                     p.id === targetId
@@ -239,10 +252,9 @@ const Forum: React.FC = () => {
                         : p
                 )
             );
-        } finally {
-            setLikingId(null);
-        }
-    }, [posts, likingId, likePost, unlikePost]);
+            showLikeError('Falha ao curtir post. Tente novamente.');
+        })();
+    }, [posts, likePost, unlikePost, showLikeError]);
 
     const handleDelete = useCallback((postId: number) => {
         setConfirmModal({
@@ -486,7 +498,6 @@ const Forum: React.FC = () => {
                                         onOpenThread={navigateThread}
                                         onLike={handleLike}
                                         onOpenProfile={navigateProfile}
-                                        isOptimistic={likingId === p.id}
                                         onDelete={handleDelete}
                                         onRepost={handleRepost}
                                         liked={p.liked}
@@ -520,6 +531,11 @@ const Forum: React.FC = () => {
                     />
                     {wsConnected ? 'Online' : 'Reconectando'}
                 </div>
+                {likeError && (
+                    <div className={s.statusSection} style={{ color: '#c00', fontWeight: 'bold' }}>
+                        {likeError}
+                    </div>
+                )}
             </div>
         </div >
     );

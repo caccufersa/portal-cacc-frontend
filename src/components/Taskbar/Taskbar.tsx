@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useWindows } from '@/context/WindowsContext';
 import { useAuth } from '@/context/AuthContext';
 import { useWebSocketContext } from '@/context/WebSocketContext';
+import { useNotifications } from '@/lib/notifications/useNotifications';
+import type { NotificationItem } from '@/lib/notifications/types';
 import StartMenu from '@/components/StartMenu/StartMenu';
 import LoginDialog from '@/components/LoginDialog/LoginDialog';
 import NewsPopup from '@/components/NewsPopup/NewsPopup';
@@ -21,8 +23,8 @@ export default function Taskbar() {
     const [date, setDate] = useState('');
     const [showLogin, setShowLogin] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
-    const [showNetwork, setShowNetwork] = useState(false);
     const [showOnlineUsers, setShowOnlineUsers] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState(0);
 
     interface OnlineUser {
@@ -34,12 +36,24 @@ export default function Taskbar() {
     const [onlineUserList, setOnlineUserList] = useState<OnlineUser[]>([]);
 
     const profileRef = useRef<HTMLDivElement>(null);
-    const networkRef = useRef<HTMLDivElement>(null);
     const onlineRef = useRef<HTMLDivElement>(null);
+    const notificationsRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [alertOpen, setAlertOpen] = useState(false);
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+    const {
+        items: notifications,
+        unreadCount,
+        hasMore: notificationsHasMore,
+        loading: notificationsLoading,
+        loadingMore: notificationsLoadingMore,
+        error: notificationsError,
+        refresh: refreshNotifications,
+        loadMore: loadMoreNotifications,
+        markAllAsRead: markAllNotificationsAsRead,
+    } = useNotifications({ limit: 20, autoFetch: !!user });
 
     useEffect(() => {
         const update = () => {
@@ -57,11 +71,11 @@ export default function Taskbar() {
             if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
                 setShowProfile(false);
             }
-            if (networkRef.current && !networkRef.current.contains(e.target as Node)) {
-                setShowNetwork(false);
-            }
             if (onlineRef.current && !onlineRef.current.contains(e.target as Node)) {
                 setShowOnlineUsers(false);
+            }
+            if (notificationsRef.current && !notificationsRef.current.contains(e.target as Node)) {
+                setShowNotifications(false);
             }
         };
         document.addEventListener('mousedown', handler);
@@ -148,6 +162,47 @@ export default function Taskbar() {
         connected: 'Conectado',
         connecting: 'Conectando…',
         offline: 'Offline',
+    };
+
+    const getNotificationMessage = (item: NotificationItem): string => {
+        const actorName = item.actor_name?.trim() || 'Alguém';
+        const baseText: Record<string, string> = {
+            reply: 'respondeu seu post',
+            repost: 'repostou seu conteúdo',
+            mention: 'mencionou você',
+            like: 'curtiu sua publicação',
+        };
+        const action = baseText[item.type] ?? 'interagiu com você';
+        return `${actorName} ${action}`;
+    };
+
+    const focusForum = () => {
+        const forumWindow = windows.find((w) => w.id === 'forum');
+        if (forumWindow?.isOpen) {
+            if (forumWindow.isMinimized) restoreWindow('forum');
+            else if (activeWindowId !== 'forum') focusWindow('forum');
+        } else {
+            openWindow('forum');
+        }
+    };
+
+    const handleToggleNotifications = () => {
+        if (!user) {
+            setShowLogin(true);
+            return;
+        }
+
+        const willOpen = !showNotifications;
+        setShowNotifications(willOpen);
+
+        if (willOpen) {
+            void refreshNotifications({ markAsRead: true });
+        }
+    };
+
+    const handleNotificationClick = () => {
+        setShowNotifications(false);
+        focusForum();
     };
 
 
@@ -315,45 +370,111 @@ export default function Taskbar() {
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                        )}
-                    </div>
 
-                    <div className={styles.separator} />
-
-                    <div className={styles.trayItem} ref={networkRef}>
-                        <button
-                            className={styles.trayBtn}
-                            onClick={() => setShowNetwork(prev => !prev)}
-                            title={`Rede: ${wsLabel[wsStatus]}`}
-                        >
-                            <img src="/icons-95/world.ico" alt="Rede" style={{ width: '16px', height: '16px' }} />
-                        </button>
-
-                        {showNetwork && (
-                            <div className={styles.popup}>
-                                <div className={styles.popupTitle}>
-                                    <img src="/icons-95/world.ico" alt="" style={{ width: '16px', height: '16px' }} />
-                                    Gerenciador de Rede
-                                </div>
-                                <div className={styles.popupBody} style={{ minWidth: '220px' }}>
-                                    <div className={styles.statusRow}>
+                                <div style={{ borderTop: '1px dotted #808080', margin: '4px 6px 0', padding: '6px 0 2px' }}>
+                                    <div className={styles.statusRow} style={{ padding: '4px 8px' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <img src="/icons-95/modem.ico" alt="" style={{ width: 14, height: 14 }} />
-                                            Conexão Socket
+                                            <img src="/icons-95/world.ico" alt="" style={{ width: 14, height: 14 }} />
+                                            Rede
                                         </span>
                                         <strong>{wsLabel[wsStatus]}</strong>
                                     </div>
-                                    <div className={styles.statusRow}>
+                                    <div className={styles.statusRow} style={{ padding: '4px 8px', borderBottom: 'none' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <img src="/icons-95/key_padlock.ico" alt="" style={{ width: 14, height: 14 }} />
                                             Sessão
                                         </span>
                                         <strong>{user ? 'Autenticado' : 'Desconectado'}</strong>
                                     </div>
-                                    <div style={{ marginTop: '12px', fontSize: '10px', color: '#666', textAlign: 'center', borderTop: '1px dotted #ccc', paddingTop: '8px' }}>
+                                    <div style={{ marginTop: '6px', fontSize: '10px', color: '#666', textAlign: 'center', padding: '0 8px 4px' }}>
                                         Servidor em {process.env.NEXT_PUBLIC_WS_URL ? 'WSS Seguro' : 'Conexão Local'}
                                     </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className={styles.separator} />
+
+                    <div className={styles.trayItem} ref={notificationsRef}>
+                        <button
+                            className={styles.trayBtn}
+                            onClick={handleToggleNotifications}
+                            title={user ? 'Notificações' : 'Faça login para ver notificações'}
+                        >
+                            <img src="/icons-95/envelope_closed.ico" alt="Notificações" style={{ width: '16px', height: '16px' }} />
+                            {user && unreadCount > 0 && (
+                                <span className={styles.notificationsBadge}>
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
+                        </button>
+
+                        {showNotifications && user && (
+                            <div className={styles.notificationsPopup}>
+                                <div className={styles.notificationsPopupTitle}>
+                                    <img src="/icons-95/envelope_closed.ico" alt="" style={{ width: '16px', height: '16px' }} />
+                                    Notificações
+                                    <span className={styles.notificationsPopupTitleCount}>{unreadCount}</span>
+                                </div>
+
+                                <div className={styles.notificationsList}>
+                                    {notificationsLoading ? (
+                                        <div className={styles.notificationsEmptyMsg}>Carregando notificações...</div>
+                                    ) : notificationsError ? (
+                                        <div className={styles.notificationsErrorMsg}>{notificationsError}</div>
+                                    ) : notifications.length === 0 ? (
+                                        <div className={styles.notificationsEmptyMsg}>
+                                            Você não possui notificações no momento.
+                                        </div>
+                                    ) : (
+                                        notifications.map((item) => (
+                                            <button
+                                                key={item.id}
+                                                className={`${styles.notificationItem} ${item.is_read ? '' : styles.notificationUnread}`}
+                                                onClick={handleNotificationClick}
+                                            >
+                                                <div className={styles.notificationAvatar}>
+                                                    {item.actor_avatar ? (
+                                                        <img src={item.actor_avatar} alt="" />
+                                                    ) : (
+                                                        (item.actor_name || '?').charAt(0).toUpperCase()
+                                                    )}
+                                                </div>
+
+                                                <div className={styles.notificationBody}>
+                                                    <div className={styles.notificationText}>{getNotificationMessage(item)}</div>
+                                                    <div className={styles.notificationMeta}>
+                                                        {new Date(item.created_at).toLocaleString('pt-BR')}
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
+
+                                <div className={styles.notificationsActions}>
+                                    <button
+                                        className={styles.notificationsActionBtn}
+                                        onClick={() => {
+                                            void markAllNotificationsAsRead();
+                                        }}
+                                        disabled={notificationsLoading || notifications.length === 0}
+                                    >
+                                        Marcar como lidas
+                                    </button>
+
+                                    {notificationsHasMore && (
+                                        <button
+                                            className={styles.notificationsActionBtn}
+                                            onClick={() => {
+                                                void loadMoreNotifications();
+                                            }}
+                                            disabled={notificationsLoadingMore}
+                                        >
+                                            {notificationsLoadingMore ? 'Carregando...' : 'Carregar mais'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         )}
