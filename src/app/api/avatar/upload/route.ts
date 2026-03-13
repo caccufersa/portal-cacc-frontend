@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 
-// Configure Cloudinary with environment variables
 cloudinary.config({
     cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -19,25 +18,22 @@ export async function POST(req: Request) {
 
         const file = files[0];
 
-        // Validation - Max 2MB
         if (file.size > 2 * 1024 * 1024) {
             return NextResponse.json({ error: 'File too large. Max 2MB allowed.' }, { status: 400 });
         }
 
-        // Convert the File object to a Buffer
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Upload to Cloudinary
         const result = await new Promise<Record<string, unknown>>((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
                     folder: 'cacc-portal/avatars',
-                    // Crop to square 256x256, focusing on face
+
                     transformation: [
                         { width: 256, height: 256, gravity: 'face', crop: 'fill' },
                     ],
-                    // Let Cloudinary choose optimal format automatically
+    
                     resource_type: 'image',
                 },
                 (error, result) => {

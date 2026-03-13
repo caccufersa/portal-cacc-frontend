@@ -42,14 +42,15 @@
     }
 
     .iconsContainer {
-        padding: 16px 8px;
+        padding: clamp(8px, 2vh, 20px) clamp(6px, 1.5vw, 16px);
         overflow-y: auto;
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+        /* colunas fluidas: cresce/diminui com a viewport */
+        grid-template-columns: repeat(auto-fill, minmax(clamp(72px, 13vw, 100px), 1fr));
         grid-auto-rows: min-content;
         justify-items: center;
-        row-gap: 16px;
-        column-gap: 4px;
+        row-gap: clamp(8px, 2vw, 20px);
+        column-gap: clamp(4px, 1vw, 12px);
         align-content: start;
         -webkit-overflow-scrolling: touch;
         /* Garante que o container tenha altura real para os filhos appearam */

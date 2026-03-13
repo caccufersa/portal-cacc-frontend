@@ -1,13 +1,10 @@
 import styles from './Content.module.css';
 
 const documents = [
-    { icon: '/icons-95/notepad_file.ico', name: 'PPC - Projeto Pedagógico do Curso', description: 'Documento oficial com toda estrutura do curso' },
-    { icon: '/icons-95/calendar.ico', name: 'Calendário Acadêmico 2026-1', description: 'Datas importantes do ano letivo' },
-    { icon: '/icons-95/document.ico', name: 'Ementas das Disciplinas', description: 'Conteúdo programático de cada disciplina' },
-    { icon: '/icons-95/certificate.ico', name: 'Regulamento de TCC', description: 'Normas para o Trabalho de Conclusão de Curso' },
-    { icon: '/icons-95/write_file.ico', name: 'Modelo de Requerimento', description: 'Template para solicitações à coordenação' },
-    { icon: '/icons-95/check.ico', name: 'Atividades Complementares', description: 'Lista de atividades válidas e formulários' }
-];
+    { icon: '/icons-95/notepad_file.ico', name: 'PPC - Projeto Pedagógico do Curso', description: 'Documento oficial com toda estrutura do curso', url: 'https://cc.ufersa.edu.br/wp-content/uploads/sites/31/2018/09/PPC_2018.pdf' },
+    { icon: '/icons-95/calendar.ico', name: 'Calendário Acadêmico 2026-1', description: 'Datas importantes do ano letivo', url: 'https://prograd.ufersa.edu.br/wp-content/uploads/sites/10/2026/03/26-1.pdf' },
+    { icon: '/icons-95/document.ico', name: 'Ementas das Disciplinas', description: 'Conteúdo programático de cada disciplina', url: 'https://cc.ufersa.edu.br/' },
+]
 
 export default function DocumentsContent() {
     return (
@@ -23,7 +20,13 @@ export default function DocumentsContent() {
 
             <h2>Documentos do Curso</h2>
             {documents.map((doc, index) => (
-                <div key={index} className={styles.docItem}>
+                    <a
+                    key= {index}
+                    href = {doc.url}
+                    target = "_blank"
+                    rel="noopener noeferrer"
+                    className={styles.docItem}
+                    >
                     <span className={styles.docIcon}>
                         <img src={doc.icon} alt="" style={{ width: '24px', height: '24px' }} />
                     </span>
@@ -31,15 +34,13 @@ export default function DocumentsContent() {
                         <strong>{doc.name}</strong>
                         <p style={{ margin: 0, fontSize: '14px' }}>{doc.description}</p>
                     </div>
-                </div>
+                    </a>
             ))}
 
             <h2>Links Úteis</h2>
             <ul>
                 <li><a href="https://sigaa.ufersa.edu.br" target="_blank" rel="noopener noreferrer">SIGAA - Sistema Acadêmico</a></li>
                 <li><a href="https://ufersa.edu.br" target="_blank" rel="noopener noreferrer">Site da UFERSA</a></li>
-                <li><a href="https://biblioteca.ufersa.edu.br" target="_blank" rel="noopener noreferrer">Biblioteca Digital</a></li>
-                <li><a href="https://restaurante.ufersa.edu.br" target="_blank" rel="noopener noreferrer">Cardápio do RU</a></li>
             </ul>
 
             <p>

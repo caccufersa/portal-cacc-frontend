@@ -1,9 +1,5 @@
 'use client';
 
-/* ------------------------------------------------------------------ */
-/*  WebSocketContext – integra o WebSocketService com React + Auth     */
-/* ------------------------------------------------------------------ */
-
 import {
     createContext,
     useContext,
@@ -102,11 +98,6 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         </WebSocketContext.Provider>
     );
 }
-
-/**
- * Acesso direto ao contexto WebSocket.
- * Para subscrição por tipo, prefira `useWebSocket(type, handler)`.
- */
 export function useWebSocketContext(): WebSocketContextType {
     const ctx = useContext(WebSocketContext);
     if (!ctx) {

@@ -31,8 +31,9 @@ interface WindowsContextType {
   restoreWindow: (id: string) => void;
   focusWindow: (id: string) => void;
   updateWindowPosition: (id: string, position: { x: number; y: number }) => void;
-  updateWindowSize: (id: string, size: { width: number; height: number }) => void;
+  updateWindowSize: (id: string) => void;
   updateIconPosition: (id: string, position: { x: number; y: number }) => void;
+  updateIconSize: (id: string, size: number) => void;
   startMenuOpen: boolean;
   setStartMenuOpen: (open: boolean) => void;
 }
@@ -40,7 +41,7 @@ interface WindowsContextType {
 const WindowsContext = createContext<WindowsContextType | null>(null);
 
 const initialWindows: WindowState[] = [
-  { id: 'about', title: 'Sobre o CACC', icon: 'icons-95/directory_closed.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 50, y: 50 }, size: { width: 500, height: 400 } },
+  { id: 'about', title: 'Sobre o CACC', icon: 'icons-95/directory_closed.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 50, y: 50 }, size: { width: 550, height: 400 } },
   { id: 'courses', title: 'Grade Curricular', icon: 'icons-95/calendar.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 80, y: 30 }, size: { width: 750, height: 550 } },
   { id: 'galeria', title: 'Galeria', icon: 'icons-95/pictures.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 150, y: 60 }, size: { width: 550, height: 420 } },
   { id: 'contact', title: 'Contato', icon: 'icons-95/phone_desk.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 200, y: 100 }, size: { width: 450, height: 400 } },
@@ -50,10 +51,11 @@ const initialWindows: WindowState[] = [
   { id: 'documents', title: 'Documentos', icon: 'icons-95/notepad_file.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 80, y: 90 }, size: { width: 520, height: 420 } },
   { id: 'balance', title: 'Transparência', icon: 'icons-95/calculator.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 400, y: 120 }, size: { width: 600, height: 450 } },
   { id: 'sugest', title: 'Sugestões', icon: 'icons-95/msg_information.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 300, y: 150 }, size: { width: 550, height: 500 } },
-  { id: 'bus', title: 'Reserva de Passagens', icon: 'images/bus.svg', iconSize: 54, isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 350, y: 180 }, size: { width: 800, height: 600 } },
+  { id: 'bus', title: 'Reserva de Passagens', icon: 'images/bus.svg', size: { width: 128, height: 128 }, isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 350, y: 180 }, size: { width: 800, height: 600 } },
   { id: 'calouroGuide', title: 'Guia do Calouro', icon: 'icons-95/user_world.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 120, y: 40 }, size: { width: 800, height: 600 } },
-  { id: 'map', title: 'Mapa UFERSA', icon: 'icons-95/gps.ico', iconSize: 48, isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 250, y: 150 }, size: { width: 750, height: 550 } },
-  { id: 'lojinha', title: 'Lojinha', icon: 'icons-95/pifedit.ico', iconSize: 32, isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 300, y: 180 }, size: { width: 500, height: 400 } },
+  { id: 'map', title: 'Mapa UFERSA', icon: 'icons-95/gps.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 250, y: 150 }, size: { width: 750, height: 550 } },
+  { id: 'lojinha', title: 'Lojinha', icon: 'icons-95/pifedit.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 300, y: 180 }, size: { width: 500, height: 400 } },
+  { id: 'projetos', title: 'Projetos', icon: 'icons-95/directory_program_group.ico', isOpen: false, isMinimized: false, isMaximized: false, zIndex: 0, position: { x: 200, y: 100 }, size: { width: 600, height: 450 } },
 ];
 
 const getInitialIconPositions = (): IconPosition[] => {
@@ -62,7 +64,7 @@ const getInitialIconPositions = (): IconPosition[] => {
 
   if (typeof window === 'undefined') {
     return [
-      { id: 'about', position: { x: leftColumn, y: 20 } },
+      { id: 'about', position: { x: leftColumn, y: 20 }, },
       { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
       { id: 'galeria', position: { x: leftColumn, y: 20 + iconSpacing * 2 } },
       { id: 'contact', position: { x: leftColumn, y: 20 + iconSpacing * 3 } },
@@ -76,6 +78,7 @@ const getInitialIconPositions = (): IconPosition[] => {
       { id: 'map', position: { x: leftColumn + 100, y: 20 + iconSpacing * 4 } },
       { id: 'lojinha', position: { x: leftColumn + 100, y: 20 + iconSpacing * 5 } },
       { id: 'calouroGuide', position: { x: 400, y: 300 } },
+      { id: 'projetos', position: { x: 200, y: 100 } },
     ];
   }
 
@@ -102,9 +105,33 @@ const getInitialIconPositions = (): IconPosition[] => {
       { id: 'bus', position: { x: leftColumn, y: 20 + iconSpacing * 10 } },
       { id: 'map', position: { x: leftColumn, y: 20 + iconSpacing * 11 } },
       { id: 'lojinha', position: { x: leftColumn, y: 20 + iconSpacing * 12 } },
-      { id: 'calouroGuide', position: { x: centerX, y: centerY } }
+      { id: 'calouroGuide', position: { x: centerX, y: centerY } },
+      { id: 'projetos', position: { x: 200, y: 100 } },
     ];
   }
+  if (screenWidth > 1280) {
+    const rightColumn = screenWidth - 100;
+
+    return [
+    { id: 'about', position: { x: leftColumn, y: 20 } },
+    { id: 'courses', position: { x: leftColumn, y: 20 + iconSpacing } },
+    { id: 'galeria', position: { x: leftColumn, y: 20 + iconSpacing * 2 } },
+    { id: 'contact', position: { x: leftColumn, y: 20 + iconSpacing * 3 } },
+    { id: 'forum', position: { x: leftColumn, y: 20 + iconSpacing * 4 } },
+    { id: 'news', position: { x: leftColumn, y: 20 + iconSpacing * 5 } },
+    { id: 'help', position: { x: leftColumn, y: 20 + iconSpacing * 6 } },
+
+    { id: 'documents', position: { x: rightColumn, y: 20 } },
+    { id: 'sugest', position: { x: rightColumn, y: 20 + iconSpacing } },
+    { id: 'bus', position: { x: rightColumn, y: 20 + iconSpacing * 2 } },
+    { id: 'map', position: { x: rightColumn, y: 20 + iconSpacing * 3 } },
+    { id: 'lojinha', position: { x: rightColumn, y: 20 + iconSpacing * 4 } },
+    { id: 'balance', position : { x: rightColumn, y: 20 + iconSpacing * 5 } },
+
+    { id: 'calouroGuide', position: { x: centerX, y: centerY }, },
+    { id: 'projetos', position: { x: 200, y: 100 } }, 
+  ];
+}
 
   // Layout clássico: Direita da tela fixa para os apps de back-office / adicionais
   const rightColumn = screenWidth - 100;
@@ -126,6 +153,7 @@ const getInitialIconPositions = (): IconPosition[] => {
     { id: 'balance', position: { x: rightColumn, y: 20 + iconSpacing * 5 } },
 
     { id: 'calouroGuide', position: { x: centerX, y: centerY } },
+    { id: 'projetos', position: { x: 200, y: 100 } }, 
   ];
 };
 
@@ -133,8 +161,7 @@ export function WindowsProvider({ children }: { children: ReactNode }) {
   const [windows, setWindows] = useState<WindowState[]>(initialWindows);
   const [iconPositions, setIconPositions] = useState<IconPosition[]>(getInitialIconPositions());
   const [activeWindowId, setActiveWindowId] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [highestZIndex, setHighestZIndex] = useState(1);
+  const [, setHighestZIndex] = useState(1);
   const [startMenuOpen, setStartMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -207,9 +234,17 @@ export function WindowsProvider({ children }: { children: ReactNode }) {
     ));
   }, []);
 
-  const updateWindowSize = useCallback((id: string, size: { width: number; height: number }) => {
+  const updateWindowSize = useCallback((id: string) => {
+    setWindows((prevWindows) =>
+      prevWindows.map((win) =>
+        win.id === id ? { ...win } : win
+      )
+    );
+  }, []);
+
+  const updateIconSize = useCallback((id: string, size: number) => {
     setWindows(prev => prev.map(w =>
-      w.id === id ? { ...w, size } : w
+      w.id === id ? { ...w, iconSize: size } : w
     ));
   }, []);
 
@@ -233,6 +268,7 @@ export function WindowsProvider({ children }: { children: ReactNode }) {
       updateWindowPosition,
       updateWindowSize,
       updateIconPosition,
+      updateIconSize,
       startMenuOpen,
       setStartMenuOpen
     }}>

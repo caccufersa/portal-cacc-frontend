@@ -8,9 +8,10 @@ export default function BootScreen() {
 
     useEffect(() => {
         const texts = [
-            'Iniciando CACC OS...',
+            'Iniciando o sistema...',
             'Carregando componentes...',
             'Preparando área de trabalho...',
+            'Não tem nada carregando, é só mídia :D',
             'Quase lá...'
         ];
 
@@ -18,7 +19,7 @@ export default function BootScreen() {
         const interval = setInterval(() => {
             index = (index + 1) % texts.length;
             setLoadingText(texts[index]);
-        }, 600);
+        }, 300);
 
         return () => clearInterval(interval);
     }, []);
@@ -26,7 +27,7 @@ export default function BootScreen() {
     return (
         <div className={styles.bootScreen}>
             <h1 className={styles.title}>CACC 95</h1>
-            <p className={styles.subtitle}>Centro Acadêmico de Ciência da Computação</p>
+            <p className={styles.subtitle}>Portal de Ciência da Computação</p>
 
             <div className={styles.loadingContainer}>
                 <p className={styles.loadingText}>{loadingText}</p>

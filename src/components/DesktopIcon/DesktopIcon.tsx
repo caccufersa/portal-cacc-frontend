@@ -7,7 +7,6 @@ interface DesktopIconProps {
     id: string;
     icon: string;
     label: string;
-    iconSize?: number;
     initialPosition: { x: number; y: number };
     isSelected: boolean;
     onSelect: (id: string) => void;
@@ -15,7 +14,7 @@ interface DesktopIconProps {
     onPositionChange: (position: { x: number; y: number }) => void;
 }
 
-export default function DesktopIcon({ id, icon, label, iconSize, initialPosition, isSelected, onSelect, onDoubleClick, onPositionChange }: DesktopIconProps) {
+export default function DesktopIcon({ id, icon, label, initialPosition, isSelected, onSelect, onDoubleClick, onPositionChange }: DesktopIconProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [position, setPosition] = useState(initialPosition);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -33,7 +32,7 @@ export default function DesktopIcon({ id, icon, label, iconSize, initialPosition
         e.preventDefault();
         e.stopPropagation();
         onSelect(id);
-        if (isMobile) return; // No drag on mobile
+        if (isMobile) return; 
         setIsDragging(true);
         setDragOffset({
             x: e.clientX - position.x,
@@ -42,11 +41,9 @@ export default function DesktopIcon({ id, icon, label, iconSize, initialPosition
     }, [id, position, onSelect, isMobile]);
 
     const handleTap = useCallback(() => {
-        if (isMobile) {
-            onSelect(id);
-            onDoubleClick();
-        }
-    }, [id, isMobile, onSelect, onDoubleClick]);
+        onSelect(id);
+        onDoubleClick();
+    }, [id, onSelect, onDoubleClick]);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -81,11 +78,10 @@ export default function DesktopIcon({ id, icon, label, iconSize, initialPosition
             style={isMobile ? {} : { left: position.x, top: position.y }}
             onMouseDown={handleMouseDown}
             onClick={handleTap}
-            onDoubleClick={(e) => { e.stopPropagation(); onDoubleClick(); }}
             tabIndex={0}
         >
             <div className={styles.iconImage}>
-                <img src={icon} alt={label} style={{ width: iconSize ? `${iconSize}px` : '32px', height: iconSize ? `${iconSize}px` : '32px' }} />
+                <img src={icon} alt={label} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
             <span className={styles.label}>{label}</span>
         </div>

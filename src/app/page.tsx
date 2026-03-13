@@ -19,7 +19,7 @@ export default function Home() {
       if (!welcomeHidden) {
         setTimeout(() => setShowWelcome(true), 500);
       }
-    }, 2500);
+    }, 1500);
 
     return () => clearTimeout(bootTimer);
   }, []);

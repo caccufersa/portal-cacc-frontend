@@ -1,6 +1,6 @@
 @font-face {
-  font-family: 'VT323';
-  src: url('/fonts/VT323-Regular.ttf') format('truetype');
+  font-family: 'FontCACC';
+  src: url('/fonts/') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -21,7 +21,7 @@
   --win95-border-darker: #404040;
   --win95-title-active: linear-gradient(90deg, #000080, #1084d0);
   --win95-title-inactive: linear-gradient(90deg, #808080, #b0b0b0);
-  --font-main: 'VT323', monospace;
+  --font-main: '';
   --font-size-base: 16px;
   --font-size-lg: 20px;
   --font-size-xl: 24px;
